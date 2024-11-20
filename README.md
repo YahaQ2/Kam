@@ -12,11 +12,6 @@ Untuk member organization PDF
 3. Commit dan push
 4. Buat pull request
 
-Untuk non member organization PDF
-1. Fork repository
-2. Clone repository
-3. Commit dan push
-4. Buat pull request
 
 # Getting Started. Pake npm semua yaa, biar sama
 
