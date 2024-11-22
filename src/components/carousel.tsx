@@ -35,21 +35,20 @@ export const Carousel: React.FC = () => {
             ease: "linear",
           },
         })
-        // Reset position instantly
         await controls.set({ x: 0 })
       }
     }
     scrollAnimation()
   }, [controls, width])
 
-  // Triple the messages to ensure smooth looping
   const tripleMessages = [...messages, ...messages, ...messages]
 
   return (
     <div className="relative w-full max-w-7xl mx-auto">
       {/* Gradient Masks */}
-      <div className="absolute left-0 top-0 w-32 h-full bg-gradient-to-r from-white via-white to-transparent z-10" />
-      <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-white via-white to-transparent z-10" />
+        <div className="absolute left-0 top-0 w-32 h-full bg-gradient-to-r from-white via-white to-transparent z-0 pointer-events-none" />
+        <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-white via-white to-transparent z-0 pointer-events-none" />
+
       
       <motion.div
         ref={carousel}
