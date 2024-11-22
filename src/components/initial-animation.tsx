@@ -16,7 +16,7 @@ export function InitialAnimation() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        Tell your untold story
+        Polines Bercerita
       </motion.h1>
     </motion.div>
   )

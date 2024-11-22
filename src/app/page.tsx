@@ -1,67 +1,77 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { AnimatedCard } from "@/components/animated-card"
+import { Carousel } from "@/components/carousel"
 import { Footer } from "@/components/ui/footer"
 import { InitialAnimation } from "@/components/initial-animation"
-
-const messages = [
-  { to: "axel", message: "i hope someday i'll be brave enough to tell u how much u meant to me", song: "Pluto Projector", artist: "Rex Orange County", imageUrl: "/placeholder.svg?height=40&width=40" },
-  { to: "lyra", message: "everything reminds me of u, even that warteg tempat kita first hangout", song: "Head In The Clouds", artist: "88rising, Joji", imageUrl: "/placeholder.svg?height=40&width=40" },
-  { to: "tara", message: "masih inget how your smile made everything feel okay... i miss that feeling", song: "Nothing's Gonna Hurt You Baby", artist: "Cigarettes After Sex", imageUrl: "/placeholder.svg?height=40&width=40" },
-  // Tambah disini
-]
+import { useState } from "react"
+import { Menu, X } from "lucide-react"
 
 export default function HomePage() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
   return (
     <div className="min-h-screen bg-white text-gray-800">
       <InitialAnimation />
-      <header className="flex justify-between items-center p-6 border-b border-gray-200">
-        <h1 className="text-3xl font-bold">Solifess</h1>
-        <nav className="space-x-4">
-          <Button variant="ghost" className="text-gray-800 hover:text-gray-600">Kirim</Button>
-          <Button variant="ghost" className="text-gray-800 hover:text-gray-600">Jelajahi</Button>
-          <Button variant="ghost" className="text-gray-800 hover:text-gray-600">Dukungan</Button>
-        </nav>
-      </header>
-      <main className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-4xl font-bold mb-6">Ungkapan Perasaan Masyarakat Solinep</h2>
-        <p className="text-lg mb-12">aaaaaaaaaaaaaaaaaaaaaaaaaaa isi apa</p>
-        <div className="flex justify-center space-x-4 mb-16">
-          <Button className="bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-gray-900 transition-colors">Kirim Perasaan</Button>
-          <Button className="border-2 border-gray-800 bg-white text-gray-800 px-8 py-3 rounded-full hover:bg-gray-100 transition-colors">Temukan Perasaan</Button>
-        </div>
-        <div className="overflow-hidden">
-          <motion.div 
-            className="flex gap-8"
-            animate={{
-              x: ["0%", "-100%"],
-            }}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 30,
-                ease: "linear",
-              },
-            }}
+      <header className="sticky top-0 z-0 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+        <div className="container mx-auto flex justify-between items-center p-4 md:p-6">
+          <h1 className="text-2xl md:text-3xl font-bold">solifess</h1>
+          
+          {/* Mobile Menu Button */}
+          <button 
+            className="md:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {messages.concat(messages).map((msg, index) => (
-              <AnimatedCard
-                key={index}
-                to={msg.to}
-                message={msg.message}
-                song={msg.song}
-                artist={msg.artist}
-                imageUrl={msg.imageUrl}
-              />
-            ))}
-          </motion.div>
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex space-x-4">
+            <Button variant="ghost" className="text-gray-800 hover:text-gray-600">Kirim</Button>
+            <Button variant="ghost" className="text-gray-800 hover:text-gray-600">Jelajahi</Button>
+            <Button variant="ghost" className="text-gray-800 hover:text-gray-600">Dukungan</Button>
+          </nav>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <nav className="md:hidden border-t border-gray-100 bg-white">
+            <div className="flex flex-col space-y-2 p-4">
+              <Button variant="ghost" className="w-full justify-start text-gray-800 hover:text-gray-600">
+                Kirim
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-gray-800 hover:text-gray-600">
+                Jelajahi
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-gray-800 hover:text-gray-600">
+                Dukungan
+              </Button>
+            </div>
+          </nav>
+        )}
+      </header>
+
+      <main className="container mx-auto px-4 py-8 md:py-16 text-center">
+        <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">
+          Ungkapan Perasaan Masyarakat Solinep
+        </h2>
+        <p className="text-base md:text-lg mb-8 md:mb-12">
+          Terbangkan perasaanmu
+        </p>
+        <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-12 md:mb-16">
+          <Button className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors">
+            Mulai Bercerita
+          </Button>
+          <Button className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors">
+            Temukan Cerita
+          </Button>
+        </div>
+        <div className="w-full max-w-5xl mx-auto">
+          <Carousel />
         </div>
       </main>
+      
       <Footer />
     </div>
   )
 }
-
