@@ -46,9 +46,8 @@ export const Carousel: React.FC = () => {
   return (
     <div className="relative w-full max-w-7xl mx-auto">
       {/* Gradient Masks */}
-        <div className="absolute left-0 top-0 w-32 h-full bg-gradient-to-r from-white via-white to-transparent z-0 pointer-events-none" />
-        <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-white via-white to-transparent z-0 pointer-events-none" />
-
+      <div className="absolute left-0 top-0 w-32 h-full bg-gradient-to-r from-white via-white to-transparent z-10" />
+      <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-white via-white to-transparent z-10" />
       
       <motion.div
         ref={carousel}
