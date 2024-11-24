@@ -4,60 +4,14 @@ import { Button } from "@/components/ui/button"
 import { Carousel } from "@/components/carousel"
 import { Footer } from "@/components/ui/footer"
 import { InitialAnimation } from "@/components/initial-animation"
-import { useState } from "react"
+import { Navbar } from "@/components/ui/navbar"
 import Link from "next/link"
-import { Menu, X } from "lucide-react"
 
 export default function HomePage() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-
   return (
     <div className="min-h-screen bg-white text-gray-800">
       <InitialAnimation />
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="container mx-auto flex justify-between items-center p-4 md:p-6">
-          <h1 className="text-2xl md:text-3xl font-bold">solifess</h1>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-4">
-            <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
-              <Link href="/kirim">Kirim</Link>
-            </Button>
-            <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
-              <Link href="/jelajahi">Jelajahi</Link>
-            </Button>
-            <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
-              <Link href="/dukungan">Dukungan</Link>
-            </Button>
-          </nav>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <nav className="md:hidden border-t border-gray-100 bg-white">
-            <div className="flex flex-col space-y-2 p-4">
-              <Button asChild variant="ghost" className="w-full justify-start text-gray-800 hover:text-gray-600">
-                <Link href="/kirim">Kirim</Link>
-              </Button>
-              <Button asChild variant="ghost" className="w-full justify-start text-gray-800 hover:text-gray-600">
-                <Link href="/jelajahi">Jelajahi</Link>
-              </Button>
-              <Button asChild variant="ghost" className="w-full justify-start text-gray-800 hover:text-gray-600">
-                <Link href="/dukungan">Dukungan</Link>
-              </Button>
-            </div>
-          </nav>
-        )}
-      </header>
-
+      <Navbar />
       <main className="container mx-auto px-4 py-8 md:py-16 text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">
           Ungkapan Perasaan Masyarakat Solinep
@@ -68,7 +22,7 @@ export default function HomePage() {
             asChild
             className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
           >
-            <Link href="/mulai-bercerita">Mulai Bercerita</Link>
+            <Link href="/message">Mulai Bercerita</Link>
           </Button>
           <Button
             asChild
@@ -81,7 +35,6 @@ export default function HomePage() {
           <Carousel />
         </div>
       </main>
-
       <Footer />
     </div>
   )
