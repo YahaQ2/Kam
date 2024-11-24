@@ -5,8 +5,8 @@ import { motion, useAnimation, useMotionValue } from 'framer-motion'
 import { CarouselCard } from './carousel-card'
 
 const messages = [
-  { to: "axel", from: "anonymous", message: "i hope someday i'll be brave enough to tell u how much u meant to me" },
-  { to: "lyra", from: "anonymous", message: "everything reminds me of u, even that warteg tempat kita first hangout" },
+  { to: "wahyu", from: "aldi", message: "woi wong secang, tes tes" },
+  { to: "dipha", from: "aldi", message: "bang heker" },
   { to: "tara", from: "anonymous", message: "masih inget how your smile made everything feel okay... i miss that feeling" },
   { to: "emil", from: "anonymous", message: "wish i could forget how safe it felt being around you dulu" },
   { to: "vanya", from: "anonymous", message: "funny how someone bisa jadi stranger padahal they knew all your secrets" },
