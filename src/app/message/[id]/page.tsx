@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
+import { useEffect, useState } from "react";
 
 const mockMessages = [
   { id: 1, sender: "Alice", recipient: "Bob", message: "Hey Bob, how are you?" },
@@ -12,13 +13,18 @@ const mockMessages = [
   { id: 4, sender: "David", recipient: "Charlie", message: "Thanks for the reminder, Charlie!" },
 ];
 
-interface Params {
-  id: string;
-}
-
-export default function MessagePage({ params }: { params: Params }) {
+export default function MessagePage() {
   const router = useRouter();
-  const message = mockMessages.find((msg) => msg.id === parseInt(params.id));
+  const params = useParams();
+  const [message, setMessage] = useState<typeof mockMessages[0] | null>(null);
+
+  useEffect(() => {
+    // Find message client-side
+    const foundMessage = mockMessages.find(
+      (msg) => msg.id === parseInt(params.id as string)
+    );
+    setMessage(foundMessage || null);
+  }, [params.id]);
 
   if (!message) {
     return <div>Message not found</div>;
