@@ -7,23 +7,38 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Navbar } from "@/components/ui/navbar"
 import { Footer } from "@/components/ui/footer"
+import { SuccessModal } from "@/components/success-modal"
 
 export default function MulaiBerceritaPage() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [message, setMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission here
-    console.log({ from, to, message })
+    setIsLoading(true)
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      console.log({ from, to, message })
+      setIsSuccessModalOpen(true)
+      setFrom('')
+      setTo('')
+      setMessage('')
+    } catch (error) {
+      console.error('Error submitting form:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
-        <h1 className="text-4xl font-bold mb-8 text-center">Mulai Bercerita</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center">Kirim Menfess</h1>
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           <div className="mb-6 md:flex md:space-x-4">
             <div className="md:w-1/2 mb-4 md:mb-0">
@@ -36,6 +51,7 @@ export default function MulaiBerceritaPage() {
                 onChange={(e) => setFrom(e.target.value)}
                 className="w-full"
                 placeholder="Your name or alias"
+                disabled={isLoading}
               />
             </div>
             <div className="md:w-1/2">
@@ -48,6 +64,7 @@ export default function MulaiBerceritaPage() {
                 onChange={(e) => setTo(e.target.value)}
                 className="w-full"
                 placeholder="Recipient's name"
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -61,16 +78,25 @@ export default function MulaiBerceritaPage() {
               onChange={(e) => setMessage(e.target.value)}
               className="w-full h-40"
               placeholder="Share your story..."
+              disabled={isLoading}
             />
           </div>
           <div className="text-center">
-            <Button type="submit" className="bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-gray-900 transition-colors">
-              Submit
+            <Button 
+              type="submit" 
+              className="bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-gray-900 transition-colors"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Submitting...' : 'Submit'}
             </Button>
           </div>
         </form>
       </main>
       <Footer />
+      <SuccessModal 
+        isOpen={isSuccessModalOpen} 
+        onClose={() => setIsSuccessModalOpen(false)} 
+      />
     </div>
   )
 }

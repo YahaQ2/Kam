@@ -29,7 +29,7 @@ export function Navbar() {
             <Link href="/message">Kirim</Link>
           </Button>
           <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
-            <Link href="/jelajahi">Temukan</Link>
+            <Link href="/search-message">Temukan</Link>
           </Button>
           <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
             <Link href="/dukungan">Dukungan</Link>
@@ -45,7 +45,7 @@ export function Navbar() {
               <Link href="/message">Kirim</Link>
             </Button>
             <Button asChild variant="ghost" className="w-full justify-start text-gray-800 hover:text-gray-600">
-              <Link href="/jelajahi">Temukan</Link>
+              <Link href="/search-message">Temukan</Link>
             </Button>
             <Button asChild variant="ghost" className="w-full justify-start text-gray-800 hover:text-gray-600">
               <Link href="/dukungan">Dukungan</Link>
