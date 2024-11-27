@@ -9,34 +9,47 @@ import { Footer } from "@/components/ui/footer"
 import { CarouselCard } from "@/components/carousel-card"
 import Link from 'next/link'
 
-// Mock data for demonstration
-const mockMessages = [
-  { id: 1, sender: "Alice", recipient: "Bob", message: "Hey Bob, how are you?" },
-  { id: 2, sender: "Bob", recipient: "Alice", message: "Hi Alice, I'm good! How about you?" },
-  { id: 3, sender: "Charlie", recipient: "David", message: "David, don't forget our meeting tomorrow." },
-  { id: 4, sender: "David", recipient: "Charlie", message: "Thanks for the reminder, Charlie!" },
-]
+type Message = {
+  id: number;
+  sender: string;
+  recipient: string;
+  message: string;
+  created_at: string;
+}
 
 export default function SearchMessagesPage() {
   const [sender, setSender] = useState('')
   const [recipient, setRecipient] = useState('')
-  const [searchResults, setSearchResults] = useState<typeof mockMessages | null>(null)
+  const [searchResults, setSearchResults] = useState<Message[] | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate API call
+    const params = new URLSearchParams()
+    if (sender) params.append('sender', sender)
+    if (recipient) params.append('recipient', recipient)
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      const filteredMessages = mockMessages.filter(msg => 
-        msg.sender.toLowerCase().includes(sender.toLowerCase()) &&
-        msg.recipient.toLowerCase().includes(recipient.toLowerCase())
-      )
-      setSearchResults(filteredMessages)
+      const response = await fetch(`https://solifess.vercel.app/v1/api/menfess?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Error fetching messages')
+      }
+
+      const result = await response.json()
+      const data: Message[] = result.data
+
+      setSearchResults(data)
     } catch (error) {
       console.error('Error searching messages:', error)
+      setSearchResults([])
     } finally {
       setIsLoading(false)
     }
@@ -91,7 +104,11 @@ export default function SearchMessagesPage() {
             {searchResults.length > 0 ? (
               searchResults.map((msg) => (
                 <Link href={`/message/${msg.id}`} key={msg.id} className="block">
-                  <CarouselCard to={msg.recipient} from={msg.sender} message={msg.message} />
+                  <CarouselCard 
+                    to={msg.recipient} 
+                    from={msg.sender} 
+                    message={msg.message} 
+                  />
                 </Link>
               ))
             ) : (

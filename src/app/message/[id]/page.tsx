@@ -5,30 +5,62 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
 import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
-const mockMessages = [
-  { id: 1, sender: "Alice", recipient: "Bob", message: "Hey Bob, how are you?" },
-  { id: 2, sender: "Bob", recipient: "Alice", message: "Hi Alice, I'm good! How about you?" },
-  { id: 3, sender: "Charlie", recipient: "David", message: "David, don't forget our meeting tomorrow." },
-  { id: 4, sender: "David", recipient: "Charlie", message: "Thanks for the reminder, Charlie!" },
-];
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+type MessageType = {
+  id: number;
+  sender: string;
+  recipient: string;
+  message: string;
+  song: string;
+  created_at: string;
+};
 
 export default function MessagePage() {
   const router = useRouter();
   const params = useParams();
-  const [message, setMessage] = useState<typeof mockMessages[0] | null>(null);
+  const [message, setMessage] = useState<MessageType | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Find message client-side
-    const foundMessage = mockMessages.find(
-      (msg) => msg.id === parseInt(params.id as string)
-    );
-    setMessage(foundMessage || null);
+    const fetchMessage = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`https://solifess.vercel.app/v1/api/menfess/${params.id}`);
+        const data = await response.json();
+
+        if (data && data.status && data.data) {
+          setMessage(data.data);
+        } else {
+          console.error("Failed to fetch message:", data.message);
+          setMessage(null);
+        }
+      } catch (error) {
+        console.error("Error fetching message:", error);
+        setMessage(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMessage();
   }, [params.id]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (!message) {
     return <div>Message not found</div>;
   }
+
+  // Format waktu dari UTC ke waktu Indonesia (WIB)
+  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
@@ -50,6 +82,9 @@ export default function MessagePage() {
               <p className="text-lg font-handwriting leading-relaxed">
                 {message.message}
               </p>
+            </div>
+            <div className="mt-4 text-right">
+              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
             </div>
           </div>
         </div>
