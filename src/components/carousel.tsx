@@ -7,7 +7,7 @@ import { CarouselCard } from './carousel-card'
 const messages = [
   { to: "wahyu", from: "aldi", message: "woi wong secang, tes tes" },
   { to: "dipha", from: "aldi", message: "bang heker" },
-  { to: "ica", from: "aldi", message: "halo ica elek" },
+  { to: "tesmank", from: "aldi", message: "tes123" },
   { to: "bang", from: "a", message: "tes tes" },
   { to: "kelas a", from: "c", message: "hai beat hitam, tau aku ngga? wkwkwk" },
   { to: "mas-mas kandok", from: "ijo", message: "mas? wkwkw" },
