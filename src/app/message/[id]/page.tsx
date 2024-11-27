@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import { useRouter } from 'next/navigation'
-import { Button } from "@/components/ui/button"
-import { Navbar } from "@/components/ui/navbar"
-import { Footer } from "@/components/ui/footer"
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/ui/navbar";
+import { Footer } from "@/components/ui/footer";
 
 const mockMessages = [
   { id: 1, sender: "Alice", recipient: "Bob", message: "Hey Bob, how are you?" },
   { id: 2, sender: "Bob", recipient: "Alice", message: "Hi Alice, I'm good! How about you?" },
   { id: 3, sender: "Charlie", recipient: "David", message: "David, don't forget our meeting tomorrow." },
   { id: 4, sender: "David", recipient: "Charlie", message: "Thanks for the reminder, Charlie!" },
-]
+];
 
 export default function MessagePage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const message = mockMessages.find(msg => msg.id === parseInt(params.id))
+  const router = useRouter();
+  const message = mockMessages.find((msg) => msg.id === parseInt(params.id));
 
   if (!message) {
-    return <div>Message not found</div>
+    return <div>Message not found</div>;
   }
 
   return (
@@ -46,5 +46,5 @@ export default function MessagePage({ params }: { params: { id: string } }) {
       </main>
       <Footer />
     </div>
-  )
+  );
 }
