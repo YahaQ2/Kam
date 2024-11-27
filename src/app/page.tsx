@@ -1,11 +1,15 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Carousel } from "@/components/carousel"
 import { Footer } from "@/components/ui/footer"
 import { InitialAnimation } from "@/components/initial-animation"
 import { Navbar } from "@/components/ui/navbar"
 import Link from "next/link"
+import dynamic from 'next/dynamic'
+
+const DynamicCarousel = dynamic(() => import('@/components/carousel').then((mod) => mod.Carousel), {
+  ssr: false,
+})
 
 export default function HomePage() {
   return (
@@ -32,7 +36,7 @@ export default function HomePage() {
           </Button>
         </div>
         <div className="relative w-full max-w-7xl mx-auto overflow-hidden">
-          <Carousel />
+          <DynamicCarousel />
         </div>
       </main>
       <Footer />
