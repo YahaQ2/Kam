@@ -21,8 +21,23 @@ export default function MulaiBerceritaPage() {
     setIsLoading(true)
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      console.log({ from, to, message })
+      const response = await fetch('https://solifess.vercel.app/v1/api/menfess', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: from,
+          recipient: to,
+          message: message,
+          song: ""
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to submit form')
+      }
+
       setIsSuccessModalOpen(true)
       setFrom('')
       setTo('')
