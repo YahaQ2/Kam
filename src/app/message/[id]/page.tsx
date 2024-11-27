@@ -12,7 +12,11 @@ const mockMessages = [
   { id: 4, sender: "David", recipient: "Charlie", message: "Thanks for the reminder, Charlie!" },
 ];
 
-export default function MessagePage({ params }: { params: { id: string } }) {
+interface Params {
+  id: string;
+}
+
+export default function MessagePage({ params }: { params: Params }) {
   const router = useRouter();
   const message = mockMessages.find((msg) => msg.id === parseInt(params.id));
 
