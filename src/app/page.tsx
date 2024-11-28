@@ -26,7 +26,7 @@ export default function HomePage() {
             href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw" 
             className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors mb-8"
           >
-            get to know suggestions, feedback, & new features
+            saran/masukan/fitur baru
             <ArrowUpRight className="ml-1 h-4 w-4" />
           </Link>
           <p className="text-base md:text-lg mb-8 md:mb-12"> 
