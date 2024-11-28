@@ -22,12 +22,12 @@ export default function HomePage() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">
             Menfess Masyarakat Polines
           </h2>
-          <Link 
-            href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw" 
-            className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors mb-8"
+          <Link
+            href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw"
+            className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
-            saran/masukan/fitur baru
-            <ArrowUpRight className="ml-1 h-4 w-4" />
+            <span>saran/masukan/fitur baru</span>
+            <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
           </Link>
           <p className="text-base md:text-lg mb-8 md:mb-12"> 
             
