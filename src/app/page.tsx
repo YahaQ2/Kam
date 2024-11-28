@@ -6,6 +6,7 @@ import { InitialAnimation } from "@/components/initial-animation"
 import { Navbar } from "@/components/ui/navbar"
 import Link from "next/link"
 import dynamic from 'next/dynamic'
+import { ArrowUpRight } from 'lucide-react'
 
 const DynamicCarousel = dynamic(() => import('@/components/carousel').then((mod) => mod.Carousel), {
   ssr: false,
@@ -21,12 +22,16 @@ export default function HomePage() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">
             Menfess Masyarakat Polines
           </h2>
+          <Link 
+            href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw" 
+            className="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors mb-8"
+          >
+            get to know suggestions, feedback, & new features
+            <ArrowUpRight className="ml-1 h-4 w-4" />
+          </Link>
           <p className="text-base md:text-lg mb-8 md:mb-12"> 
             
           </p>
-          <br>
-          
-          </br>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-12 md:mb-16">
             <Button
               asChild
@@ -50,4 +55,3 @@ export default function HomePage() {
     </div>
   )
 }
-
