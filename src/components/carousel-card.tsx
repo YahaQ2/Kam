@@ -1,10 +1,10 @@
-import { motion } from 'framer-motion'
-import { Card, CardContent } from "@/components/ui/card"
+import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface CarouselCardProps {
-  to: string
-  from: string
-  message: string
+  to: string;
+  from: string;
+  message: string;
 }
 
 export const CarouselCard: React.FC<CarouselCardProps> = ({ to, from, message }) => {
@@ -23,12 +23,15 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({ to, from, message })
 
           {/* Message - Centered */}
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-lg font-handwriting text-center leading-relaxed">
+            <p
+              className="text-lg font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis whitespace-nowrap"
+              title={message} // Menambahkan tooltip untuk teks penuh
+            >
               {message}
             </p>
           </div>
         </CardContent>
       </Card>
     </motion.div>
-  )
-}
+  );
+};
