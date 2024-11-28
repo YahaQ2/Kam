@@ -24,8 +24,8 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({ to, from, message })
           {/* Message - Centered */}
           <div className="flex-1 flex items-center justify-center">
             <p
-              className="text-lg font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis whitespace-nowrap"
-              title={message} // Menambahkan tooltip untuk teks penuh
+              className="text-3xl text-gray-700 font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis line-clamp-3 font-['Reenie_Beanie']"
+              title={message}
             >
               {message}
             </p>

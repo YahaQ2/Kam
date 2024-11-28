@@ -12,7 +12,7 @@ export function Navbar() {
     <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
       <div className="container mx-auto flex justify-between items-center p-4 md:p-6">
       <Link href="/" className="hover:opacity-80 transition-opacity">
-          <h1 className="text-2xl md:text-3xl font-bold">solifess</h1>
+          <h1 className="text-3xl md:text-4xl font-bold font-['Reenie_Beanie']">solifess</h1>
         </Link>
 
         {/* Mobile Menu Button */}
@@ -29,7 +29,7 @@ export function Navbar() {
             <Link href="/message">Kirim</Link>
           </Button>
           <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
-            <Link href="/jelajahi">Temukan</Link>
+            <Link href="/search-message">Temukan</Link>
           </Button>
           <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
             <Link href="/dukungan">Dukungan</Link>
@@ -45,7 +45,7 @@ export function Navbar() {
               <Link href="/message">Kirim</Link>
             </Button>
             <Button asChild variant="ghost" className="w-full justify-start text-gray-800 hover:text-gray-600">
-              <Link href="/jelajahi">Temukan</Link>
+              <Link href="/search-message">Temukan</Link>
             </Button>
             <Button asChild variant="ghost" className="w-full justify-start text-gray-800 hover:text-gray-600">
               <Link href="/dukungan">Dukungan</Link>

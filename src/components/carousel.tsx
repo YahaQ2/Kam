@@ -1,16 +1,16 @@
 "use client"
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useLayoutEffect, useRef } from 'react'
 import { motion, useAnimation, useMotionValue } from 'framer-motion'
 import { CarouselCard } from './carousel-card'
 
 const messages = [
-  { to: "axel", from: "anonymous", message: "i hope someday i'll be brave enough to tell u how much u meant to me" },
-  { to: "lyra", from: "anonymous", message: "everything reminds me of u, even that warteg tempat kita first hangout" },
-  { to: "tara", from: "anonymous", message: "masih inget how your smile made everything feel okay... i miss that feeling" },
-  { to: "emil", from: "anonymous", message: "wish i could forget how safe it felt being around you dulu" },
-  { to: "vanya", from: "anonymous", message: "funny how someone bisa jadi stranger padahal they knew all your secrets" },
-  { to: "marcel", from: "anonymous", message: "i still use the playlist u made pas aku sedih... it still helps somehow" },
+  { to: "wahyu", from: "aldi", message: "woi wong secang, tes tes" },
+  { to: "dipha", from: "aldi", message: "bang heker" },
+  { to: "tesmank", from: "aldi", message: "tes123" },
+  { to: "bang", from: "a", message: "tes tes" },
+  { to: "kelas a", from: "c", message: "hai beat hitam, tau aku ngga? wkwkwk" },
+  { to: "mas-mas kandok", from: "ijo", message: "mas? wkwkw" },
 ]
 
 export const Carousel: React.FC = () => {
@@ -19,33 +19,48 @@ export const Carousel: React.FC = () => {
   const x = useMotionValue(0)
   const controls = useAnimation()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (carousel.current) {
       setWidth(carousel.current.scrollWidth - carousel.current.offsetWidth)
     }
   }, [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    let isMounted = true;
+    let animationFrame: number;
+
     const scrollAnimation = async () => {
-      while (true) {
-        await controls.start({
-          x: -width,
-          transition: {
-            duration: 60,
-            ease: "linear",
-          },
-        })
-        await controls.set({ x: 0 })
+      if (!isMounted) return;
+
+      await controls.start({
+        x: -width,
+        transition: {
+          duration: 60,
+          ease: "linear",
+        },
+      })
+
+      if (isMounted) {
+        controls.set({ x: 0 })
+        animationFrame = requestAnimationFrame(scrollAnimation)
       }
     }
+
     scrollAnimation()
+
+    return () => {
+      isMounted = false;
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame)
+      }
+      controls.stop()
+    }
   }, [controls, width])
 
   const tripleMessages = [...messages, ...messages, ...messages]
 
   return (
     <div className="relative w-full max-w-7xl mx-auto">
-      {/* Gradient Masks */}
       <div className="absolute left-0 top-0 w-32 h-full bg-gradient-to-r from-white via-white to-transparent z-10" />
       <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-white via-white to-transparent z-10" />
       

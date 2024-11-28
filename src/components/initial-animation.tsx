@@ -17,7 +17,7 @@ export function InitialAnimation() {
       onAnimationComplete={() => setIsVisible(false)}
     >
       <motion.h1
-        className="text-4xl font-bold text-gray-800"
+        className="text-6xl font-bold text-gray-800 font-['Reenie_Beanie']"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
