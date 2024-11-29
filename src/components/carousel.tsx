@@ -2,15 +2,15 @@
 
 import { useState, useLayoutEffect, useRef } from 'react'
 import { motion, useAnimation, useMotionValue } from 'framer-motion'
-import { CarouselCard } from './carousel-card'
+import { TickerCard } from './ticket-card'
 
 const messages = [
-  { to: "wahyu", from: "aldi", message: "woi wong secang, tes tes" },
-  { to: "dipha", from: "aldi", message: "bang heker" },
-  { to: "tesmank", from: "aldi", message: "tes123" },
-  { to: "bang", from: "a", message: "tes tes" },
-  { to: "kelas a", from: "c", message: "hai beat hitam, tau aku ngga? wkwkwk" },
-  { to: "mas-mas kandok", from: "ijo", message: "mas? wkwkw" },
+  { to: "al hme", from: "-", message: "kapan kita bisa main bareng?" },
+  { to: "semua anak polines", from: "me", message: "guys jgn lupa jaga kebersihan klo udh makan minum, bungkus sampahnya WAJIB dibuang di tong sampah, meski di kantin jg harus begitu. dah gede ayo sadar kebersihan" },
+  { to: "tesmank", from: "aldi", message: "jgn lupa me time" },
+  { to: "bang", from: "a", message: "Semangatt masss, semoga segera wisuda yaaa. tutor dong jadi berkarisma" },
+  { to: "kelas a", from: "c", message: "Mbak dirimu sangat Masya Allah aselii" },
+  { to: "mas-mas kandok", from: "ijo", message: "😓🖤" },
 ]
 
 export const Carousel: React.FC = () => {
@@ -66,20 +66,20 @@ export const Carousel: React.FC = () => {
       
       <motion.div
         ref={carousel}
-        className="cursor-grab overflow-hidden px-8"
+        className="cursor-grab overflow-hidden"
         whileTap={{ cursor: "grabbing" }}
       >
         <motion.div
-          className="flex"
+          className="flex space-x-4 py-4"
           style={{ x }}
           animate={controls}
         >
           {tripleMessages.map((msg, index) => (
             <motion.div
               key={`${msg.to}-${index}`}
-              className="flex-none px-3"
+              className="flex-none"
             >
-              <CarouselCard {...msg} />
+              <TickerCard {...msg} />
             </motion.div>
           ))}
         </motion.div>
@@ -87,3 +87,4 @@ export const Carousel: React.FC = () => {
     </div>
   )
 }
+

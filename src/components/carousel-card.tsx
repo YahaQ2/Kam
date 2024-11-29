@@ -16,7 +16,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({ to, from, message })
       <Card className="w-64 h-80 bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
         <CardContent className="p-8 flex flex-col h-full">
           {/* Header */}
-          <div className="space-y-1 mb-6">
+          <div className="space-y-1 mb-6 text-start">
             <p className="text-sm text-gray-500">To: {to}</p>
             <p className="text-sm text-gray-500">From: {from}</p>
           </div>
