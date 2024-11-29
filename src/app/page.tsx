@@ -50,7 +50,7 @@ export default function HomePage() {
       setError(null);
       try {
         const todayDate = getTodayDate();
-        const response = await fetch(`http://solifess.vercel.app/v1/api/menfess?date=${todayDate}`);
+        const response = await fetch(`https://solifess.vercel.app/v1/api/menfess?date=${todayDate}`);
         if (!response.ok) {
           throw new Error("Failed to fetch messages.");
         }
