@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
+import { motion } from "framer-motion";
 
-// Define the type for your Menfess message
 interface Menfess {
   id: number;
   sender: string;
@@ -21,7 +21,6 @@ interface Menfess {
   updated_at?: string | null;
 }
 
-// Define the API response type
 interface MenfessResponse {
   status: boolean;
   success: boolean;
@@ -34,15 +33,28 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
 });
 
 export default function HomePage() {
-  // Use the Menfess type for the state
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [currentCard, setCurrentCard] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split("T")[0];
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -80,6 +92,15 @@ export default function HomePage() {
     fetchMessages();
   }, []);
 
+  const handleScroll = () => {
+    if (containerRef.current) {
+      const scrollPosition = containerRef.current.scrollLeft;
+      const cardWidth = containerRef.current.offsetWidth;
+      const newCard = Math.round(scrollPosition / cardWidth);
+      setCurrentCard(newCard);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
@@ -113,21 +134,49 @@ export default function HomePage() {
           </div>
           <div className="mt-16">
             <h3 className="text-2xl md:text-3xl font-bold mb-8">Menfess Terbaru</h3>
-            <div className="flex flex-wrap justify-center">
-              {loading ? (
-                <p>Loading...</p>
-              ) : error ? (
-                <p className="text-red-500">{error}</p>
-              ) : recentlyAddedMessages.length === 0 ? (
-                <p>No recent messages found.</p>
-              ) : (
-                recentlyAddedMessages.map((msg) => (
-                  <Link href={`/message/${msg.id}`} key={msg.id} className="block">
-                    <CarouselCard to={msg.recipient} from={msg.sender} key={msg.id} {...msg} />
-                  </Link>
-                ))
-              )}
-            </div>
+            {loading ? (
+              <p>Loading...</p>
+            ) : error ? (
+              <p className="text-red-500">{error}</p>
+            ) : recentlyAddedMessages.length === 0 ? (
+              <p>No recent messages found.</p>
+            ) : (
+              <div className="relative">
+                <div 
+                  ref={containerRef}
+                  className={`
+                    ${isMobile ? 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide' : 'flex justify-center'}
+                    gap-4
+                  `}
+                  onScroll={handleScroll}
+                >
+                  {recentlyAddedMessages.map((msg) => (
+                    <div 
+                      key={msg.id} 
+                      className={`
+                        ${isMobile ? 'flex flex-shrink-0 w-full snap-center justify-center' : ''}
+                      `}
+                    >
+                      <Link href={`/message/${msg.id}`}>
+                        <CarouselCard to={msg.recipient} from={msg.sender} message={msg.message} />
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+                {isMobile && (
+                  <div className="flex justify-center space-x-2 mt-4">
+                    {recentlyAddedMessages.map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${currentCard === index ? 'bg-gray-800' : 'bg-gray-300'}`}
+                        initial={false}
+                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </main>

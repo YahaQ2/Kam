@@ -8,7 +8,7 @@ interface SuccessModalProps {
   onClose: () => void;
 }
 
-export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose }) => {
+export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen}) => {
   if (!isOpen) return null;
 
   return (
@@ -29,9 +29,9 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose }) =
           >
             <span>saran/masukan/fitur baru</span>
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-          </Link>
-        <Button onClick={onClose} className="w-full bg-gray-800 text-white hover:bg-gray-900">
-          Tutup
+          </Link >
+        <Button className="w-full bg-gray-800 text-white hover:bg-gray-900">
+          <Link href={'/'} className="w-full h-full">Tutup</Link>
         </Button>
       </div>
     </div>
