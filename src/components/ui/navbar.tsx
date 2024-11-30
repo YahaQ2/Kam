@@ -24,7 +24,7 @@ export function Navbar() {
         </button>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-4">
+        <nav className="hidden md:flex space-x-5">
           <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
             <Link href="/message">Kirim</Link>
           </Button>
