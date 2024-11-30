@@ -84,7 +84,7 @@ export default function SearchMessagesPage() {
         <h1 className="text-4xl font-bold mb-8 text-center">Cari Menfess</h1>
         <div className="flex justify-center mb-8">
           <Link
-            href="https://www.instagram.com/fer_.putra
+            href="https://www.instagram.com/fer_.putra"
             className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
             <span>saran/masukan/fitur baru</span>
