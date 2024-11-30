@@ -91,8 +91,7 @@ export default function SearchMessagesPage() {
 
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
           </Link>
-                      <div className="text-center text-gray-500">
-                Yahh menfess yang kamu cari gaada :(
+                      </span> isi kosong untuk melihat pesan terbaru dari siapa pun
         </div>
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mb-8">
           <div className="mb-6">
