@@ -22,7 +22,8 @@ export function InitialAnimation() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        Polines Bercerita
+        unand fess 
+         BY FER
       </motion.h1>
     </motion.div>
   )
