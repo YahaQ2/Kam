@@ -24,7 +24,7 @@ export function Navbar() {
         </button>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-5">
+        <nav className="hidden md:flex space-x-4">
           <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
             <Link href="/message">Kirim</Link>
           </Button>
@@ -34,9 +34,7 @@ export function Navbar() {
           <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
             <Link href="/dukungan">Dukungan</Link>
           </Button>
-          <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
-            <Link href="https://ziwa-351410.web.app/#/">ziwa</Link>
-            </Button>
+
         </nav>
       </div>
 
