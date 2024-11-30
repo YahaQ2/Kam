@@ -22,7 +22,7 @@ export function InitialAnimation() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        unand fess 
+        Unand fess 
          BY FER
       </motion.h1>
     </motion.div>
