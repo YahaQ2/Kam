@@ -44,7 +44,7 @@ export default function SearchMessagesPage() {
     if (recipient) params.append('recipient', recipient)
 
     try {
-      const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`, {
+      const response = await fetch(`https://yunand.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -93,19 +93,7 @@ export default function SearchMessagesPage() {
                   
           </Link>
           
-                <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-32">
-        <h1 className="text-4xl font-bold mb-8 text-center">Cari Menfess</h1>
-        <div className="flex justify-center mb-8">
-          <Link
-            href="https://www.instagram.com/fer_.putra"
-            className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
-          >
-            <span>saran/masukan/fitur baru</span> 
-
-            <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-                  
-          </Link>
+          
 
         </div>
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mb-8">
