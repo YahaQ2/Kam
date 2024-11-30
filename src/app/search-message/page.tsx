@@ -90,7 +90,7 @@ export default function SearchMessagesPage() {
             <span>saran/masukan/fitur baru</span> 
 
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-                             </span> isi kosong untuk melihat pesan terbaru dari siapa pun
+                  
           </Link>
 
         </div>
@@ -101,7 +101,7 @@ export default function SearchMessagesPage() {
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               className="w-full"
-              placeholder="Recipient's name"
+              placeholder="Recipient's name atau isi kosong untuk melihat pesan terbaru"
               disabled={isLoading}
             />
           </div>
