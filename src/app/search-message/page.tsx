@@ -88,9 +88,10 @@ export default function SearchMessagesPage() {
             className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
             <span>saran/masukan/fitur baru</span> 
-            <h1 isi kosong untuk melihat pesan terbaru dari siapa pun
+
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
           </Link>
+                      <h1 isi kosong untuk melihat pesan terbaru dari siapa pun
         </div>
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mb-8">
           <div className="mb-6">
