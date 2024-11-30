@@ -87,7 +87,7 @@ export default function MulaiBerceritaPage() {
     });
   
     try {
-      const response = await fetch("https://yunand.vercel.app/v1/api/menfess-spotify-search", {
+      const response = await fetch("https://solifess.vercel.app/v1/api/menfess-spotify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
