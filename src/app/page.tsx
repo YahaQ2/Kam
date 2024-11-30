@@ -143,7 +143,7 @@ export default function HomePage() {
               <Link href="/search-message">Cari Menfess</Link>
             </Button>
           <Button asChild variant="ghost" className="text-gray-800 hover:text-gray-600">
-            <Link href="https://ziwa-351410.web.app/#/">ziwa</Link>
+            <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
             </Button>
           </div>
           <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
