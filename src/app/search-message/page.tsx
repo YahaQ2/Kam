@@ -3,25 +3,37 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Navbar } from "@/components/ui/navbar"
 import { Footer } from "@/components/ui/footer"
 import { CarouselCard } from "@/components/carousel-card"
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 
-type Message = {
+interface Menfess {
   id: number;
   sender: string;
   recipient: string;
   message: string;
+  spotify_id?: string;
+  track?: {
+    title: string;
+    artist: string;
+    cover_img: string;
+    preview_link: string | null;
+    spotify_embed_link: string;
+  };
+  song?: {
+    title: string;
+    artist: string;
+    coverUrl: string;
+  };
   created_at: string;
+  updated_at?: string | null;
 }
 
 export default function SearchMessagesPage() {
-  const [sender, setSender] = useState('')
   const [recipient, setRecipient] = useState('')
-  const [searchResults, setSearchResults] = useState<Message[] | null>(null)
+  const [searchResults, setSearchResults] = useState<Menfess[] | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,11 +41,10 @@ export default function SearchMessagesPage() {
     setIsLoading(true)
 
     const params = new URLSearchParams()
-    if (sender) params.append('sender', sender)
     if (recipient) params.append('recipient', recipient)
 
     try {
-      const response = await fetch(`https://solifess.vercel.app/v1/api/menfess?${params.toString()}`, {
+      const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -45,9 +56,19 @@ export default function SearchMessagesPage() {
       }
 
       const result = await response.json()
-      const data: Message[] = result.data
+      const data: Menfess[] = result.data
 
-      setSearchResults(data)
+      const sortedMessages = data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .map(menfess => ({
+          ...menfess,
+          song: menfess.track ? {
+            title: menfess.track.title,
+            artist: menfess.track.artist,
+            coverUrl: menfess.track.cover_img
+          } : undefined
+        }));
+
+      setSearchResults(sortedMessages)
     } catch (error) {
       console.error('Error searching messages:', error)
       setSearchResults([])
@@ -71,33 +92,15 @@ export default function SearchMessagesPage() {
           </Link>
         </div>
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mb-8">
-          <div className="mb-6 md:flex md:space-x-4">
-            <div className="md:w-1/2 mb-4 md:mb-0">
-              <Label htmlFor="sender" className="block text-sm font-medium text-gray-700 mb-1">
-                From
-              </Label>
-              <Input
-                id="sender"
-                value={sender}
-                onChange={(e) => setSender(e.target.value)}
-                className="w-full"
-                placeholder="Sender's name"
-                disabled={isLoading}
-              />
-            </div>
-            <div className="md:w-1/2">
-              <Label htmlFor="recipient" className="block text-sm font-medium text-gray-700 mb-1">
-                To
-              </Label>
-              <Input
-                id="recipient"
-                value={recipient}
-                onChange={(e) => setRecipient(e.target.value)}
-                className="w-full"
-                placeholder="Recipient's name"
-                disabled={isLoading}
-              />
-            </div>
+          <div className="mb-6">
+            <Input
+              id="recipient"
+              value={recipient}
+              onChange={(e) => setRecipient(e.target.value)}
+              className="w-full"
+              placeholder="Recipient's name"
+              disabled={isLoading}
+            />
           </div>
           <div className="text-center">
             <Button 
@@ -118,6 +121,9 @@ export default function SearchMessagesPage() {
                     to={msg.recipient} 
                     from={msg.sender} 
                     message={msg.message} 
+                    songTitle={msg.song?.title}
+                    artist={msg.song?.artist}
+                    coverUrl={msg.song?.coverUrl}
                   />
                 </Link>
               ))
@@ -133,4 +139,3 @@ export default function SearchMessagesPage() {
     </div>
   )
 }
-

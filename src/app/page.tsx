@@ -16,7 +16,19 @@ interface Menfess {
   sender: string;
   recipient: string;
   message: string;
-  song?: string;
+  spotify_id?: string;
+  track?: {
+    title: string;
+    artist: string;
+    cover_img: string;
+    preview_link: string | null;
+    spotify_embed_link: string;
+  };
+  song?: {
+    title: string;
+    artist: string;
+    coverUrl: string;
+  };
   created_at: string;
   updated_at?: string | null;
 }
@@ -40,11 +52,6 @@ export default function HomePage() {
   const [currentCard, setCurrentCard] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const getTodayDate = () => {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
-  };
-
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
@@ -61,8 +68,7 @@ export default function HomePage() {
       setLoading(true);
       setError(null);
       try {
-        const todayDate = getTodayDate();
-        const response = await fetch(`https://solifess.vercel.app/v1/api/menfess?date=${todayDate}`);
+        const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search`);
         if (!response.ok) {
           throw new Error("Failed to fetch messages.");
         }
@@ -72,7 +78,15 @@ export default function HomePage() {
         if (responseData.status && Array.isArray(responseData.data)) {
           const sortedMessages = responseData.data
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 5);
+            .slice(0, 5)
+            .map(menfess => ({
+              ...menfess,
+              song: menfess.track ? {
+                title: menfess.track.title,
+                artist: menfess.track.artist,
+                coverUrl: menfess.track.cover_img
+              } : undefined
+            }));
           
           setRecentlyAddedMessages(sortedMessages);
         } else {
@@ -88,7 +102,7 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-
+  
     fetchMessages();
   }, []);
 
@@ -158,7 +172,14 @@ export default function HomePage() {
                       `}
                     >
                       <Link href={`/message/${msg.id}`}>
-                        <CarouselCard to={msg.recipient} from={msg.sender} message={msg.message} />
+                        <CarouselCard 
+                          to={msg.recipient} 
+                          from={msg.sender} 
+                          message={msg.message}
+                          songTitle={msg.song?.title}
+                          artist={msg.song?.artist}
+                          coverUrl={msg.song?.coverUrl}
+                        />
                       </Link>
                     </div>
                   ))}
