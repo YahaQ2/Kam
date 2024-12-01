@@ -69,7 +69,7 @@ export default function HomePage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
+        const response = await fetch(`https://unand-78epx9jvv-fer-putra-s-projects.vercel.app`);
         if (!response.ok) {
           throw new Error("Failed to fetch messages.");
         }
