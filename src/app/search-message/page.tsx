@@ -44,7 +44,7 @@ export default function SearchMessagesPage() {
     if (recipient) params.append('recipient', recipient)
 
     try {
-      const response = await fetch(`https://yunand.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`, {
+      const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
