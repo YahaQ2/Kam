@@ -16,6 +16,7 @@ interface SpotifyTrack {
   artist: string;
   album: string;
   cover_url: string;
+  external_url: string;
 }
 
 export default function MulaiBerceritaPage() {
@@ -29,7 +30,20 @@ export default function MulaiBerceritaPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
+  useEffect(() => {
+    // Load reCAPTCHA script
+    const script = document.createElement("script");
+    
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   useEffect(() => {
     if (selectedTrack) return;
@@ -66,7 +80,6 @@ export default function MulaiBerceritaPage() {
     setSong(track.name);
     setSelectedTrack(track);
     setTracks([]);
-    console.log("Selected Spotify ID:", track.id);
   };
 
   const handleClearSelection = () => {
@@ -78,51 +91,106 @@ export default function MulaiBerceritaPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-  
-    console.log("Data yang dikirim:", {
-      sender: from,
-      recipient: to,
-      message: message,
-      spotify_id: spotifyId,
-    });
-  
+    setErrorMessage("");
+
+    // Validasi input
+    if (!from.trim()) {
+      setErrorMessage("Nama pengirim tidak boleh kosong");
+      setIsLoading(false);
+      return;
+    }
+    if (!to.trim()) {
+      setErrorMessage("Nama penerima tidak boleh kosong");
+      setIsLoading(false);
+      return;
+    }
+    if (!message.trim()) {
+      setErrorMessage("Pesan tidak boleh kosong");
+      setIsLoading(false);
+      return;
+    }
+    if (!spotifyId) {
+      setErrorMessage("Harap pilih lagu terlebih dahulu");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      // Generate reCAPTCHA token
+      const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
+        if (!recaptchaSiteKey) {
+          throw new Error("reCAPTCHA site key is not defined.");
+        }
+
+        const recaptchaToken = await new Promise<string>((resolve, reject) => {
+          window.grecaptcha
+            .execute(recaptchaSiteKey, { action: "submit_menfess" })
+            .then(resolve)
+            .catch(reject);
+        });
+
+        console.log(recaptchaToken);
+        console.log("reCAPTCHA Token:", recaptchaToken);
+
+        const submissionData = {
           sender: from,
           recipient: to,
           message: message,
           spotify_id: spotifyId,
-        }),
-      });
-  
-      if (!response.ok) {
-        throw new Error("Failed to submit form");
-      }
+          track_metadata: {
+            name: selectedTrack?.name,
+            artist: selectedTrack?.artist,
+            album: selectedTrack?.album,
+            cover_url: selectedTrack?.cover_url,
+            external_url: selectedTrack?.external_url
+          },
+          recaptcha_token: recaptchaToken
+        };
+        
+        const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData),
+        });
 
-      setIsSuccessModalOpen(true);
-      setFrom("");
-      setTo("");
-      setMessage("");
-      setSong("");
-      setSpotifyId("");
-      setSelectedTrack(null);
+      const result = await response.json();
+
+      if (result.success) {
+        setIsSuccessModalOpen(true);
+        // Reset form fields
+        setFrom("");
+        setTo("");
+        setMessage("");
+        setSong("");
+        setSpotifyId("");
+        setSelectedTrack(null);
+      } else {
+        // Handle submission error
+        setErrorMessage(result.message || "Gagal mengirim menfess");
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
+      setErrorMessage("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
         <h1 className="text-4xl font-bold mb-8 text-center">Kirim Menfess</h1>
+
+        {errorMessage && (
+          <div className="max-w-4xl mx-auto mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <span className="block sm:inline">{errorMessage}</span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           <div className="mb-6 md:flex md:space-x-4">
             <div className="md:w-1/2 mb-4 md:mb-0">
@@ -179,7 +247,7 @@ export default function MulaiBerceritaPage() {
                 disabled={isLoading || isSearching || !!selectedTrack}
               />
               {selectedTrack && (
-                <Button onClick={handleClearSelection} className="ml-2">
+                <Button type="button" onClick={handleClearSelection} className="ml-2">
                   ✕
                 </Button>
               )}
