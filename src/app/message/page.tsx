@@ -148,7 +148,7 @@ export default function MulaiBerceritaPage() {
           recaptcha_token: recaptchaToken
         };
         
-        const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify", {
+        const response = await fetch("https://unand.vercel.app/v1/api/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
