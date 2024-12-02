@@ -43,7 +43,7 @@ export default function MulaiBerceritaPage() {
       setIsSearching(true);
       try {
         const response = await fetch(
-          `http://localhost:5000/v1/api/search-spotify-song?song=${encodeURIComponent(song)}`
+          `http://unand.vercel.app/v1/api/search-spotify-song?song=${encodeURIComponent(song)}`
         );
         const result = await response.json();
 
