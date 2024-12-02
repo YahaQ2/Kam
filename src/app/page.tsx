@@ -69,7 +69,7 @@ export default function HomePage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`https://solifess.vercel.app/v1/api/search-spotify-song?song=${encodeURICompo);
+        const response = await fetch(`https://solifess.vercel.app/v1/api/search-spotify-song?song';
         if (!response.ok) {
           throw new Error("Failed to fetch messages.");
         }
