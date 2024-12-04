@@ -62,7 +62,7 @@ export default function HomePage() {
       setError(null);
       try {
         const todayDate = getTodayDate();
-        const response = await fetch(`https://solifess.vercel.app/v1/api/menfess?date=${todayDate}`);
+        const response = await fetch(`https://unand.vercel.app/v1/api/menfess?date=${todayDate}`);
         if (!response.ok) {
           throw new Error("Failed to fetch messages.");
         }
@@ -107,9 +107,9 @@ export default function HomePage() {
       <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8 md:py-16 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat Polines</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat yunand</h2>
           <Link
-            href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw"
+            href="https://www.instagram.com/stories/fer_.putra"
             className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
             <span>saran/masukan/fitur baru</span>
