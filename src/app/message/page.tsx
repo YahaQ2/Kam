@@ -88,7 +88,7 @@ export default function MulaiBerceritaPage() {
   
     try {
       const response = await fetch(
-        "https://unand.vercel.app/v1/api/menfess-spotify", {
+        "https://solifess.vercel.app/v1/api/menfess-spotify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
