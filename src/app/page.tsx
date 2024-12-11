@@ -64,7 +64,7 @@ export default function HomePage() {
         const todayDate = getTodayDate();
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search=${params.toString()}`
         if (!response.ok) {
-          throw new Error("amlye.");
+          throw new Error("maaferor.");
         }
         
         const responseData: MenfessResponse = await response.json();
