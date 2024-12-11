@@ -16,7 +16,19 @@ interface Menfess {
   sender: string;
   recipient: string;
   message: string;
-  song?: string;
+  spotify_id?: string;
+  track?: {
+    title: string;
+    artist: string;
+    cover_img: string;
+    preview_link: string | null;
+    spotify_embed_link: string;
+  };
+  song?: {
+    title: string;
+    artist: string;
+    coverUrl: string;
+  };
   created_at: string;
   updated_at?: string | null;
 }
@@ -40,11 +52,6 @@ export default function HomePage() {
   const [currentCard, setCurrentCard] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const getTodayDate = () => {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
-  };
-
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
@@ -61,10 +68,9 @@ export default function HomePage() {
       setLoading(true);
       setError(null);
       try {
-        const todayDate = getTodayDate();
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search=${params.toString()}`
+        const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search`);
         if (!response.ok) {
-          throw new Error("maaferor.");
+          throw new Error("Failed to fetch messages.");
         }
         
         const responseData: MenfessResponse = await response.json();
@@ -72,7 +78,15 @@ export default function HomePage() {
         if (responseData.status && Array.isArray(responseData.data)) {
           const sortedMessages = responseData.data
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 5);
+            .slice(0, 5)
+            .map(menfess => ({
+              ...menfess,
+              song: menfess.track ? {
+                title: menfess.track.title,
+                artist: menfess.track.artist,
+                coverUrl: menfess.track.cover_img
+              } : undefined
+            }));
           
           setRecentlyAddedMessages(sortedMessages);
         } else {
@@ -88,7 +102,7 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-
+  
     fetchMessages();
   }, []);
 
@@ -107,9 +121,9 @@ export default function HomePage() {
       <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8 md:py-16 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat yunand</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat Polines</h2>
           <Link
-            href="https://www.instagram.com/stories/fer_.putra"
+            href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw"
             className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
             <span>saran/masukan/fitur baru</span>
@@ -126,7 +140,7 @@ export default function HomePage() {
               asChild
               className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
             >
-              <Link href="/search-message">Cari Menfess</Link>
+              <Link href="/search-message">Explore Menfess</Link>
             </Button>
           </div>
           <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
@@ -158,7 +172,14 @@ export default function HomePage() {
                       `}
                     >
                       <Link href={`/message/${msg.id}`}>
-                        <CarouselCard to={msg.recipient} from={msg.sender} message={msg.message} />
+                        <CarouselCard 
+                          to={msg.recipient} 
+                          from={msg.sender} 
+                          message={msg.message}
+                          songTitle={msg.song?.title}
+                          artist={msg.song?.artist}
+                          coverUrl={msg.song?.coverUrl}
+                        />
                       </Link>
                     </div>
                   ))}
