@@ -62,7 +62,7 @@ export default function HomePage() {
       setError(null);
       try {
         const todayDate = getTodayDate();
-        const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search=${params.toString()}`
+        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search=${params.toString()}`
         if (!response.ok) {
           throw new Error("amlye.");
         }
