@@ -13,9 +13,7 @@ const messages = [
     { to: "yunend", from: "admin", message: "suport ya,dari admin fer (yang paling ganteng" },
   { to: "mas-mas kandok", from: "ijo", message: "😓🖤" },
     { to: "mbaks2", from: "admin fer", message: "hai semoga kamu coba ya 22-08-23" },
-    
-    
-    { to: "Rafi", from: "Aldi", message: "Selamat pagi!" },
+   { to: "Rafi", from: "Aldi", message: "Selamat pagi!" },
 { to: "Nisa", from: "Joko", message: "Kamu sangat berarti." },
 { to: "Tono", from: "Lestari", message: "Terima kasih." },
 { to: "Dina", from: "Rino", message: "" },
