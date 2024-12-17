@@ -24,7 +24,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen}) => {
         </h2>
         <p className="mb-6">Pesanmu terkirim. Semoga sampai di dia yaaa</p>
         <Link
-            href="https://www.instagram.com/fer_.putra"
+            href="https://www.instagram.com/"
             className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
             <span>saran/masukan/fitur baru</span>
