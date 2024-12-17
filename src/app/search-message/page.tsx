@@ -84,12 +84,17 @@ export default function SearchMessagesPage() {
         <h1 className="text-4xl font-bold mb-8 text-center">Cari Menfess</h1>
         <div className="flex justify-center mb-8">
           <Link
-            href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw"
+            href="https://www.instagram.com/fer_.putra"
             className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
-            <span>saran/masukan/fitur baru</span>
+            <span>saran/masukan/fitur baru</span> 
+
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+                  
           </Link>
+          
+          
+
         </div>
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mb-8">
           <div className="mb-6">
@@ -98,7 +103,7 @@ export default function SearchMessagesPage() {
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               className="w-full"
-              placeholder="Recipient's name"
+              placeholder="Recipient's name atau isi kosong untuk melihat pesan terbaru"
               disabled={isLoading}
             />
           </div>
