@@ -37,7 +37,7 @@ export const Carousel: React.FC = () => {
       await controls.start({
         x: -width,
         transition: {
-          duration: 60,
+          duration: 70,
           ease: "linear",
         },
       })
