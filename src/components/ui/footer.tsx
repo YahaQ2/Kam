@@ -12,10 +12,10 @@ export function Footer() {
             <a href="#" className="text-gray-600 hover:text-gray-800">
               <FaTwitter size={20} />
             </a>
-            <a href="https://www.instagram.com/fer_.putra/" className="text-gray-600 hover:text-gray-800">
+            <a href="https://www.instagram.com/" className="text-gray-600 hover:text-gray-800">
               <FaInstagram size={20} />
             </a>
-            <a href="https://github.com/ferput" className="text-gray-600 hover:text-gray-800">
+            <a href="https://github.com/ferpt" className="text-gray-600 hover:text-gray-800">
               <FaGithub size={20} />
             </a>
           </div>
