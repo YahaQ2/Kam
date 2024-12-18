@@ -117,7 +117,7 @@ export default function MulaiBerceritaPage() {
         },
       };
 
-      const response = await fetch("https://unand.vercel.app/v1/api/menfess", {
+      const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify-search", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
