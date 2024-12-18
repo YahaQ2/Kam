@@ -33,6 +33,19 @@ export default function MulaiBerceritaPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    // Load reCAPTCHA script
+    const script = document.createElement("script");
+    
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  useEffect(() => {
     if (selectedTrack) return;
 
     const searchSongs = async () => {
@@ -103,27 +116,45 @@ export default function MulaiBerceritaPage() {
     }
 
     try {
-      const submissionData = {
-        sender: from,
-        recipient: to,
-        message: message,
-        spotify_id: spotifyId,
-        track_metadata: {
-          name: selectedTrack?.name,
-          artist: selectedTrack?.artist,
-          album: selectedTrack?.album,
-          cover_url: selectedTrack?.cover_url,
-          external_url: selectedTrack?.external_url,
-        },
-      };
+      // Generate reCAPTCHA token
+      const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
-      const response = await fetch("https://unand.vercel.app/v1/api/menfess", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      });
+        if (!recaptchaSiteKey) {
+          throw new Error("reCAPTCHA site key is not defined.");
+        }
+
+        const recaptchaToken = await new Promise<string>((resolve, reject) => {
+          window.grecaptcha
+            .execute(recaptchaSiteKey, { action: "submit_menfess" })
+            .then(resolve)
+            .catch(reject);
+        });
+
+        console.log(recaptchaToken);
+        console.log("reCAPTCHA Token:", recaptchaToken);
+
+        const submissionData = {
+          sender: from,
+          recipient: to,
+          message: message,
+          spotify_id: spotifyId,
+          track_metadata: {
+            name: selectedTrack?.name,
+            artist: selectedTrack?.artist,
+            album: selectedTrack?.album,
+            cover_url: selectedTrack?.cover_url,
+            external_url: selectedTrack?.external_url
+          },
+          recaptcha_token: recaptchaToken
+        };
+        
+        const response = await fetch("https://unand.vercel.app/v1/api/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData),
+        });
 
       const result = await response.json();
 
@@ -155,10 +186,7 @@ export default function MulaiBerceritaPage() {
         <h1 className="text-4xl font-bold mb-8 text-center">Kirim Menfess</h1>
 
         {errorMessage && (
-          <div
-            className="max-w-4xl mx-auto mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-            role="alert"
-          >
+          <div className="max-w-4xl mx-auto mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span className="block sm:inline">{errorMessage}</span>
           </div>
         )}
@@ -166,10 +194,7 @@ export default function MulaiBerceritaPage() {
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
           <div className="mb-6 md:flex md:space-x-4">
             <div className="md:w-1/2 mb-4 md:mb-0">
-              <Label
-                htmlFor="from"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <Label htmlFor="from" className="block text-sm font-medium text-gray-700 mb-1">
                 From
               </Label>
               <Input
@@ -182,10 +207,7 @@ export default function MulaiBerceritaPage() {
               />
             </div>
             <div className="md:w-1/2">
-              <Label
-                htmlFor="to"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <Label htmlFor="to" className="block text-sm font-medium text-gray-700 mb-1">
                 To
               </Label>
               <Input
@@ -199,10 +221,7 @@ export default function MulaiBerceritaPage() {
             </div>
           </div>
           <div className="mb-6">
-            <Label
-              htmlFor="message"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <Label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
               Message
             </Label>
             <Textarea
@@ -215,10 +234,7 @@ export default function MulaiBerceritaPage() {
             />
           </div>
           <div className="mb-6 relative">
-            <Label
-              htmlFor="song"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <Label htmlFor="song" className="block text-sm font-medium text-gray-700 mb-1">
               Search Song
             </Label>
             <div className="flex items-center">
@@ -231,11 +247,7 @@ export default function MulaiBerceritaPage() {
                 disabled={isLoading || isSearching || !!selectedTrack}
               />
               {selectedTrack && (
-                <Button
-                  type="button"
-                  onClick={handleClearSelection}
-                  className="ml-2"
-                >
+                <Button type="button" onClick={handleClearSelection} className="ml-2">
                   ✕
                 </Button>
               )}
@@ -255,14 +267,14 @@ export default function MulaiBerceritaPage() {
                     />
                     <div>
                       <div className="font-medium">{track.name}</div>
-                      <div className="text-sm text-gray-500">
-                        {track.artist}
-                      </div>
+                      <div className="text-sm text-gray-500">{track.artist}</div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
+
+            {/* Display selected song details */}
             {selectedTrack && (
               <div className="mt-4 flex items-center">
                 {selectedTrack.cover_url && (
