@@ -116,19 +116,8 @@ export default function MulaiBerceritaPage() {
     }
 
     try {
-      // Generate reCAPTCHA token
-      const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
-        if (!recaptchaSiteKey) {
-          throw new Error("reCAPTCHA site key is not defined.");
-        }
 
-        const recaptchaToken = await new Promise<string>((resolve, reject) => {
-          window.grecaptcha
-            .execute(recaptchaSiteKey, { action: "submit_menfess" })
-            .then(resolve)
-            .catch(reject);
-        });
 
         console.log(recaptchaToken);
         console.log("reCAPTCHA Token:", recaptchaToken);
