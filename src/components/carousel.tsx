@@ -10,7 +10,7 @@ const messages = [
   { to: "tesmank", from: "aldi", message: "jgn lupa me time" },
   { to: "bang", from: "a", message: "Semangatt bang, semoga segera wisuda yaaa. tutor dong jadi berkarisma" },
   { to: "kelas a", from: "c", message: "kak dirimu sangat Masya Allah aselii" },
-    { to: "yunend", from: "admin", message: "suport ya,dari admin fer (yang paling ganteng" },
+  { to: "yunend", from: "admin", message: "suport ya,dari admin fer (yang paling ganteng" },
   { to: "mas-mas kandok", from: "ijo", message: "suport web ini ya dari admin🥰😗" },
 ]
 
