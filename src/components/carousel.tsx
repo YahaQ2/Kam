@@ -8,10 +8,9 @@ const messages = [
   { to: "al hme", from: "-", message: "kapan kita bisa main bareng?" },
   { to: "semua anak unand", from: "me", message: "guys jgn lupa jaga kebersihan klo udh makan minum, bungkus sampahnya WAJIB dibuang di tong sampah, meski di kantin jg harus begitu. dah gede ayo sadar kebersihan" },
   { to: "tesmank", from: "aldi", message: "jgn lupa me time" },
-  { to: "bang", from: "a", message: "Semangatt bang, semoga segera wisuda yaaa. tutor dong jadi berkarisma" },
-  { to: "kelas a", from: "c", message: "kak dirimu sangat Masya Allah aselii" },
-  { to: "yunend", from: "admin", message: "suport ya,dari admin fer (yang paling ganteng" },
-  { to: "mas-mas kandok", from: "ijo", message: "suport web ini ya dari admin🥰😗" },
+  { to: "bang", from: "a", message: "Semangatt abang, semoga segera wisuda yaaa. tutor dong jadi berkarisma" },
+  { to: "kelas a", from: "c", message: "Mbak dirimu sangat Masya Allah aselii" },
+  { to: "mas-mas kandok", from: "ijo", message: "😓🖤" },
 ]
 
 export const Carousel: React.FC = () => {
