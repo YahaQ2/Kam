@@ -10,7 +10,7 @@ const messages = [
   { to: "tesmank", from: "aldi", message: "jgn lupa me time" },
   { to: "bang", from: "a", message: "Semangatt masss, semoga segera wisuda yaaa. tutor dong jadi berkarisma" },
   { to: "kelas a", from: "c", message: "Mbak dirimu sangat Masya Allah aselii" },
-  { to: "mas-mas kandok", from: "ijo", message: "😓🖤" }
+  { to: "mas-mas kandok", from: "ijo", message: "😓🖤" },
 ]
 
 export const Carousel: React.FC = () => {
