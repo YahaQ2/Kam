@@ -1,22 +1,22 @@
-'use client'
+"use client"
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/ui/navbar"
 import { Footer } from "@/components/ui/footer"
 import { CarouselCard } from "@/components/carousel-card"
 import { ScrollToTopButton } from "@/components/scroll-to-top-button"
-import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
+import Link from "next/link"
+import { ArrowUpRight } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
-import { CalendarIcon } from 'lucide-react'
-import debounce from 'lodash/debounce'
+import { CalendarIcon } from "lucide-react"
+import debounce from "lodash/debounce"
 
 interface Menfess {
   id: number;
@@ -44,9 +44,9 @@ export default function SearchMessagesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState<Menfess[] | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [searchBy, setSearchBy] = useState<'recipient' | 'sender'>('recipient')
+  const [searchBy, setSearchBy] = useState<"recipient" | "sender">("recipient")
   const [date, setDate] = useState<Date | undefined>(undefined)
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest")
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,14 +69,14 @@ export default function SearchMessagesPage() {
 
     const params = new URLSearchParams()
     if (searchTerm) params.append(searchBy, searchTerm)
-    if (date) params.append('date', format(date, 'yyyy-MM-dd'))
-    params.append('sort', sortOrder === 'newest' ? 'desc' : 'asc')
+    if (date) params.append("date", format(date, "yyyy-MM-dd"))
+    params.append("sort", sortOrder === "newest" ? "desc" : "asc")
 
     try {
-      const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`, {
-        method: 'GET',
+      const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`, {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       })
 
@@ -98,7 +98,7 @@ export default function SearchMessagesPage() {
 
       setSearchResults(sortedMessages)
     } catch (error) {
-      console.error('Error searching messages:', error)
+      console.error("Error searching messages:", error)
       setSearchResults([])
     } finally {
       setIsLoading(false)
@@ -133,9 +133,9 @@ export default function SearchMessagesPage() {
               <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center">
                 <Switch
                   id="search-by"
-                  checked={searchBy === 'sender'}
-                  onCheckedChange={(checked) => setSearchBy(checked ? 'sender' : 'recipient')}
-                  aria-label={`Switch search to ${searchBy === 'sender' ? 'recipient' : 'sender'}`}
+                  checked={searchBy === "sender"}
+                  onCheckedChange={(checked) => setSearchBy(checked ? "sender" : "recipient")}
+                  aria-label={`Switch search to ${searchBy === "sender" ? "recipient" : "sender"}`}
                 />
               </div>
             </div>
