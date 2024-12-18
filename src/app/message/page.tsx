@@ -115,11 +115,8 @@ export default function MulaiBerceritaPage() {
       return;
     }
 
-  
+    try {
 
-
-
-        
 
         const submissionData = {
           sender: from,
