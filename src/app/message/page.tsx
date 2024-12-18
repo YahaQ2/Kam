@@ -115,7 +115,7 @@ export default function MulaiBerceritaPage() {
       return;
     }
 
-    try {
+  
 
 
 
