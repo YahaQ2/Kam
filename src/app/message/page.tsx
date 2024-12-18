@@ -119,8 +119,7 @@ export default function MulaiBerceritaPage() {
 
 
 
-        console.log(recaptchaToken);
-        console.log("reCAPTCHA Token:", recaptchaToken);
+        
 
         const submissionData = {
           sender: from,
