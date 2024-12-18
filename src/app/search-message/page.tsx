@@ -1,141 +1,241 @@
-"use client"
+/* eslint-disable @next/next/no-img-element */
+"use client";
 
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Navbar } from "@/components/ui/navbar"
-import { Footer } from "@/components/ui/footer"
-import { CarouselCard } from "@/components/carousel-card"
-import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Navbar } from "@/components/ui/navbar";
+import { Footer } from "@/components/ui/footer";
+import { SuccessModal } from "@/components/success-modal";
 
-interface Menfess {
-  id: number;
-  sender: string;
-  recipient: string;
-  message: string;
-  spotify_id?: string;
-  track?: {
-    title: string;
-    artist: string;
-    cover_img: string;
-    preview_link: string | null;
-    spotify_embed_link: string;
-  };
-  song?: {
-    title: string;
-    artist: string;
-    coverUrl: string;
-  };
-  created_at: string;
-  updated_at?: string | null;
+interface SpotifyTrack {
+  id: string;
+  name: string;
+  artist: string;
+  album: string;
+  cover_url: string;
 }
 
-export default function SearchMessagesPage() {
-  const [recipient, setRecipient] = useState('')
-  const [searchResults, setSearchResults] = useState<Menfess[] | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+export default function MulaiBerceritaPage() {
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [message, setMessage] = useState("");
+  const [song, setSong] = useState("");
+  const [spotifyId, setSpotifyId] = useState("");
+  const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
+  const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
 
-    const params = new URLSearchParams()
-    if (recipient) params.append('recipient', recipient)
+  useEffect(() => {
+    if (selectedTrack) return;
 
-    try {
-      const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error('Error fetching messages')
+    const searchSongs = async () => {
+      if (song.length < 3) {
+        setTracks([]);
+        return;
       }
 
-      const result = await response.json()
-      const data: Menfess[] = result.data
+      setIsSearching(true);
+      try {
+        const response = await fetch(
+          `http://localhost:5000/v1/api/search-spotify-song?song=${encodeURIComponent(song)}`
+        );
+        const result = await response.json();
 
-      const sortedMessages = data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .map(menfess => ({
-          ...menfess,
-          song: menfess.track ? {
-            title: menfess.track.title,
-            artist: menfess.track.artist,
-            coverUrl: menfess.track.cover_img
-          } : undefined
-        }));
+        if (result.success) {
+          setTracks(result.data);
+        }
+      } catch (error) {
+        console.error("Error searching songs:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
 
-      setSearchResults(sortedMessages)
+    const timeoutId = setTimeout(searchSongs, 500);
+    return () => clearTimeout(timeoutId);
+  }, [song, selectedTrack]);
+
+  const handleSelectTrack = (track: SpotifyTrack) => {
+    setSpotifyId(track.id);
+    setSong(track.name);
+    setSelectedTrack(track);
+    setTracks([]);
+    console.log("Selected Spotify ID:", track.id);
+  };
+
+  const handleClearSelection = () => {
+    setSpotifyId("");
+    setSong("");
+    setSelectedTrack(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+  
+    console.log("Data yang dikirim:", {
+      sender: from,
+      recipient: to,
+      message: message,
+      spotify_id: spotifyId,
+    });
+  
+    try {
+      const response = await fetch("https://solifess.vercel.app/v1/api/menfess-spotify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sender: from,
+          recipient: to,
+          message: message,
+          spotify_id: spotifyId,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to submit form");
+      }
+
+      setIsSuccessModalOpen(true);
+      setFrom("");
+      setTo("");
+      setMessage("");
+      setSong("");
+      setSpotifyId("");
+      setSelectedTrack(null);
     } catch (error) {
-      console.error('Error searching messages:', error)
-      setSearchResults([])
+      console.error("Error submitting form:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
-
+  };
+  
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
-        <h1 className="text-4xl font-bold mb-8 text-center">Cari Menfess</h1>
-        <div className="flex justify-center mb-8">
-          <Link
-            href="https://www.instagram.com/"
-            className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
-          >
-            <span>saran/masukan/fitur baru</span>
-            <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-          </Link>
-        </div>
-        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto mb-8">
+        <h1 className="text-4xl font-bold mb-8 text-center">Kirim Menfess</h1>
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+          <div className="mb-6 md:flex md:space-x-4">
+            <div className="md:w-1/2 mb-4 md:mb-0">
+              <Label htmlFor="from" className="block text-sm font-medium text-gray-700 mb-1">
+                From
+              </Label>
+              <Input
+                id="from"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                className="w-full"
+                placeholder="Your name or alias"
+                disabled={isLoading}
+              />
+            </div>
+            <div className="md:w-1/2">
+              <Label htmlFor="to" className="block text-sm font-medium text-gray-700 mb-1">
+                To
+              </Label>
+              <Input
+                id="to"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                className="w-full"
+                placeholder="Recipient's name"
+                disabled={isLoading}
+              />
+            </div>
+          </div>
           <div className="mb-6">
-            <Input
-              id="recipient"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              className="w-full"
-              placeholder="Recipient's name"
+            <Label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+              Message
+            </Label>
+            <Textarea
+              id="message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="w-full h-40"
+              placeholder="Share your story..."
               disabled={isLoading}
             />
           </div>
-          <div className="text-center">
-            <Button 
-              type="submit" 
-              className="bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-gray-900 transition-colors"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Searching...' : 'Search'}
-            </Button>
-          </div>
-        </form>
-        {searchResults !== null && (
-          <div className="flex flex-wrap justify-center gap-4 mt-8">
-            {searchResults.length > 0 ? (
-              searchResults.map((msg) => (
-                <Link href={`/message/${msg.id}`} key={msg.id} className="block">
-                  <CarouselCard 
-                    to={msg.recipient} 
-                    from={msg.sender} 
-                    message={msg.message} 
-                    songTitle={msg.song?.title}
-                    artist={msg.song?.artist}
-                    coverUrl={msg.song?.coverUrl}
+          <div className="mb-6 relative">
+            <Label htmlFor="song" className="block text-sm font-medium text-gray-700 mb-1">
+              Search Song
+            </Label>
+            <div className="flex items-center">
+              <Input
+                id="song"
+                value={song}
+                onChange={(e) => setSong(e.target.value)}
+                className="w-full"
+                placeholder="Type song title..."
+                disabled={isLoading || isSearching || !!selectedTrack} // Disable if song is selected
+              />
+              {selectedTrack && (
+                <Button onClick={handleClearSelection} className="ml-2">
+                  ✕
+                </Button>
+              )}
+            </div>
+            {tracks.length > 0 && !selectedTrack && (
+              <div className="absolute z-10 w-full bg-white border rounded-md shadow-lg mt-1">
+                {tracks.map((track) => (
+                  <div
+                    key={track.id}
+                    onClick={() => handleSelectTrack(track)}
+                    className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
+                  >
+                    <img
+                      src={track.cover_url}
+                      alt={track.name}
+                      className="w-12 h-12 mr-4 object-cover"
+                    />
+                    <div>
+                      <div className="font-medium">{track.name}</div>
+                      <div className="text-sm text-gray-500">{track.artist}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Display selected song details */}
+            {selectedTrack && (
+              <div className="mt-4 flex items-center">
+                {selectedTrack.cover_url && (
+                  <img
+                    src={selectedTrack.cover_url}
+                    alt={selectedTrack.name}
+                    className="w-12 h-12 mr-4 object-cover"
                   />
-                </Link>
-              ))
-            ) : (
-              <div className="text-center text-gray-500">
-                Yahh menfess yang kamu cari gaada :(
+                )}
+                <div>
+                  <div className="font-medium">{selectedTrack.name}</div>
+                  <div className="text-sm text-gray-500">{selectedTrack.artist}</div>
+                </div>
               </div>
             )}
           </div>
-        )}
+          <div className="text-center">
+            <Button
+              type="submit"
+              className="bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-gray-900 transition-colors"
+              disabled={isLoading}
+            >
+              {isLoading ? "Submitting..." : "Submit"}
+            </Button>
+          </div>
+        </form>
       </main>
       <Footer />
+      <SuccessModal isOpen={isSuccessModalOpen} onClose={() => setIsSuccessModalOpen(false)} />
     </div>
-  )
+  );
 }
