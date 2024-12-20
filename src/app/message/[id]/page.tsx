@@ -24,12 +24,17 @@ type MessageType = {
   created_at: string;
 };
 
+type CommentType = {
+  id: string; // ID komentar
+  comment: string; // Isi komentar
+};
+
 export default function MessagePage() {
   const router = useRouter();
   const params = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [comments, setComments] = useState<string[]>([]);
+  const [comments, setComments] = useState<CommentType[]>([]);
   const [newComment, setNewComment] = useState("");
 
   useEffect(() => {
@@ -87,11 +92,13 @@ export default function MessagePage() {
           }),
         });
 
+        const result = await response.json();
+
         if (response.ok) {
-          setComments([...comments, newComment]);
+          // Tambahkan komentar baru dengan ID dari server
+          setComments([...comments, { id: result.data.id, comment: newComment }]);
           setNewComment("");
         } else {
-          const result = await response.json();
           console.error("Failed to add comment:", result.message);
         }
       } catch (error) {
@@ -157,12 +164,13 @@ export default function MessagePage() {
             <h3 className="text-lg font-medium mb-4">Komentar</h3>
             <div className="space-y-3 mb-4">
               {comments.length > 0 ? (
-                comments.map((comment, index) => (
+                comments.map((comment) => (
                   <div
-                    key={index}
+                    key={comment.id}
                     className="bg-gray-100 text-gray-800 rounded-lg px-4 py-2 shadow-sm"
                   >
-                    {comment}
+                    <p className="text-sm text-gray-500">ID: {comment.id}</p>
+                    <p>{comment.comment}</p>
                   </div>
                 ))
               ) : (
