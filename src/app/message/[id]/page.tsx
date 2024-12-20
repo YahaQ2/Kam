@@ -21,9 +21,12 @@ type MessageType = {
   track?: {
     spotify_embed_link?: string;
     
-      content: string;
+      
   };
   created_at: string;
+  id: number;
+  content: string;
+  messageId: number;
 };
 
 type CommentType = {
