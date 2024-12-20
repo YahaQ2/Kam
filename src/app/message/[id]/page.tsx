@@ -44,7 +44,7 @@ export default function MessagePage() {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `https://unand.vercel.app/v1/api/menfess${params.id}`
+          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
         );
         const data = await response.json();
 
