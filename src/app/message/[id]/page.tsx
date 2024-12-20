@@ -28,6 +28,7 @@ type CommentType = {
   id: number;
   content: string;
   messageId: number;
+  created_at: string;
 };
 
 export default function MessagePage() {
@@ -38,45 +39,40 @@ export default function MessagePage() {
   const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch message data
+  // Fetch message and comments
   useEffect(() => {
-    const fetchMessage = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(
+        // Fetch message
+        const messageResponse = await fetch(
           `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
         );
-        const data = await response.json();
-        if (data?.status && data?.data?.length > 0) {
-          setMessage(data.data[0]);
+        const messageData = await messageResponse.json();
+        if (messageData?.status && messageData?.data?.length > 0) {
+          setMessage(messageData.data[0]);
         } else {
-          console.error("Failed to fetch message:", data.message);
+          console.error("Failed to fetch message:", messageData.message);
+        }
+
+        // Fetch comments
+        const commentsResponse = await fetch(
+          `https://unand.vercel.app/v1/api/comments?messageId=${params.id}`
+        );
+        if (commentsResponse.ok) {
+          const commentsData = await commentsResponse.json();
+          setComments(commentsData);
+        } else {
+          console.error("Failed to fetch comments:", commentsResponse.statusText);
         }
       } catch (error) {
-        console.error("Error fetching message:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    const fetchComments = async () => {
-      try {
-        const response = await fetch(
-          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setComments(data);
-        } else {
-          console.error("Failed to fetch comments:", response.statusText);
-        }
-      } catch (error) {
-        console.error("Error fetching comments:", error);
-      }
-    };
-
-    fetchMessage();
-    fetchComments();
+    fetchData();
   }, [params.id]);
 
   // Handle adding a comment
@@ -85,9 +81,7 @@ export default function MessagePage() {
       try {
         const response = await fetch("https://unand.vercel.app/v1/api/comments", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             messageId: Number(params.id),
             content: newComment,
@@ -96,8 +90,8 @@ export default function MessagePage() {
 
         if (response.ok) {
           const savedComment = await response.json();
-          setComments([...comments, savedComment]); // Update comments state
-          setNewComment(""); // Clear the input
+          setComments((prevComments) => [...prevComments, savedComment]);
+          setNewComment("");
         } else {
           console.error("Failed to save comment:", response.statusText);
         }
@@ -173,7 +167,13 @@ export default function MessagePage() {
                       key={comment.id}
                       className="bg-gray-100 p-4 rounded-lg shadow-sm text-gray-800"
                     >
-                      <p>{comment.content}</p>
+                      <p className="text-gray-700">{comment.content}</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {dayjs
+                          .utc(comment.created_at)
+                          .tz("Asia/Jakarta")
+                          .format("DD MMM YYYY, HH:mm")}
+                      </p>
                     </div>
                   ))
                 ) : (
