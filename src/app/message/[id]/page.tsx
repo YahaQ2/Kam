@@ -33,34 +33,70 @@ export default function MessagePage() {
   const [newComment, setNewComment] = useState("");
 
   useEffect(() => {
-    const fetchMessage = async () => {
+    const fetchData = async () => {
+      if (!params?.id) {
+        console.error("Message ID not provided");
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-        const text = await response.text();
-        const data = JSON.parse(text);
+        const [messageResponse, commentsResponse] = await Promise.all([
+          fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`),
+          fetch(`https://unand.vercel.app/v1/api/comments?message_id=${params.id}`),
+        ]);
 
-        if (data && data.status && data.data && data.data.length > 0) {
-          setMessage(data.data[0]);
+        const messageData = await messageResponse.json();
+        const commentsData = await commentsResponse.json();
+
+        if (messageResponse.ok && messageData.status && messageData.data?.length > 0) {
+          setMessage(messageData.data[0]);
         } else {
-          console.error("Failed to fetch message:", data.message);
+          console.error("Failed to fetch message:", messageData.message);
           setMessage(null);
         }
+
+        if (commentsResponse.ok) {
+          setComments(commentsData.data || []);
+        } else {
+          console.error("Failed to fetch comments");
+        }
       } catch (error) {
-        console.error("Error fetching message:", error);
+        console.error("Error fetching data:", error);
         setMessage(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchMessage();
+    fetchData();
   }, [params.id]);
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (newComment.trim() !== "") {
-      setComments([...comments, newComment]);
-      setNewComment("");
+      try {
+        const response = await fetch("https://unand.vercel.app/v1/api/comments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message_id: params.id,
+            comment: newComment,
+          }),
+        });
+
+        if (response.ok) {
+          setComments([...comments, newComment]);
+          setNewComment("");
+        } else {
+          const result = await response.json();
+          console.error("Failed to add comment:", result.message);
+        }
+      } catch (error) {
+        console.error("Error adding comment:", error);
+      }
     }
   };
 
@@ -99,16 +135,14 @@ export default function MessagePage() {
               <p className="text-sm text-gray-500">From: {message.sender}</p>
             </div>
             <div className="border-t border-b border-gray-200 py-6">
-              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
-                {message.message}
-              </p>
+              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">{message.message}</p>
               {message.track?.spotify_embed_link && (
-                <iframe 
+                <iframe
                   key={message.track.spotify_embed_link}
-                  src={message.track.spotify_embed_link} 
-                  width="100%" 
-                  height="352" 
-                  allowFullScreen 
+                  src={message.track.spotify_embed_link}
+                  width="100%"
+                  height="352"
+                  allowFullScreen
                   allow="encrypted-media"
                   className="rounded-lg mt-6"
                 />
@@ -119,7 +153,6 @@ export default function MessagePage() {
             </div>
           </div>
 
-          {/* Comment Section */}
           <div className="p-8 border-t">
             <h3 className="text-lg font-medium mb-4">Komentar</h3>
             <div className="space-y-3 mb-4">
@@ -146,40 +179,10 @@ export default function MessagePage() {
               />
               <button
                 onClick={handleAddComment}
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-greyy-600 transition"
+                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
               >
                 Tambah
               </button>
-              
-              const handleAddComment = async () => {
-  if (newComment.trim() !== "") {
-    try {
-      // Kirim komentar ke server
-      const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message_id: params.id, // ID pesan
-          comment: newComment,  // Isi komentar
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        // Tambahkan komentar ke daftar jika berhasil
-        setComments([...comments, newComment]);
-        setNewComment("");
-      } else {
-        console.error("Failed to add comment:", result.message);
-      }
-    } catch (error) {
-      console.error("Error adding comment:", error);
-    }
-  }
-};
             </div>
           </div>
         </div>
