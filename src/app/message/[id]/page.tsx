@@ -68,7 +68,7 @@ export default function MessagePage() {
   const handleAddComment = async () => {
     if (newComment.trim()) {
       try {
-        const response = await fetch("https://yunand.vercel.app/v1/api/comments", {
+        const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
