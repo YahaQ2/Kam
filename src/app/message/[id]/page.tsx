@@ -119,37 +119,47 @@ export default function MessagePage() {
             </div>
           </div>
 
-          {/* Comment Section */}
-          <div className="p-8 border-t">
-            <h3 className="text-lg font-medium mb-4">Komentar</h3>
-            <div className="space-y-3 mb-4">
-              {comments.length > 0 ? (
-                comments.map((comment, index) => (
-                  <div
-                    key={index}
-                    className="bg-gray-100 text-gray-800 rounded-lg px-4 py-2 shadow-sm"
-                  >
-                    {comment}
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">Belum ada komentar untuk pesan ini.</p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Tambahkan komentar..."
-                className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-              />
-              <button
-                onClick={handleAddComment}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
-              >
-                Tambah
-              </button>
+          {/* Comment Section */}<div className="p-8 border-t">
+  <h3 className="text-lg font-medium mb-4">Komentar</h3>
+  <div className="space-y-3 mb-4">
+    {comments.length > 0 ? (
+      comments.map((comment, index) => (
+        <div
+          key={index}
+          className="bg-gray-100 text-gray-800 rounded-lg px-4 py-2 shadow-sm"
+        >
+          {comment}
+        </div>
+      ))
+    ) : (
+      <p className="text-sm text-gray-500">Belum ada komentar untuk pesan ini.</p>
+    )}
+  </div>
+  <div className="flex gap-2">
+    <input
+      type="text"
+      value={newComment}
+      onChange={(e) => setNewComment(e.target.value)}
+      placeholder="Tambahkan komentar..."
+      className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-gray-400"
+    />
+    <button
+      onClick={handleAddComment}
+      className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition"
+    >
+      Tambah
+    </button>
+  </div>
+</div>
+         <Button
+  onClick={() => router.back()}
+  className="mb-8 bg-black text-white hover:bg-gray-800"
+>
+  tambah
+</Button>
+           
+            
+            
             </div>
           </div>
         </div>
