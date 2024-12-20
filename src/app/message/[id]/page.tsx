@@ -62,7 +62,7 @@ export default function MessagePage() {
     const fetchComments = async () => {
       try {
         const response = await fetch(
-          `https://unand.vercel.app/v1/api/comments/${params.id}`
+          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
         );
         if (response.ok) {
           const data = await response.json();
