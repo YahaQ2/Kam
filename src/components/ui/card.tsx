@@ -1,76 +1,79 @@
-import React, { useState } from "react";
-import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./Card";
+import * as React from "react"
 
-interface CommentCardProps {
-  title: string;
-  description?: string;
-  message: string;
-}
+import { cn } from "@/lib/utils"
 
-const CommentCard: React.FC<CommentCardProps> = ({ title, description, message }) => {
-  const [comments, setComments] = useState<string[]>([]);
-  const [newComment, setNewComment] = useState("");
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      className
+    )}
+    {...props}
+  />
+))
+Card.displayName = "Card"
 
-  const handleAddComment = () => {
-    if (newComment.trim() !== "") {
-      setComments([...comments, newComment]);
-      setNewComment("");
-    }
-  };
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    {...props}
+  />
+))
+CardHeader.displayName = "CardHeader"
 
-  return (
-    <Card className="max-w-md mx-auto">
-      {/* Header */}
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
+const CardTitle = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "text-2xl font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+))
+CardTitle.displayName = "CardTitle"
 
-      {/* Content */}
-      <CardContent>
-        <p className="text-gray-700">{message}</p>
-      </CardContent>
+const CardDescription = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+CardDescription.displayName = "CardDescription"
 
-      {/* Comments */}
-      <CardContent className="border-t mt-4">
-        <h3 className="text-lg font-medium mb-3">Komentar</h3>
-        <div className="space-y-3">
-          {comments.length > 0 ? (
-            comments.map((comment, index) => (
-              <div
-                key={index}
-                className="bg-gray-100 text-gray-800 rounded-lg px-4 py-2 shadow-sm"
-              >
-                {comment}
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-gray-500">Belum ada komentar untuk pesan ini.</p>
-          )}
-        </div>
-        <div className="mt-4 flex gap-2">
-          <input
-            type="text"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Tambahkan komentar..."
-            className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-          />
-          <button
-            onClick={handleAddComment}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
-          >
-            Tambah
-          </button>
-        </div>
-      </CardContent>
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+))
+CardContent.displayName = "CardContent"
 
-      {/* Footer */}
-      <CardFooter className="justify-end">
-        <p className="text-sm text-gray-500">Terima kasih atas komentarnya!</p>
-      </CardFooter>
-    </Card>
-  );
-};
+const CardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center p-6 pt-0", className)}
+    {...props}
+  />
+))
+CardFooter.displayName = "CardFooter"
 
-export default CommentCard;
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
