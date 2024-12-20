@@ -146,7 +146,7 @@ export default function MessagePage() {
               />
               <button
                 onClick={handleAddComment}
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
+                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-greyy-600 transition"
               >
                 Tambah
               </button>
@@ -180,38 +180,6 @@ export default function MessagePage() {
     }
   }
 };
-
-useEffect(() => {
-  const fetchMessage = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-      const text = await response.text();
-      const data = JSON.parse(text);
-
-      if (data && data.status && data.data && data.data.length > 0) {
-        setMessage(data.data[0]);
-
-        // Fetch komentar terkait
-        const commentsResponse = await fetch(`https://unand.vercel.app/v1/api/comments?message_id=${params.id}`);
-        const commentsData = await commentsResponse.json();
-        if (commentsResponse.ok) {
-          setComments(commentsData.data);
-        }
-      } else {
-        console.error("Failed to fetch message:", data.message);
-        setMessage(null);
-      }
-    } catch (error) {
-      console.error("Error fetching message:", error);
-      setMessage(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  fetchMessage();
-}, [params.id]);
             </div>
           </div>
         </div>
