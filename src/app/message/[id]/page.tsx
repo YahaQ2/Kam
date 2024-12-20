@@ -150,6 +150,68 @@ export default function MessagePage() {
               >
                 Tambah
               </button>
+              
+              const handleAddComment = async () => {
+  if (newComment.trim() !== "") {
+    try {
+      // Kirim komentar ke server
+      const response = await fetch("https://unand.vercel.app/v1/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message_id: params.id, // ID pesan
+          comment: newComment,  // Isi komentar
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Tambahkan komentar ke daftar jika berhasil
+        setComments([...comments, newComment]);
+        setNewComment("");
+      } else {
+        console.error("Failed to add comment:", result.message);
+      }
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
+  }
+};
+
+useEffect(() => {
+  const fetchMessage = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
+      const text = await response.text();
+      const data = JSON.parse(text);
+
+      if (data && data.status && data.data && data.data.length > 0) {
+        setMessage(data.data[0]);
+
+        // Fetch komentar terkait
+        const commentsResponse = await fetch(`https://unand.vercel.app/v1/api/comments?message_id=${params.id}`);
+        const commentsData = await commentsResponse.json();
+        if (commentsResponse.ok) {
+          setComments(commentsData.data);
+        }
+      } else {
+        console.error("Failed to fetch message:", data.message);
+        setMessage(null);
+      }
+    } catch (error) {
+      console.error("Error fetching message:", error);
+      setMessage(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchMessage();
+}, [params.id]);
             </div>
           </div>
         </div>
