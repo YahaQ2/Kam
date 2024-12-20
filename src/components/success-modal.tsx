@@ -22,7 +22,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen}) => {
         <h2 id="success-modal-title" className="text-2xl font-bold mb-4">
           Yeay!
         </h2>
-        <p className="mb-6">Pesanmu terkirim. dua tiga kucing berlari semangat hati ini🤜</p>
+        <p className="mb-6">Pesanmu terkirim. dua tiga kucing berlari semangat hari ini🤜</p>
         <Link
             href="https://www.instagram.com/"
             className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
