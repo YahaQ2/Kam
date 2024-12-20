@@ -44,7 +44,7 @@ export default function MessagePage() {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `https://unand.vercel.app/v1/api/menfess-with-comments/${params.id}`
+          `https://unand.vercel.app/v1/api/menfess/comments${params.id}`
         );
         const data = await response.json();
 
