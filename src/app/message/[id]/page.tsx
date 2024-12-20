@@ -20,19 +20,13 @@ type MessageType = {
   message: string;
   track?: {
     spotify_embed_link?: string;
-    
-      
   };
   created_at: string;
-
-  content: string;
-  messageId: number;
 };
 
 type CommentType = {
   id: number;
   content: string;
-  messageId: number;
   created_at: string;
 };
 
@@ -49,26 +43,16 @@ export default function MessagePage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch message
-        const messageResponse = await fetch(
-          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/menfess-with-comments/${params.id}`
         );
-        const messageData = await messageResponse.json();
-        if (messageData?.status && messageData?.data?.length > 0) {
-          setMessage(messageData.data[0]);
-        } else {
-          console.error("Failed to fetch message:", messageData.message);
-        }
+        const data = await response.json();
 
-        // Fetch comments
-        const commentsResponse = await fetch(
-          `https://yunand.vercel.app/v1/api/comments?messageId=${params.id}`
-        );
-        if (commentsResponse.ok) {
-          const commentsData = await commentsResponse.json();
-          setComments(commentsData);
+        if (data?.status && data?.data) {
+          setMessage(data.data.message);
+          setComments(data.data.comments || []);
         } else {
-          console.error("Failed to fetch comments:", commentsResponse.statusText);
+          console.error("Failed to fetch data:", data.message);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
