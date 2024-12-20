@@ -155,7 +155,7 @@ export default function MessagePage() {
   if (newComment.trim() !== "") {
     try {
       // Kirim komentar ke server
-      const response = await fetch("https://unand.vercel.app/v1/api/comments", {
+      const response = await fetch("https://unand.vercel.app/v1/api/menfess", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
