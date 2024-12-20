@@ -24,7 +24,7 @@ type MessageType = {
       
   };
   created_at: string;
-  id: number;
+
   content: string;
   messageId: number;
 };
