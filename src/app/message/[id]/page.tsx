@@ -6,9 +6,9 @@ import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import { Loader2 } from 'lucide-react';
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import { Loader2 } from "lucide-react";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -29,6 +29,8 @@ export default function MessagePage() {
   const params = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [comments, setComments] = useState<string[]>([]);
+  const [newComment, setNewComment] = useState("");
 
   useEffect(() => {
     const fetchMessage = async () => {
@@ -37,7 +39,7 @@ export default function MessagePage() {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
         const text = await response.text();
         const data = JSON.parse(text);
-        
+
         if (data && data.status && data.data && data.data.length > 0) {
           setMessage(data.data[0]);
         } else {
@@ -51,9 +53,16 @@ export default function MessagePage() {
         setIsLoading(false);
       }
     };
-  
+
     fetchMessage();
   }, [params.id]);
+
+  const handleAddComment = () => {
+    if (newComment.trim() !== "") {
+      setComments([...comments, newComment]);
+      setNewComment("");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -107,6 +116,40 @@ export default function MessagePage() {
             </div>
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
+            </div>
+          </div>
+
+          {/* Comment Section */}
+          <div className="p-8 border-t">
+            <h3 className="text-lg font-medium mb-4">Komentar</h3>
+            <div className="space-y-3 mb-4">
+              {comments.length > 0 ? (
+                comments.map((comment, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-100 text-gray-800 rounded-lg px-4 py-2 shadow-sm"
+                  >
+                    {comment}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">Belum ada komentar untuk pesan ini.</p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Tambahkan komentar..."
+                className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-400"
+              />
+              <button
+                onClick={handleAddComment}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+              >
+                Tambah
+              </button>
             </div>
           </div>
         </div>
