@@ -25,61 +25,67 @@ type MessageType = {
 };
 
 type CommentType = {
-  id: string; // ID komentar
-  comment: string; // Isi komentar
+  id: number;
+  content: string;
+  messageId: number;
 };
 
 export default function MessagePage() {
   const router = useRouter();
   const params = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [comments, setComments] = useState<CommentType[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch message data
   useEffect(() => {
-    const fetchData = async () => {
-      if (!params?.id) {
-        console.error("Message ID not provided");
-        setIsLoading(false);
-        return;
-      }
-
+    const fetchMessage = async () => {
       setIsLoading(true);
       try {
-        const [messageResponse, commentsResponse] = await Promise.all([
-          fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`),
-          fetch(`https://unand.vercel.app/v1/api/comments?message_id=${params.id}`),
-        ]);
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
+        );
+        const text = await response.text();
+        const data = JSON.parse(text);
 
-        const messageData = await messageResponse.json();
-        const commentsData = await commentsResponse.json();
-
-        if (messageResponse.ok && messageData.status && messageData.data?.length > 0) {
-          setMessage(messageData.data[0]);
+        if (data && data.status && data.data && data.data.length > 0) {
+          setMessage(data.data[0]);
         } else {
-          console.error("Failed to fetch message:", messageData.message);
+          console.error("Failed to fetch message:", data.message);
           setMessage(null);
         }
-
-        if (commentsResponse.ok) {
-          setComments(commentsData.data || []);
-        } else {
-          console.error("Failed to fetch comments");
-        }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching message:", error);
         setMessage(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchData();
+    const fetchComments = async () => {
+      try {
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/comments?messageId=${params.id}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setComments(data);
+        } else {
+          console.error("Failed to fetch comments:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+
+    fetchMessage();
+    fetchComments();
   }, [params.id]);
 
+  // Handle adding a comment
   const handleAddComment = async () => {
-    if (newComment.trim() !== "") {
+    if (newComment.trim()) {
       try {
         const response = await fetch("https://unand.vercel.app/v1/api/comments", {
           method: "POST",
@@ -87,22 +93,20 @@ export default function MessagePage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            message_id: params.id,
-            comment: newComment,
+            messageId: Number(params.id),
+            content: newComment,
           }),
         });
 
-        const result = await response.json();
-
         if (response.ok) {
-          // Tambahkan komentar baru dengan ID dari server
-          setComments([...comments, { id: result.data.id, comment: newComment }]);
-          setNewComment("");
+          const savedComment = await response.json();
+          setComments([...comments, savedComment]); // Update comments state
+          setNewComment(""); // Clear the input
         } else {
-          console.error("Failed to add comment:", result.message);
+          console.error("Failed to save comment:", response.statusText);
         }
       } catch (error) {
-        console.error("Error adding comment:", error);
+        console.error("Error saving comment:", error);
       }
     }
   };
@@ -123,7 +127,10 @@ export default function MessagePage() {
     );
   }
 
-  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
+  const formattedDate = dayjs
+    .utc(message.created_at)
+    .tz("Asia/Jakarta")
+    .format("DD MMM YYYY, HH:mm");
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
@@ -142,7 +149,9 @@ export default function MessagePage() {
               <p className="text-sm text-gray-500">From: {message.sender}</p>
             </div>
             <div className="border-t border-b border-gray-200 py-6">
-              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">{message.message}</p>
+              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
+                {message.message}
+              </p>
               {message.track?.spotify_embed_link && (
                 <iframe
                   key={message.track.spotify_embed_link}
@@ -158,39 +167,37 @@ export default function MessagePage() {
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
             </div>
-          </div>
-
-          <div className="p-8 border-t">
-            <h3 className="text-lg font-medium mb-4">Komentar</h3>
-            <div className="space-y-3 mb-4">
-              {comments.length > 0 ? (
-                comments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="bg-gray-100 text-gray-800 rounded-lg px-4 py-2 shadow-sm"
-                  >
-                    <p className="text-sm text-gray-500">ID: {comment.id}</p>
-                    <p>{comment.comment}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">Belum ada komentar untuk pesan ini.</p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Tambahkan komentar..."
-                className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-gray-400"
-              />
-              <button
-                onClick={handleAddComment}
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
-              >
-                Tambah
-              </button>
+            {/* Komentar Section */}
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-gray-800">Komentar</h3>
+              <div className="mt-4 space-y-4">
+                {comments.length > 0 ? (
+                  comments.map((comment, index) => (
+                    <div
+                      key={index}
+                      className="bg-gray-100 p-4 rounded-lg shadow-sm text-gray-800"
+                    >
+                      <p>{comment.content}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">Belum ada komentar.</p>
+                )}
+              </div>
+              <div className="mt-6">
+                <textarea
+                  className="w-full border rounded-lg p-3 text-gray-800 focus:outline-none focus:ring"
+                  placeholder="Tambahkan komentar..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                />
+                <button
+                  onClick={handleAddComment}
+                  className="mt-3 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                >
+                  Tambah Komentar
+                </button>
+              </div>
             </div>
           </div>
         </div>
