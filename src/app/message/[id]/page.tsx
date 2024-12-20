@@ -46,18 +46,14 @@ export default function MessagePage() {
         const response = await fetch(
           `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
         );
-        const text = await response.text();
-        const data = JSON.parse(text);
-
-        if (data && data.status && data.data && data.data.length > 0) {
+        const data = await response.json();
+        if (data?.status && data?.data?.length > 0) {
           setMessage(data.data[0]);
         } else {
           console.error("Failed to fetch message:", data.message);
-          setMessage(null);
         }
       } catch (error) {
         console.error("Error fetching message:", error);
-        setMessage(null);
       } finally {
         setIsLoading(false);
       }
@@ -66,7 +62,7 @@ export default function MessagePage() {
     const fetchComments = async () => {
       try {
         const response = await fetch(
-          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
+          `https://unand.vercel.app/v1/api/comments/${params.id}`
         );
         if (response.ok) {
           const data = await response.json();
@@ -87,7 +83,7 @@ export default function MessagePage() {
   const handleAddComment = async () => {
     if (newComment.trim()) {
       try {
-        const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify", {
+        const response = await fetch("https://unand.vercel.app/v1/api/comments", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -172,9 +168,9 @@ export default function MessagePage() {
               <h3 className="text-lg font-semibold text-gray-800">Komentar</h3>
               <div className="mt-4 space-y-4">
                 {comments.length > 0 ? (
-                  comments.map((comment, index) => (
+                  comments.map((comment) => (
                     <div
-                      key={index}
+                      key={comment.id}
                       className="bg-gray-100 p-4 rounded-lg shadow-sm text-gray-800"
                     >
                       <p>{comment.content}</p>
