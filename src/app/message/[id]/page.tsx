@@ -20,6 +20,8 @@ type MessageType = {
   message: string;
   track?: {
     spotify_embed_link?: string;
+    
+      content: string;
   };
   created_at: string;
 };
