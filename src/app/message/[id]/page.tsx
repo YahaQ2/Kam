@@ -24,43 +24,80 @@ type MessageType = {
   created_at: string;
 };
 
+type CommentType = {
+  id: number;
+  content: string;
+  messageId: number;
+  created_at: string;
+};
+
 export default function MessagePage() {
   const router = useRouter();
   const params = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [comments, setComments] = useState<string[]>([]);
+  const [comments, setComments] = useState<CommentType[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch message and comments
   useEffect(() => {
-    const fetchMessage = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-        const text = await response.text();
-        const data = JSON.parse(text);
-
-        if (data && data.status && data.data && data.data.length > 0) {
-          setMessage(data.data[0]);
+        // Fetch message
+        const messageResponse = await fetch(
+          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
+        );
+        const messageData = await messageResponse.json();
+        if (messageData?.status && messageData?.data?.length > 0) {
+          setMessage(messageData.data[0]);
         } else {
-          console.error("Failed to fetch message:", data.message);
-          setMessage(null);
+          console.error("Failed to fetch message:", messageData.message);
+        }
+
+        // Fetch comments
+        const commentsResponse = await fetch(
+          `https://unand.vercel.app/v1/api/comments?messageId=${params.id}`
+        );
+        if (commentsResponse.ok) {
+          const commentsData = await commentsResponse.json();
+          setComments(commentsData);
+        } else {
+          console.error("Failed to fetch comments:", commentsResponse.statusText);
         }
       } catch (error) {
-        console.error("Error fetching message:", error);
-        setMessage(null);
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchMessage();
+    fetchData();
   }, [params.id]);
 
-  const handleAddComment = () => {
-    if (newComment.trim() !== "") {
-      setComments([...comments, newComment]);
-      setNewComment("");
+  // Handle adding a comment
+  const handleAddComment = async () => {
+    if (newComment.trim()) {
+      try {
+        const response = await fetch("https://unand.vercel.app/v1/api/comments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messageId: Number(params.id),
+            content: newComment,
+          }),
+        });
+
+        if (response.ok) {
+          const savedComment = await response.json();
+          setComments((prevComments) => [...prevComments, savedComment]);
+          setNewComment("");
+        } else {
+          console.error("Failed to save comment:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error saving comment:", error);
+      }
     }
   };
 
@@ -80,7 +117,10 @@ export default function MessagePage() {
     );
   }
 
-  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
+  const formattedDate = dayjs
+    .utc(message.created_at)
+    .tz("Asia/Jakarta")
+    .format("DD MMM YYYY, HH:mm");
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
@@ -103,12 +143,12 @@ export default function MessagePage() {
                 {message.message}
               </p>
               {message.track?.spotify_embed_link && (
-                <iframe 
+                <iframe
                   key={message.track.spotify_embed_link}
-                  src={message.track.spotify_embed_link} 
-                  width="100%" 
-                  height="352" 
-                  allowFullScreen 
+                  src={message.track.spotify_embed_link}
+                  width="100%"
+                  height="352"
+                  allowFullScreen
                   allow="encrypted-media"
                   className="rounded-lg mt-6"
                 />
@@ -117,69 +157,43 @@ export default function MessagePage() {
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
             </div>
-          </div>
-
-          {/* Comment Section */}
-          <div className="p-8 border-t">
-            <h3 className="text-lg font-medium mb-4">Komentar</h3>
-            <div className="space-y-3 mb-4">
-              {comments.length > 0 ? (
-                comments.map((comment, index) => (
-                  <div
-                    key={index}
-                    className="bg-gray-100 text-gray-800 rounded-lg px-4 py-2 shadow-sm"
-                  >
-                    {comment}
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">Belum ada komentar untuk pesan ini.</p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Tambahkan komentar..."
-                className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-gray-400"
-              />
-              <button
-                onClick={handleAddComment}
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-greyy-600 transition"
-              >
-                Tambah
-              </button>
-              
-              const handleAddComment = async () => {
-  if (newComment.trim() !== "") {
-    try {
-      // Kirim komentar ke server
-      const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message_id: params.id, // ID pesan
-          comment: newComment,  // Isi komentar
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        // Tambahkan komentar ke daftar jika berhasil
-        setComments([...comments, newComment]);
-        setNewComment("");
-      } else {
-        console.error("Failed to add comment:", result.message);
-      }
-    } catch (error) {
-      console.error("Error adding comment:", error);
-    }
-  }
-};
+            {/* Komentar Section */}
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-gray-800">Komentar</h3>
+              <div className="mt-4 space-y-4">
+                {comments.length > 0 ? (
+                  comments.map((comment) => (
+                    <div
+                      key={comment.id}
+                      className="bg-gray-100 p-4 rounded-lg shadow-sm text-gray-800"
+                    >
+                      <p className="text-gray-700">{comment.content}</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {dayjs
+                          .utc(comment.created_at)
+                          .tz("Asia/Jakarta")
+                          .format("DD MMM YYYY, HH:mm")}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">Belum ada komentar.</p>
+                )}
+              </div>
+              <div className="mt-6">
+                <textarea
+                  className="w-full border rounded-lg p-3 text-gray-800 focus:outline-none focus:ring"
+                  placeholder="Tambahkan komentar..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                />
+                <button
+                  onClick={handleAddComment}
+                  className="mt-3 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                >
+                  Tambah Komentar
+                </button>
+              </div>
             </div>
           </div>
         </div>
