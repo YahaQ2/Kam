@@ -191,7 +191,7 @@ export default function MessagePage() {
                   onClick={handleAddComment}
                   className="mt-3 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
                 >
-                  add comment
+                  Tambahkan komentar
                 </button>
               </div>
             </div>
