@@ -214,7 +214,7 @@ export default function SearchMessagesPage() {
               ))
             ) : (
               <div className="col-span-full text-center text-gray-500">
-                Yahh menfess yang kamu cari gaada jangan terlalu berharap nanti sakit :(
+                Yahh menfess yang kamu cari gaada jangan terlalu berharap yah!! nanti sakit :(
               </div>
             )}
           </div>
