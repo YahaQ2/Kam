@@ -1,5 +1,5 @@
 "use client";
-
+import { WarningPopup } from "@/components/WarningPopup"; // sesuaikan dengan path file WarningPopup.js
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/ui/footer";
