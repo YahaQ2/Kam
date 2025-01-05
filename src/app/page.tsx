@@ -51,6 +51,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
+  const [showPopup, setShowPopup] = useState(true); // State untuk kontrol popup
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -119,6 +120,10 @@ export default function HomePage() {
     }
   };
 
+  const closePopup = () => {
+    setShowPopup(false);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
@@ -133,78 +138,6 @@ export default function HomePage() {
             <span>saran/masukan/fitur baru</span>
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
           </Link>
-    <style>
-        /* Style untuk overlay (latarnya) */
-        .overlay {
-            display: none; /* Default sembunyikan */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Transparan hitam */
-            z-index: 1;
-        }
-
-        /* Style untuk popup */
-        .popup {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: center;
-        }
-
-        /* Tombol untuk menutup popup */
-        .close-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-
-        .close-btn:hover {
-            background-color: #e53935;
-        }
-    </style>
-</head>
-<body>
-
-<!-- Tombol untuk memunculkan popup -->
-<button onclick="showPopup()">Tampilkan Pesan</button>
-
-<!-- Overlay dan popup -->
-<div class="overlay" id="popupOverlay">
-    <div class="popup">
-        <h2>Pesan Popup</h2>
-        <p>Ini adalah pesan popup yang bisa ditutup.</p>
-        <button class="close-btn" onclick="closePopup()">Tutup</button>
-    </div>
-</div>
-
-<script>
-    // Fungsi untuk menampilkan popup
-    function showPopup() {
-        document.getElementById('popupOverlay').style.display = 'block';
-    }
-
-    // Fungsi untuk menutup popup
-    function closePopup() {
-        document.getElementById('popupOverlay').style.display = 'none';
-    }
-</script>
-
-</body>
-          
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-12 md:mb-16">
             <Button
               asChild
@@ -218,13 +151,22 @@ export default function HomePage() {
             >
               <Link href="/search-message">Explore Menfess</Link>
             </Button>
-<Button asChild 
-          className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
-          >
-            <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
+            <Button asChild 
+              className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
             </Button>
           </div>
-                      <h3 className="text-2xl md:text-2xl font-bold mb-8">Trending</h3>
+
+          {/* Popup message */}
+          {showPopup && (
+            <div className="fixed top-0 left-0 right-0 bg-gray-800 text-white p-4 flex justify-between items-center">
+              <p>This is a popup message!</p>
+              <button onClick={closePopup} className="text-white font-bold">X</button>
+            </div>
+          )}
+
+          <h3 className="text-2xl md:text-2xl font-bold mb-8">Trending</h3>
           <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
           </div>
@@ -275,14 +217,3 @@ export default function HomePage() {
                         animate={{ scale: currentCard === index ? 1.2 : 1 }}
                       />
                     ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
-}
