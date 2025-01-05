@@ -133,12 +133,6 @@ export default function HomePage() {
             <span>saran/masukan/fitur baru</span>
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
           </Link>
-          <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Popup Example</title>
     <style>
         /* Style untuk overlay (latarnya) */
         .overlay {
