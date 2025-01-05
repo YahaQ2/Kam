@@ -49,5 +49,3 @@ const closeButtonStyles = {
 };
 
 export default WarningPopup;
-
-Jelas cara menerapkannya di kodingan saya
