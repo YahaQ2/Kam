@@ -126,17 +126,6 @@ export default function HomePage() {
         <button class="close-btn" onclick="closePopup()">Tutup</button>
     </div>
 </div>
-
-<script>
-    // Fungsi untuk menampilkan popup
-    function showPopup() {
-        document.getElementById('popupOverlay').style.display = 'block';
-    }
-
-    // Fungsi untuk menutup popup
-    function closePopup() {
-        document.getElementById('popupOverlay').style.display = 'none';
-    }
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
       <Navbar />
