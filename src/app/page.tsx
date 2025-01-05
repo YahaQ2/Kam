@@ -119,7 +119,24 @@ export default function HomePage() {
     }
   };
 
-  return (
+  return (<div class="overlay" id="popupOverlay">
+    <div class="popup">
+        <h2>Pesan Popup</h2>
+        <p>Ini adalah pesan popup yang bisa ditutup.</p>
+        <button class="close-btn" onclick="closePopup()">Tutup</button>
+    </div>
+</div>
+
+<script>
+    // Fungsi untuk menampilkan popup
+    function showPopup() {
+        document.getElementById('popupOverlay').style.display = 'block';
+    }
+
+    // Fungsi untuk menutup popup
+    function closePopup() {
+        document.getElementById('popupOverlay').style.display = 'none';
+    }
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
       <Navbar />
