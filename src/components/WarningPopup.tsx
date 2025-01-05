@@ -1,6 +1,4 @@
-"use client"
-
-import React, { useState } from 'react';
+import React from 'react'
 
 const WarningPopup = () => {
   const [isVisible, setIsVisible] = useState(true);
