@@ -204,7 +204,6 @@ export default function HomePage() {
 </script>
 
 </body>
-</html>
           
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-12 md:mb-16">
             <Button
