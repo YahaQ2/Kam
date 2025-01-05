@@ -51,7 +51,6 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
-  const [showPopup, setShowPopup] = useState(true); // State untuk kontrol popup
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -120,10 +119,6 @@ export default function HomePage() {
     }
   };
 
-  const closePopup = () => {
-    setShowPopup(false);
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
@@ -135,6 +130,15 @@ export default function HomePage() {
             href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
             className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
+          
+
+    {/* Popup message */}
+          {showPopup && (
+            <div className="fixed top-0 left-0 right-0 bg-gray-800 text-white p-4 flex justify-between items-center">
+              <p>This is a popup message!</p>
+              <button onClick={closePopup} className="text-white font-bold">X</button>
+            </div>
+          )}
             <span>saran/masukan/fitur baru</span>
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
           </Link>
@@ -151,22 +155,13 @@ export default function HomePage() {
             >
               <Link href="/search-message">Explore Menfess</Link>
             </Button>
-            <Button asChild 
-              className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
+<Button asChild 
+          className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
             </Button>
           </div>
-
-          {/* Popup message */}
-          {showPopup && (
-            <div className="fixed top-0 left-0 right-0 bg-gray-800 text-white p-4 flex justify-between items-center">
-              <p>This is a popup message!</p>
-              <button onClick={closePopup} className="text-white font-bold">X</button>
-            </div>
-          )}
-
-          <h3 className="text-2xl md:text-2xl font-bold mb-8">Trending</h3>
+                      <h3 className="text-2xl md:text-2xl font-bold mb-8">Trending</h3>
           <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
           </div>
@@ -217,3 +212,14 @@ export default function HomePage() {
                         animate={{ scale: currentCard === index ? 1.2 : 1 }}
                       />
                     ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
