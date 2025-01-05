@@ -119,19 +119,35 @@ export default function HomePage() {
     }
   };
 
-  return (<div class="overlay" id="popupOverlay">
-    <div class="popup">
-        <h2>Pesan Popup</h2>
-        <p>Ini adalah pesan popup yang bisa ditutup.</p>
-        <button class="close-btn" onclick="closePopup()">Tutup</button>
-    </div>
-</div>
+  return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
       <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8 md:py-16 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat unand</h2>
+          <button onclick="showPopup()">Tampilkan Pesan</button>
+
+
+<div class="overlay" id="popupOverlay">
+    <div class="popup">
+        <h2>Pesan Popup</h2>
+        <p>Ini adalah pesan popup yang bisa ditutup.</p>
+        <button class="close-btn" onclick="closePopup()">Tutup</button>
+    </div>
+</div>
+
+<script>
+    // Fungsi untuk menampilkan popup
+    function showPopup() {
+        document.getElementById('popupOverlay').style.display = 'block';
+    }
+
+    // Fungsi untuk menutup popup
+    function closePopup() {
+        document.getElementById('popupOverlay').style.display = 'none';
+    }
+          
           <Link
             href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
             className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
