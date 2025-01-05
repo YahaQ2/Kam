@@ -51,7 +51,6 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
-  const [showPopup, setShowPopup] = useState(true); // state for popup visibility
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -120,26 +119,12 @@ export default function HomePage() {
     }
   };
 
-  const closePopup = () => {
-    setShowPopup(false); // close the popup when called
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
       <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8 md:py-16 text-center">
-          {/* Popup Message */}
-          {showPopup && (
-            <div className="fixed top-0 left-0 right-0 bg-gray-800 text-white text-center py-4 z-50">
-              <p>Hai, bahagia selalu ya!</p>
-              <button onClick={closePopup} className="absolute top-2 right-4 text-white">
-                ×
-              </button>
-            </div>
-          )}
-          
           <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat unand</h2>
           <Link
             href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
@@ -161,13 +146,13 @@ export default function HomePage() {
             >
               <Link href="/search-message">Explore Menfess</Link>
             </Button>
-            <Button asChild 
-              className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
+<Button asChild 
+          className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
             </Button>
           </div>
-          <h3 className="text-2xl md:text-2xl font-bold mb-8">Trending</h3>
+                      <h3 className="text-2xl md:text-2xl font-bold mb-8">Trending</h3>
           <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
           </div>
@@ -223,4 +208,9 @@ export default function HomePage() {
               </div>
             )}
           </div>
-        </
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
