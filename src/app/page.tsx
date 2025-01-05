@@ -125,6 +125,7 @@ export default function HomePage() {
       <InitialAnimation />
       <Navbar />
       <main className="flex-grow">
+      <div class="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 bg-yellow-400 text-purple-900 px-4 py-1 rounded-full text-sm font-bold shadow-lg" style="opacity: 1; transform: none;">Selamat Tahun Baru 2025!</div>
         <div className="container mx-auto px-4 py-8 md:py-16 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat unand</h2>
           <Link
