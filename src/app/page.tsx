@@ -152,6 +152,7 @@ export default function HomePage() {
             <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
             </Button>
           </div>
+                      <h3 className="text-2xl md:text-3xl font-bold mb-8">trending</h3>
           <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
           </div>
