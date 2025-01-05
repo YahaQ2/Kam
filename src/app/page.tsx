@@ -132,13 +132,74 @@ export default function HomePage() {
           >
           
 
-    {/* Popup message */}
-          {showPopup && (
+const Popup = () => {
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        // Tampilkan pop-up saat halaman dimuat
+        setIsVisible(true);
+    }, []);
+
+    const closePopup = () => {
+        setIsVisible(false);
+    };
+
+    return (
+        <>
+            {isVisible && (
+                <>
+                    <div className="popup-overlay" onClick={closePopup}></div>
+                    <div className="popup">
+                        <p>Kamu bahagia y</p>
+                        <button onClick={closePopup}>Tutup</button>
+                    </div>
+                <
+            )}
+            <style jsx>{`
+                .popup {
+                    display: block;
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background-color: #fff;
+                    padding: 20px;
+                    border: 1px solid #ccc;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                    z-index: 1000;
+                }
+                .popup-overlay {
+                    display: block;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    z-index: 999;
+                }
+                .popup button {
+                    padding: 10px 20px;
+                    background-color: #ff6347;
+                    color: #fff;
+                    border: none;
+                    cursor: pointer;
+                    border-radius: 5px;
+                }
+                .popup button:hover {
+                    background-color: #ff4500;
+                }
+            `}
+    );
+};
+
+export default Popup;
+
             <div className="fixed top-0 left-0 right-0 bg-gray-800 text-white p-4 flex justify-between items-center">
               <p>This is a popup message!</p>
               <button onClick={closePopup} className="text-white font-bold">X</button>
             </div>
-          )}
+  
             <span>saran/masukan/fitur baru</span>
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
           </Link>
