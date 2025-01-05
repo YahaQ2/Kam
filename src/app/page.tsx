@@ -5,9 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
+import Link from "next/link";
+import dynamic from "next/dynamic";
+import { ArrowUpRight } from 'lucide-react';
+import { Popup } from "@/components/Popup";
 import { CarouselCard } from "@/components/carousel-card";
 import { motion } from "framer-motion";
-import { Popup } from "@/components/Popup";
+
 interface Menfess {
   id: number;
   sender: string;
