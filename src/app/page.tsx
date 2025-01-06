@@ -9,7 +9,6 @@ import dynamic from "next/dynamic";
 import { ArrowUpRight } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion } from "framer-motion";
-
 interface Menfess {
   id: number;
   sender: string;
