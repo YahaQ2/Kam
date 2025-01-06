@@ -8,7 +8,6 @@ import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ArrowUpRight } from 'lucide-react';
-import { Popup } from "@/components/Popup";
 import { CarouselCard } from "@/components/carousel-card";
 import { motion } from "framer-motion";
 
