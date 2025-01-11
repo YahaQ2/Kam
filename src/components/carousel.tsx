@@ -7,7 +7,7 @@ import { TickerCard } from './ticket-card'
 const messages = [
   { to: "al hme", from: "-", message: "kapan kita bisa main bareng?" },
   { to: "semua anak unand", from: "me", message: "guys jgn lupa jaga kebersihan klo udh makan minum, bungkus sampahnya WAJIB dibuang di tong sampah, meski di kantin jg harus begitu. dah gede ayo sadar kebersihan" },
-  { to: "tesmank", from: "aldi", message: "jgn lupa me time" },
+  { to: "tesmank", from: "aldi", message: "Makasih yah guyss🤜🏻 maaf fitur comment belum tersedia masih ada bug soalnya lagi update tanggal 15 bisa dipakai sama, and nanti ada bikin fitur kuisioner nanti kalian bisa upload kuisoner kalian. tinggal upload link kuisioner kalian dan yang ngisi bkal dapet voucher internet atau saldo ewallet gratis ini fiturnya ada iklan ya guys untuk fitur ini di tambahin atau ga usah di beda web aja? Kalian tinggal bilang di tombol saran. Note iklannya di fitur kuisoner aja bukan di tampilan yunandfess." },
   { to: "bang", from: "a", message: "Semangatt bang, semoga segera wisuda yaaa. tutor dong jadi berkarisma" },
   { to: "kelas a", from: "c", message: "Hy Varel, sehat selalu ya :)" },
   { to: "mas-mas kandok", from: "ijo", message: "Kasih saran buat nambahin fitur baru" },
