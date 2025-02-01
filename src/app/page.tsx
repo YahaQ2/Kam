@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/ui/footer";
@@ -9,6 +10,7 @@ import dynamic from "next/dynamic";
 import { ArrowUpRight } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion } from "framer-motion";
+
 interface Menfess {
   id: number;
   sender: string;
@@ -125,7 +127,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-8 md:py-16 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat unand</h2>
           <Link
-            href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
+            href="https://www.instagram.com/@fer_.putra"
             className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
             <span>saran/masukan/fitur baru</span>
@@ -150,7 +152,6 @@ export default function HomePage() {
             <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
             </Button>
           </div>
-                      <h3 className="text-2xl md:text-2xl font-bold mb-8">Trending</h3>
           <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
           </div>
