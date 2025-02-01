@@ -45,7 +45,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 
           {/* Song Info */}
           {songTitle && artist && coverUrl && (
-            <div className="mt-4 flex items-center space-x-3 text-sm text-gray-700">
+            <div className="mt-4 flex items-center space-x-3 text-sm text-gray-600">
               <img 
                 src={coverUrl} 
                 alt={`${songTitle} cover`} 
