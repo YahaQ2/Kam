@@ -8,7 +8,8 @@ interface CarouselCardProps {
   message: string;
   songTitle?: string;
   artist?: string;
-  coverUrl?: string;}
+  coverUrl?: string;
+}
 
 export const CarouselCard: React.FC<CarouselCardProps> = ({ 
   to, 
@@ -29,7 +30,6 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
           <div className="space-y-1 mb-6 text-start">
             <p className="text-sm text-gray-500">To: {to}</p>
             <p className="text-sm text-gray-500">From: {from}</p>
-            
           </div>
 
           {/* Message */}
@@ -44,7 +44,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 
           {/* Song Info */}
           {songTitle && artist && coverUrl && (
-            <div className="mt-4 flex items-center space-x-3 text-sm text-gray-700">
+            <div className="mt-4 flex items-center space-x-3 text-sm text-gray-600">
               <img 
                 src={coverUrl} 
                 alt={`${songTitle} cover`} 
@@ -58,7 +58,6 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
           )}
         </CardContent>
       </Card>
-      
     </motion.div>
   );
 };
