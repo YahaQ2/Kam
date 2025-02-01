@@ -8,8 +8,7 @@ interface CarouselCardProps {
   message: string;
   songTitle?: string;
   artist?: string;
-  coverUrl?: string;
-}
+  coverUrl?: string;}
 
 export const CarouselCard: React.FC<CarouselCardProps> = ({ 
   to, 
