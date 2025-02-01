@@ -67,7 +67,7 @@ export default function HomePage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
+        const response = await fetch(`https://api.sendthesong.xyz/api/posts?page=1&limit=10/https://unand.vercel.app/v1/api/menfess-spotify-search`);
         if (!response.ok) {
           throw new Error("Failed to fetch messages.");
         }
