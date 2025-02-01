@@ -53,13 +53,11 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
               <div className="flex-1 overflow-hidden">
                 <p className="font-semibold truncate">{songTitle}</p>
                 <p className="text-xs truncate">{artist}</p>
-                
-                <div class="mt-auto pt-4 flex items-center justify-end space-x-1 text-sm text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path></svg><span>0</span></div>
-                
               </div>
             </div>
           )}
         </CardContent>
+<div class="mt-auto pt-4 flex items-center justify-end space-x-1 text-sm text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path></svg><span>0</span></div>
       </Card>
     </motion.div>
   );
