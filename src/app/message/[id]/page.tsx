@@ -62,6 +62,7 @@ export default function MessagePage() {
         if (commentsResponse.ok) {
           const commentsData = await commentsResponse.json();
           setComments(commentsData);
+          console.log("Fetched comments:", commentsData); // Debugging
         } else {
           console.error("Failed to fetch comments:", commentsResponse.statusText);
         }
@@ -92,6 +93,7 @@ export default function MessagePage() {
           const savedComment = await response.json();
           setComments((prevComments) => [...prevComments, savedComment]);
           setNewComment("");
+          console.log("New comment added:", savedComment); // Debugging
         } else {
           console.error("Failed to save comment:", response.statusText);
         }
