@@ -31,8 +31,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
           <div className="space-y-1 mb-6 text-start">
             <p className="text-sm text-gray-500">To: {to}</p>
             <p className="text-sm text-gray-500">From: {from}</p>
-             <p className="text-sm text-gray-100">ada pesan buat kamu:</p>
- </div>
+            
           </div>
 
           {/* Message */}
