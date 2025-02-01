@@ -136,7 +136,6 @@ export default function HomePage() {
               asChild
               className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
             >
-            <div class="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 bg-yellow-400 text-purple-900 px-4 py-1 rounded-full text-sm font-bold shadow-lg" style="opacity: 1; transform: none;">Selamat Tahun Baru 2025!</div>
               <Link href="/message">Kirim Menfess</Link>
             </Button>
             <Button
