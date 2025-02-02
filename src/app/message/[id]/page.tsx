@@ -57,7 +57,7 @@ export default function MessagePage() {
 
         // Fetch comments
         const commentsResponse = await fetch(
-          `https://yunand.vercel.app/v1/api/comments${params.id}`
+          `https://yunand.vercel.app/v1/api/comments/${params.id}`
         );
         if (commentsResponse.ok) {
           const commentsData = await commentsResponse.json();
