@@ -24,76 +24,36 @@ type MessageType = {
   created_at: string;
 };
 
-type CommentType = {
-  id: number;
-  author: string;
-  content: string;
-  created_at: string;
-};
-
 export default function MessagePage() {
   const router = useRouter();
   const params = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
-  const [comments, setComments] = useState<CommentType[]>([]);
-  const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [commentLoading, setCommentLoading] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchMessage = async () => {
       setIsLoading(true);
       try {
-        // Fetch message
-        const messageRes = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-        const messageData = await messageRes.json();
+        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
+        const text = await response.text();
+        const data = JSON.parse(text);
         
-        if (messageData?.status) {
-          setMessage(messageData.data[0]);
-          // Fetch comments
-          const commentsRes = await fetch(`/api/comments?messageId=${params.id}`);
-          const commentsData = await commentsRes.json();
-          setComments(commentsData);
+        if (data && data.status && data.data && data.data.length > 0) {
+          setMessage(data.data[0]);
+        } else {
+          console.error("Failed to fetch message:", data.message);
+          setMessage(null);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching message:", error);
+        setMessage(null);
       } finally {
         setIsLoading(false);
       }
     };
   
-    fetchData();
+    fetchMessage();
   }, [params.id]);
-
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-
-    setCommentLoading(true);
-    try {
-      const res = await fetch('/api/comments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messageId: params.id,
-          content: newComment,
-          author: 'Anonymous',
-        }),
-      });
-
-      if (res.ok) {
-        const newCommentData = await res.json();
-        setComments([...comments, newCommentData]);
-        setNewComment('');
-      }
-    } catch (error) {
-      console.error('Error submitting comment:', error);
-    } finally {
-      setCommentLoading(false);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -125,42 +85,28 @@ export default function MessagePage() {
         </Button>
         <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
-            {/* Existing message content... */}
-
-            {/* Comments Section */}
-            <div className="mt-12">
-              <h3 className="text-lg font-semibold mb-6">Comments ({comments.length})</h3>
-              
-              <form onSubmit={handleCommentSubmit} className="mb-8">
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Write a comment..."
-                  className="w-full p-3 border rounded-lg mb-2 resize-none"
-                  rows={3}
+            <div className="mb-6">
+              <p className="text-sm text-gray-500">To: {message.recipient}</p>
+              <p className="text-sm text-gray-500">From: {message.sender}</p>
+            </div>
+            <div className="border-t border-b border-gray-200 py-6">
+              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
+                {message.message}
+              </p>
+              {message.track?.spotify_embed_link && (
+                <iframe 
+                  key={message.track.spotify_embed_link}
+                  src={message.track.spotify_embed_link} 
+                  width="100%" 
+                  height="352" 
+                  allowFullScreen 
+                  allow="encrypted-media"
+                  className="rounded-lg mt-6"
                 />
-                <Button
-                  type="submit"
-                  disabled={commentLoading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  {commentLoading ? 'Posting...' : 'Post Comment'}
-                </Button>
-              </form>
-
-              <div className="space-y-6">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="border-l-4 border-blue-200 pl-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-medium">{comment.author}</span>
-                      <span className="text-sm text-gray-500">
-                        {dayjs(comment.created_at).format('DD MMM YYYY, HH:mm')}
-                      </span>
-                    </div>
-                    <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
-                  </div>
-                ))}
-              </div>
+              )}
+            </div>
+            <div className="mt-4 text-right">
+              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
             </div>
           </div>
         </div>
