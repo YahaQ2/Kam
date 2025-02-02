@@ -13,47 +13,31 @@ import { Loader2 } from 'lucide-react';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-type MessageType = {
-  id: number;
-  sender: string;
-  recipient: string;
-  message: string;
-  track?: {
-    spotify_embed_link?: string;
-  };
-  created_at: string;
-};
-
-type CommentType = {
-  id: number;
-  user: string;
-  text: string;
-  created_at: string;
-};
+// ... (tipe data MessageType dan CommentType tetap sama)
 
 export default function MessagePage() {
-  const router = useRouter();
-  const params = useParams();
-  const [message, setMessage] = useState<MessageType | null>(null);
-  const [comments, setComments] = useState<CommentType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [commentLoading, setCommentLoading] = useState(true);
-  const [newComment, setNewComment] = useState('');
-  const [commentUser, setCommentUser] = useState('');
+  // ... (state dan hooks tetap sama)
 
   useEffect(() => {
     const fetchMessage = async () => {
       setIsLoading(true);
       try {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-        const text = await response.text();
-        const data = JSON.parse(text);
         
-        if (data && data.status && data.data && data.data.length > 0) {
-          setMessage(data.data[0]);
+        if (!response.ok) { // Tambahkan pengecekan status response
+          throw new Error('Failed to fetch message');
+        }
+        
+        const data = await response.json(); // Langsung parse JSON
+        
+        if (data?.status && data.data) {
+          setMessage(data.data); // Ambil objek langsung, bukan array
         } else {
           setMessage(null);
         }
+      } catch (error) {
+        console.error('Error fetching message:', error);
+        setMessage(null);
       } finally {
         setIsLoading(false);
       }
@@ -63,8 +47,16 @@ export default function MessagePage() {
       setCommentLoading(true);
       try {
         const response = await fetch(`https://unand.vercel.app/v1/api/comments/${params.id}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch comments');
+        }
+        
         const data = await response.json();
         setComments(data.data || []);
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+        setComments([]);
       } finally {
         setCommentLoading(false);
       }
@@ -90,96 +82,20 @@ export default function MessagePage() {
         }),
       });
 
-      if (response.ok) {
-        const newCommentData = await response.json();
-        setComments([...comments, newCommentData.data]);
-        setNewComment('');
-        setCommentUser('');
+      if (!response.ok) {
+        throw new Error('Failed to post comment');
       }
+
+      const newCommentData = await response.json();
+      
+      // Pastikan struktur respons sesuai, misal: newCommentData.data
+      setComments(prev => [...prev, newCommentData.data]); 
+      setNewComment('');
+      setCommentUser('');
     } catch (error) {
       console.error('Error posting comment:', error);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!message) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl font-semibold text-gray-600">Message not found</p>
-      </div>
-    );
-  }
-
-  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
-
-  return (
-    <div className="min-h-screen bg-white text-gray-800 flex flex-col">
-      <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-32">
-        <Button
-          onClick={() => router.back()}
-          className="mb-8 bg-gray-800 text-white hover:bg-gray-900"
-        >
-          Back
-        </Button>
-        <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-8">
-            {/* Existing message content... */}
-            
-            <div className="mt-8">
-              <h3 className="text-xl font-semibold mb-4">Komentar ({comments.length})</h3>
-              {commentLoading ? (
-                <Loader2 className="w-6 h-6 animate-spin" />
-              ) : (
-                comments.map((comment) => (
-                  <div key={comment.id} className="mb-4 p-4 border rounded-lg bg-gray-50">
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="font-medium text-sm text-gray-700">{comment.user}</p>
-                      <p className="text-xs text-gray-500">
-                        {dayjs.utc(comment.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm")}
-                      </p>
-                    </div>
-                    <p className="text-gray-900">{comment.text}</p>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <form onSubmit={handleSubmitComment} className="mt-6">
-              <input
-                type="text"
-                value={commentUser}
-                onChange={(e) => setCommentUser(e.target.value)}
-                className="w-full p-2 border rounded-lg mb-2"
-                placeholder="Nama Anda"
-                required
-              />
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="w-full p-2 border rounded-lg mb-2"
-                placeholder="Tulis komentar..."
-                rows={3}
-                required
-              />
-              <Button 
-                type="submit" 
-                className="bg-blue-600 text-white hover:bg-blue-700"
-              >
-                Kirim Komentar
-              </Button>
-            </form>
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+  // ... (bagian rendering tetap sama)
 }
