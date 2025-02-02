@@ -6,9 +6,9 @@ import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
-import { Loader2 } from "lucide-react";
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import { Loader2 } from 'lucide-react';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -26,8 +26,8 @@ type MessageType = {
 
 type CommentType = {
   id: number;
+  author: string;
   content: string;
-  messageId: number;
   created_at: string;
 };
 
@@ -36,35 +36,24 @@ export default function MessagePage() {
   const params = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [comments, setComments] = useState<CommentType[]>([]);
-  const [newComment, setNewComment] = useState("");
+  const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [commentLoading, setCommentLoading] = useState(false);
 
-  // Fetch message and comments
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
         // Fetch message
-        const messageResponse = await fetch(
-          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
-        );
-        const messageData = await messageResponse.json();
-        if (messageData?.status && messageData?.data?.length > 0) {
+        const messageRes = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
+        const messageData = await messageRes.json();
+        
+        if (messageData?.status) {
           setMessage(messageData.data[0]);
-        } else {
-          console.error("Failed to fetch message:", messageData.message);
-        }
-
-        // Fetch comments
-        const commentsResponse = await fetch(
-          `https://unand.vercel.app/v1/api/comments/${params.id}`
-        );
-        if (commentsResponse.ok) {
-          const commentsData = await commentsResponse.json();
+          // Fetch comments
+          const commentsRes = await fetch(`/api/comments?messageId=${params.id}`);
+          const commentsData = await commentsRes.json();
           setComments(commentsData);
-          console.log("Fetched comments:", commentsData); // Debugging
-        } else {
-          console.error("Failed to fetch comments:", commentsResponse.statusText);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -72,34 +61,37 @@ export default function MessagePage() {
         setIsLoading(false);
       }
     };
-
+  
     fetchData();
   }, [params.id]);
 
-  // Handle adding a comment
-  const handleAddComment = async () => {
-    if (newComment.trim()) {
-      try {
-        const response = await fetch("https://unand.vercel.app/v1/api/comments", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messageId: Number(params.id),
-            content: newComment,
-          }),
-        });
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
 
-        if (response.ok) {
-          const savedComment = await response.json();
-          setComments((prevComments) => [...prevComments, savedComment]);
-          setNewComment("");
-          console.log("New comment added:", savedComment); // Debugging
-        } else {
-          console.error("Failed to save comment:", response.statusText);
-        }
-      } catch (error) {
-        console.error("Error saving comment:", error);
+    setCommentLoading(true);
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messageId: params.id,
+          content: newComment,
+          author: 'Anonymous',
+        }),
+      });
+
+      if (res.ok) {
+        const newCommentData = await res.json();
+        setComments([...comments, newCommentData]);
+        setNewComment('');
       }
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    } finally {
+      setCommentLoading(false);
     }
   };
 
@@ -119,10 +111,7 @@ export default function MessagePage() {
     );
   }
 
-  const formattedDate = dayjs
-    .utc(message.created_at)
-    .tz("Asia/Jakarta")
-    .format("DD MMM YYYY, HH:mm");
+  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
@@ -136,65 +125,41 @@ export default function MessagePage() {
         </Button>
         <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
-            <div className="mb-6">
-              <p className="text-sm text-gray-500">To: {message.recipient}</p>
-              <p className="text-sm text-gray-500">From: {message.sender}</p>
-            </div>
-            <div className="border-t border-b border-gray-200 py-6">
-              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
-                {message.message}
-              </p>
-              {message.track?.spotify_embed_link && (
-                <iframe
-                  key={message.track.spotify_embed_link}
-                  src={message.track.spotify_embed_link}
-                  width="100%"
-                  height="352"
-                  allowFullScreen
-                  allow="encrypted-media"
-                  className="rounded-lg mt-6"
-                />
-              )}
-            </div>
-            <div className="mt-4 text-right">
-              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
-            </div>
-            {/* Komentar Section */}
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-800">Komentar</h3>
-              <div className="mt-4 space-y-4">
-                {comments.length > 0 ? (
-                  comments.map((comment) => (
-                    <div
-                      key={comment.id}
-                      className="bg-gray-100 p-4 rounded-lg shadow-sm text-gray-800"
-                    >
-                      <p className="text-gray-700">{comment.content}</p>
-                      <p className="text-xs text-gray-500 mt-2">
-                        {dayjs
-                          .utc(comment.created_at)
-                          .tz("Asia/Jakarta")
-                          .format("DD MMM YYYY, HH:mm")}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">Belum ada komentar.</p>
-                )}
-              </div>
-              <div className="mt-6">
+            {/* Existing message content... */}
+
+            {/* Comments Section */}
+            <div className="mt-12">
+              <h3 className="text-lg font-semibold mb-6">Comments ({comments.length})</h3>
+              
+              <form onSubmit={handleCommentSubmit} className="mb-8">
                 <textarea
-                  className="w-full border rounded-lg p-3 text-gray-800 focus:outline-none focus:ring"
-                  placeholder="Tambahkan komentar..."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Write a comment..."
+                  className="w-full p-3 border rounded-lg mb-2 resize-none"
+                  rows={3}
                 />
-                <button
-                  onClick={handleAddComment}
-                  className="mt-3 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700"
+                <Button
+                  type="submit"
+                  disabled={commentLoading}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  Tambahkan komentar
-                </button>
+                  {commentLoading ? 'Posting...' : 'Post Comment'}
+                </Button>
+              </form>
+
+              <div className="space-y-6">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="border-l-4 border-blue-200 pl-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-medium">{comment.author}</span>
+                      <span className="text-sm text-gray-500">
+                        {dayjs(comment.created_at).format('DD MMM YYYY, HH:mm')}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
