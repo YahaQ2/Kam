@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -29,44 +29,63 @@ export default function MessagePage() {
   const params = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMessage = async () => {
-      setIsLoading(true);
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-        const text = await response.text();
-        const data = JSON.parse(text);
-        
-        if (data && data.status && data.data && data.data.length > 0) {
-          setMessage(data.data[0]);
-        } else {
-          console.error("Failed to fetch message:", data.message);
-          setMessage(null);
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      } catch (error) {
-        console.error("Error fetching message:", error);
-        setMessage(null);
+
+        const data = await response.json();
+        console.log('API Response:', data); // Untuk debugging
+
+        if (data?.status && data?.data?.[0]) {
+          const messageData = data.data[0];
+          
+          // Validasi Spotify embed link
+          if (messageData.track?.spotify_embed_link) {
+            const spotifyUrl = new URL(messageData.track.spotify_embed_link);
+            if (!spotifyUrl.pathname.includes('/embed/')) {
+              console.warn('URL Spotify mungkin bukan format embed');
+            }
+          }
+          
+          setMessage(messageData);
+        } else {
+          setError('Pesan tidak ditemukan');
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+        setError(err instanceof Error ? err.message : 'Gagal memuat pesan');
       } finally {
         setIsLoading(false);
       }
     };
-  
+
     fetchMessage();
   }, [params.id]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin" />
+        <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
       </div>
     );
   }
 
-  if (!message) {
+  if (error || !message) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl font-semibold text-gray-600">Message not found</p>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <p className="text-xl font-semibold text-red-600 mb-4">{error || 'Pesan tidak ditemukan'}</p>
+        <Button onClick={() => router.back()} className="bg-gray-800 hover:bg-gray-900">
+          Kembali
+        </Button>
       </div>
     );
   }
@@ -77,36 +96,49 @@ export default function MessagePage() {
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
-        <Button
-          onClick={() => router.back()}
-          className="mb-8 bg-gray-800 text-white hover:bg-gray-900"
-        >
-          Back
-        </Button>
-        <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-8">
-            <div className="mb-6">
-              <p className="text-sm text-gray-500">To: {message.recipient}</p>
-              <p className="text-sm text-gray-500">From: {message.sender}</p>
-            </div>
-            <div className="border-t border-b border-gray-200 py-6">
-              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
-                {message.message}
-              </p>
-              {message.track?.spotify_embed_link && (
-                <iframe 
-                  key={message.track.spotify_embed_link}
-                  src={message.track.spotify_embed_link} 
-                  width="100%" 
-                  height="352" 
-                  allowFullScreen 
-                  allow="encrypted-media"
-                  className="rounded-lg mt-6"
-                />
-              )}
-            </div>
-            <div className="mt-4 text-right">
-              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
+        <div className="max-w-2xl mx-auto">
+          <Button
+            onClick={() => router.back()}
+            className="mb-8 bg-gray-800 text-white hover:bg-gray-900"
+          >
+            Kembali
+          </Button>
+          
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+            <div className="p-6 md:p-8">
+              <div className="mb-6 space-y-2">
+                <p className="text-sm text-gray-600">
+                  Kepada: <span className="font-medium">{message.recipient}</span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  Dari: <span className="font-medium">{message.sender}</span>
+                </p>
+              </div>
+
+              <div className="border-t border-b border-gray-200 py-6">
+                <p className="font-['Reenie_Beanie'] text-4xl leading-relaxed mb-6">
+                  {message.message}
+                </p>
+
+                {message.track?.spotify_embed_link && (
+                  <div className="mt-6 rounded-lg overflow-hidden">
+                    <iframe
+                      title="Spotify Embed"
+                      src={`${message.track.spotify_embed_link}?utm_source=generator`}
+                      width="100%"
+                      height="352"
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      loading="lazy"
+                      className="bg-gray-100"
+                      style={{ minHeight: '352px' }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 text-right">
+                <p className="text-sm text-gray-500">{formattedDate}</p>
+              </div>
             </div>
           </div>
         </div>
