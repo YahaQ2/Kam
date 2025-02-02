@@ -6,9 +6,9 @@ import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import { Loader2 } from 'lucide-react';
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import { Loader2 } from "lucide-react";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -38,28 +38,30 @@ export default function MessagePage() {
   const [comments, setComments] = useState<CommentType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [commentLoading, setCommentLoading] = useState(true);
-  const [newComment, setNewComment] = useState('');
-  const [commentUser, setCommentUser] = useState('');
+  const [newComment, setNewComment] = useState("");
+  const [commentUser, setCommentUser] = useState("");
 
   useEffect(() => {
     const fetchMessage = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-        
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
+        );
+
         if (!response.ok) {
-          throw new Error('Failed to fetch message');
+          throw new Error("Failed to fetch message");
         }
-        
+
         const data = await response.json();
-        
+
         if (data?.status && data.data) {
           setMessage(data.data); // Asumsi data.data adalah objek tunggal
         } else {
           setMessage(null);
         }
       } catch (error) {
-        console.error('Error fetching message:', error);
+        console.error("Error fetching message:", error);
         setMessage(null);
       } finally {
         setIsLoading(false);
@@ -69,16 +71,18 @@ export default function MessagePage() {
     const fetchComments = async () => {
       setCommentLoading(true);
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/comments/${params.id}`);
-        
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/comments/${params.id}`
+        );
+
         if (!response.ok) {
-          throw new Error('Failed to fetch comments');
+          throw new Error("Failed to fetch comments");
         }
-        
+
         const data = await response.json();
         setComments(data.data || []);
       } catch (error) {
-        console.error('Error fetching comments:', error);
+        console.error("Error fetching comments:", error);
         setComments([]);
       } finally {
         setCommentLoading(false);
@@ -94,29 +98,32 @@ export default function MessagePage() {
     if (!newComment.trim() || !commentUser.trim()) return;
 
     try {
-      const response = await fetch(`https://unand.vercel.app/v1/api/comments/${params.id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user: commentUser,
-          text: newComment,
-        }),
-      });
+      const response = await fetch(
+        `https://unand.vercel.app/v1/api/comments/${params.id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user: commentUser,
+            text: newComment,
+          }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to post comment');
+        throw new Error("Failed to post comment");
       }
 
       const newCommentData = await response.json();
-      
+
       // Asumsi respons memiliki struktur { data: CommentType }
-      setComments(prev => [...prev, newCommentData.data]);
-      setNewComment('');
-      setCommentUser('');
+      setComments((prev) => [...prev, newCommentData.data]);
+      setNewComment("");
+      setCommentUser("");
     } catch (error) {
-      console.error('Error posting comment:', error);
+      console.error("Error posting comment:", error);
     }
   };
 
@@ -136,7 +143,10 @@ export default function MessagePage() {
     );
   }
 
-  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
+  const formattedDate = dayjs
+    .utc(message.created_at)
+    .tz("Asia/Jakarta")
+    .format("DD MMM YYYY, HH:mm");
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
@@ -151,39 +161,45 @@ export default function MessagePage() {
         <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold mb-2">Message Details</h1>   </p>
+              <h1 className="text-2xl font-bold mb-2">Message Details</h1>
+              <p>{message.message}</p>
+
               {message.track?.spotify_embed_link && (
-                <iframe 
+                <iframe
                   key={message.track.spotify_embed_link}
-                  src={message.track.spotify_embed_link} 
-                  width="100%" 
-                  height="352" 
-                  allowFullScreen 
+                  src={message.track.spotify_embed_link}
+                  width="100%"
+                  height="352"
+                  frameBorder="0"
                   allow="encrypted-media"
                   className="rounded-lg mt-6"
                 />
-             
-                  width="100%"
-                  height="80"
-                  frameBorder="0"
-                  allow="encrypted-media"
-                  className="mb-4"
-                ></iframe>
               )}
+
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
             </div>
 
             <div className="mt-8">
-              <h3 className="text-xl font-semibold mb-4">Komentar ({comments.length})</h3>
+              <h3 className="text-xl font-semibold mb-4">
+                Komentar ({comments.length})
+              </h3>
               {commentLoading ? (
                 <Loader2 className="w-6 h-6 animate-spin" />
               ) : (
                 comments.map((comment) => (
-                  <div key={comment.id} className="mb-4 p-4 border rounded-lg bg-gray-50">
+                  <div
+                    key={comment.id}
+                    className="mb-4 p-4 border rounded-lg bg-gray-50"
+                  >
                     <div className="flex justify-between items-center mb-2">
-                      <p className="font-medium text-sm text-gray-700">{comment.user}</p>
+                      <p className="font-medium text-sm text-gray-700">
+                        {comment.user}
+                      </p>
                       <p className="text-xs text-gray-500">
-                        {dayjs.utc(comment.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm")}
+                        {dayjs
+                          .utc(comment.created_at)
+                          .tz("Asia/Jakarta")
+                          .format("DD MMM YYYY, HH:mm")}
                       </p>
                     </div>
                     <p className="text-gray-900">{comment.text}</p>
@@ -209,8 +225,8 @@ export default function MessagePage() {
                 rows={3}
                 required
               />
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="bg-blue-600 text-white hover:bg-blue-700"
               >
                 Kirim Komentar
