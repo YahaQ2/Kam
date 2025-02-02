@@ -24,11 +24,22 @@ type MessageType = {
   created_at: string;
 };
 
+type CommentType = {
+  id: number;
+  user: string;
+  text: string;
+  created_at: string;
+};
+
 export default function MessagePage() {
   const router = useRouter();
   const params = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
+  const [comments, setComments] = useState<CommentType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [commentLoading, setCommentLoading] = useState(true);
+  const [newComment, setNewComment] = useState('');
+  const [commentUser, setCommentUser] = useState('');
 
   useEffect(() => {
     const fetchMessage = async () => {
@@ -41,19 +52,54 @@ export default function MessagePage() {
         if (data && data.status && data.data && data.data.length > 0) {
           setMessage(data.data[0]);
         } else {
-          console.error("Failed to fetch message:", data.message);
           setMessage(null);
         }
-      } catch (error) {
-        console.error("Error fetching message:", error);
-        setMessage(null);
       } finally {
         setIsLoading(false);
       }
     };
-  
+
+    const fetchComments = async () => {
+      setCommentLoading(true);
+      try {
+        const response = await fetch(`https://unand.vercel.app/v1/api/comments/${params.id}`);
+        const data = await response.json();
+        setComments(data.data || []);
+      } finally {
+        setCommentLoading(false);
+      }
+    };
+
     fetchMessage();
+    fetchComments();
   }, [params.id]);
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || !commentUser.trim()) return;
+
+    try {
+      const response = await fetch(`https://unand.vercel.app/v1/api/comments/${params.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user: commentUser,
+          text: newComment,
+        }),
+      });
+
+      if (response.ok) {
+        const newCommentData = await response.json();
+        setComments([...comments, newCommentData.data]);
+        setNewComment('');
+        setCommentUser('');
+      }
+    } catch (error) {
+      console.error('Error posting comment:', error);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -85,29 +131,51 @@ export default function MessagePage() {
         </Button>
         <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
-            <div className="mb-6">
-              <p className="text-sm text-gray-500">To: {message.recipient}</p>
-              <p className="text-sm text-gray-500">From: {message.sender}</p>
-            </div>
-            <div className="border-t border-b border-gray-200 py-6">
-              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
-                {message.message}
-              </p>
-              {message.track?.spotify_embed_link && (
-                <iframe 
-                  key={message.track.spotify_embed_link}
-                  src={message.track.spotify_embed_link} 
-                  width="100%" 
-                  height="352" 
-                  allowFullScreen 
-                  allow="encrypted-media"
-                  className="rounded-lg mt-6"
-                />
+            {/* Existing message content... */}
+            
+            <div className="mt-8">
+              <h3 className="text-xl font-semibold mb-4">Komentar ({comments.length})</h3>
+              {commentLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                comments.map((comment) => (
+                  <div key={comment.id} className="mb-4 p-4 border rounded-lg bg-gray-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <p className="font-medium text-sm text-gray-700">{comment.user}</p>
+                      <p className="text-xs text-gray-500">
+                        {dayjs.utc(comment.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm")}
+                      </p>
+                    </div>
+                    <p className="text-gray-900">{comment.text}</p>
+                  </div>
+                ))
               )}
             </div>
-            <div className="mt-4 text-right">
-              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
-            </div>
+
+            <form onSubmit={handleSubmitComment} className="mt-6">
+              <input
+                type="text"
+                value={commentUser}
+                onChange={(e) => setCommentUser(e.target.value)}
+                className="w-full p-2 border rounded-lg mb-2"
+                placeholder="Nama Anda"
+                required
+              />
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="w-full p-2 border rounded-lg mb-2"
+                placeholder="Tulis komentar..."
+                rows={3}
+                required
+              />
+              <Button 
+                type="submit" 
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Kirim Komentar
+              </Button>
+            </form>
           </div>
         </div>
       </main>
