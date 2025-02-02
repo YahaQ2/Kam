@@ -151,11 +151,18 @@ export default function MessagePage() {
         <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold mb-2">Message Details</h1>
-              <p className="text-gray-700 mb-4">{message.message}</p>
+              <h1 className="text-2xl font-bold mb-2">Message Details</h1>   </p>
               {message.track?.spotify_embed_link && (
-                <iframe
-                  src={message.track.spotify_embed_link}
+                <iframe 
+                  key={message.track.spotify_embed_link}
+                  src={message.track.spotify_embed_link} 
+                  width="100%" 
+                  height="352" 
+                  allowFullScreen 
+                  allow="encrypted-media"
+                  className="rounded-lg mt-6"
+                />
+             
                   width="100%"
                   height="80"
                   frameBorder="0"
