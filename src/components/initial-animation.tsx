@@ -10,7 +10,7 @@ export function InitialAnimation() {
   
   return (
     <motion.div
-      className="fixed inset-0 bg-white z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center puzzle-background"
       initial={{ opacity: 1 }}
       animate={{ opacity: 0 }}
       transition={{ duration: 1, delay: 2 }}
@@ -22,7 +22,7 @@ export function InitialAnimation() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        Unand bercerita
+        Unand Bercerita
       </motion.h1>
     </motion.div>
   )
