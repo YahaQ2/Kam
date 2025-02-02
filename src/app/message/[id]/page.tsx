@@ -110,40 +110,6 @@ export default function MessagePage() {
             </div>
           </div>
         </div>
-
-        {/* Kolom komentar */}
-        <div className="mt-8 max-w-2xl mx-auto">
-          <h3 className="text-lg font-semibold mb-4">Comments</h3>
-          <div className="space-y-4">
-            {comments.length > 0 ? (
-              comments.map((comment, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-100 p-4 rounded-lg shadow-sm text-sm text-gray-800"
-                >
-                  {comment}
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No comments yet.</p>
-            )}
-          </div>
-          <div className="mt-4 flex items-center">
-            <input
-              type="text"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment..."
-              className="flex-grow p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring focus:ring-gray-200"
-            />
-            <button
-              onClick={handleAddComment}
-              className="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600"
-            >
-              Add Comment
-            </button>
-          </div>
-        </div>
       </main>
       <Footer />
     </div>
