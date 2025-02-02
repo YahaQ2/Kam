@@ -73,7 +73,7 @@ export default function SearchMessagesPage() {
     params.append('sort', sortOrder === 'newest' ? 'desc' : 'asc')
 
     try {
-      const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.toString()}`, {
+      const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search?/${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
