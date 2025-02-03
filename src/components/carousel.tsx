@@ -11,7 +11,7 @@ const messages = [
   { to: "bang", from: "a", message: "Semangatt bang, semoga segera wisuda yaaa. tutor dong jadi berkarisma" },
   { to: "kelas a", from: "c", message: "Hy Varel, sehat selalu ya :)" },
   { to: "mas-mas kandok", from: "ijo", message: "Kasih saran buat nambahin fitur baru" },
-  { to: "mas-mas kandok", from: "ijo", message: "Love U Nad🥰" },
+  { to: "mas-mas kandok", from: "ijo", message: "semangat" },
 ]
 
 export const Carousel: React.FC = () => {
