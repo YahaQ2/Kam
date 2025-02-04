@@ -29,38 +29,55 @@ export default function MessagePage() {
   const params = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMessage = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
+        );
+        
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          if (response.status === 404) {
+            throw new Error('Pesan tidak ditemukan');
+          }
+          throw new Error(`Gagal memuat pesan (Status: ${response.status})`);
         }
+
         const data = await response.json();
 
-        if (data && data.status && data.data && data.data.length > 0) {
-          setMessage(data.data[0]);
+        if (data?.status && data.data) {
+          setMessage(data.data); // Asumsi API mengembalikan objek langsung
         } else {
-          console.error("Failed to fetch message:", data.message);
-          setMessage(null);
+          throw new Error('Format respons tidak valid');
         }
       } catch (error) {
-        console.error("Error fetching message:", error);
+        console.error("Error:", error);
+        setError(error instanceof Error ? error.message : 'Terjadi kesalahan');
         setMessage(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchMessage();
+    if (params.id) fetchMessage();
   }, [params.id]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin" />
+        <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <p className="text-xl font-semibold text-gray-600 mb-4">{error}</p>
+        <Button onClick={() => router.push('/')}>Kembali ke Beranda</Button>
       </div>
     );
   }
@@ -68,53 +85,71 @@ export default function MessagePage() {
   if (!message) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl font-semibold text-gray-600">Message not found</p>
+        <p className="text-xl font-semibold text-gray-600">Pesan tidak ditemukan</p>
       </div>
     );
   }
 
-  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
+  const formattedDate = dayjs.utc(message.created_at)
+    .tz("Asia/Jakarta")
+    .format("DD MMM YYYY, HH:mm");
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-32">
-        <Button
-          onClick={() => router.back()}
-          className="mb-8 bg-gray-800 text-white hover:bg-gray-900"
-        >
-          Back
-        </Button>
-        <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-8">
-            <div className="mb-6">
-              <p className="text-sm text-gray-500">To: {message.recipient}</p>
-              <p className="text-sm text-gray-500">From: {message.sender}</p>
-            </div>
+      
+      <main className="flex-1 container mx-auto px-4 py-12 md:py-16">
+        <div className="max-w-2xl mx-auto">
+          <Button
+            onClick={() => router.back()}
+            variant="outline"
+            className="mb-8 hover:bg-gray-50"
+          >
+            ← Kembali
+          </Button>
 
-            <div className="border-t border-b border-gray-200 py-6">
-              <p className="text-sm text-gray-500">There's someone sending you a song, they want you to hear this song that maybe you'll like :)</p>
-              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
-                {message.message}
-              </p>
-              {message.track?.spotify_embed_link && (
-                <iframe
-                  key={message.track.spotify_embed_link}
-                  src={message.track.spotify_embed_link}
-                  width="100%"
-                  height="202"
-                  allowFullScreen
-                  allow="encrypted-media"
-                  className="rounded-lg mt-6"
-                />
-              )}
-            </div>
-            <div className="mt-4 text-right">
-              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
+          <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+            <div className="p-6 md:p-8 space-y-6">
+              <div className="space-y-1">
+                <p className="text-sm text-gray-500">
+                  Untuk: <span className="font-medium text-gray-700">{message.recipient}</span>
+                </p>
+                <p className="text-sm text-gray-500">
+                  Dari: <span className="font-medium text-gray-700">{message.sender}</span>
+                </p>
+              </div>
+
+              <div className="space-y-6 border-t border-gray-200 pt-6">
+                <p className="text-sm text-gray-500 italic">
+                  Seseorang mengirimkan lagu untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
+                </p>
+
+                <p className="font-['Reenie_Beanie'] text-4xl leading-tight text-gray-900">
+                  {message.message}
+                </p>
+
+                {message.track?.spotify_embed_link && (
+                  <div className="mt-6">
+                    <iframe
+                      src={message.track.spotify_embed_link}
+                      width="100%"
+                      height="152"
+                      allow="encrypted-media"
+                      className="rounded-lg shadow-sm"
+                      title="Spotify Embed"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="text-sm text-gray-500 text-right">
+                Dikirim pada: {formattedDate} WIB
+              </div>
             </div>
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );
