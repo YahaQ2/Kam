@@ -28,6 +28,43 @@ interface FormState {
   selectedTrack: SpotifyTrack | null;
 }
 
+const isValidFormState = (state: unknown): state is FormState => {
+  return (
+    typeof state === "object" &&
+    state !== null &&
+    "from" in state &&
+    "to" in state &&
+    "message" in state &&
+    "song" in state &&
+    "gifUrl" in state &&
+    "spotifyId" in state &&
+    "selectedTrack" in state &&
+    typeof (state as FormState).from === "string" &&
+    typeof (state as FormState).to === "string" &&
+    typeof (state as FormState).message === "string" &&
+    typeof (state as FormState).song === "string" &&
+    typeof (state as FormState).gifUrl === "string" &&
+    typeof (state as FormState).spotifyId === "string" &&
+    (
+      (state as FormState).selectedTrack === null ||
+      (
+        typeof (state as FormState).selectedTrack === "object" &&
+        (state as FormState).selectedTrack !== null &&
+        "id" in (state as FormState).selectedTrack! &&
+        "name" in (state as FormState).selectedTrack! &&
+        "artist" in (state as FormState).selectedTrack! &&
+        "album" in (state as FormState).selectedTrack! &&
+        "cover_url" in (state as FormState).selectedTrack! &&
+        typeof (state as FormState).selectedTrack!.id === "string" &&
+        typeof (state as FormState).selectedTrack!.name === "string" &&
+        typeof (state as FormState).selectedTrack!.artist === "string" &&
+        typeof (state as FormState).selectedTrack!.album === "string" &&
+        typeof (state as FormState).selectedTrack!.cover_url === "string"
+      )
+    )
+  );
+};
+
 export default function MulaiBerceritaPage() {
   const [formState, setFormState] = useState<FormState>({
     from: "",
@@ -45,7 +82,6 @@ export default function MulaiBerceritaPage() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load saved state from localStorage
   useEffect(() => {
     const savedState = localStorage.getItem("menfessFormState");
     if (savedState) {
@@ -60,12 +96,10 @@ export default function MulaiBerceritaPage() {
     }
   }, []);
 
-  // Save state to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("menfessFormState", JSON.stringify(formState));
   }, [formState]);
 
-  // Search for songs based on the input
   useEffect(() => {
     if (formState.selectedTrack) return;
 
@@ -151,7 +185,6 @@ export default function MulaiBerceritaPage() {
       }
 
       setIsSuccessModalOpen(true);
-      // Clear form and localStorage after successful submission
       setFormState({
         from: "",
         to: "",
@@ -175,24 +208,6 @@ export default function MulaiBerceritaPage() {
       ...prev,
       [field]: value
     }));
-  };
-
-  const isValidFormState = (state: any): state is FormState => {
-    return (
-      typeof state.from === "string" &&
-      typeof state.to === "string" &&
-      typeof state.message === "string" &&
-      typeof state.song === "string" &&
-      typeof state.gifUrl === "string" &&
-      typeof state.spotifyId === "string" &&
-      (state.selectedTrack === null || (
-        typeof state.selectedTrack.id === "string" &&
-        typeof state.selectedTrack.name === "string" &&
-        typeof state.selectedTrack.artist === "string" &&
-        typeof state.selectedTrack.album === "string" &&
-        typeof state.selectedTrack.cover_url === "string"
-      ))
-    );
   };
 
   return (
