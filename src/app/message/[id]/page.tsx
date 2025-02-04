@@ -97,7 +97,7 @@ export default function MessagePage() {
                 <iframe 
                   key={message.track.spotify_embed_link}
                   src={message.track.spotify_embed_link} 
-                  width="100%" 
+                  width="50%" 
                   height="350" 
                   allowFullScreen 
                   allow="encrypted-media"
