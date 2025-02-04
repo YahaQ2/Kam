@@ -275,13 +275,13 @@ export default function MulaiBerceritaPage() {
               asChild
               className="mt-2 bg-gray-800 text-white hover:bg-gray-900"
             >
-              <a
+              <p
                 href="https://gifunand.vercel.app"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 Cari GIF
-              </a>
+              </p>
             </Button>
           </div>
 
