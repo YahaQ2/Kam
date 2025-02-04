@@ -29,69 +29,36 @@ export default function MessagePage() {
   const params = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMessage = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-        
-        // Handle non-JSON responses
+        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
         const text = await response.text();
-        const data = text ? JSON.parse(text) : {};
-
-        if (!response.ok) {
-          throw new Error(data.message || `HTTP error! status: ${response.status}`);
-        }
-
-        // Handle different response structures
-        const messageData = data.data?.length > 0 ? data.data[0] : data.data;
+        const data = JSON.parse(text);
         
-        if (!messageData) {
-          throw new Error('Message data not found in response');
+        if (data && data.status && data.data && data.data.length > 0) {
+          setMessage(data.data[0]);
+        } else {
+          console.error("Failed to fetch message:", data.message);
+          setMessage(null);
         }
-
-        // Transform Spotify embed URL if needed
-        const transformedTrack = messageData.track?.spotify_embed_link 
-          ? {
-              ...messageData.track,
-              spotify_embed_link: messageData.track.spotify_embed_link
-                .replace('/track/', '/embed/track/')
-                .replace('https://open.spotify.com/', 'https://open.spotify.com/embed/')
-            }
-          : null;
-
-        setMessage({
-          ...messageData,
-          track: transformedTrack
-        });
-
       } catch (error) {
         console.error("Error fetching message:", error);
-        setError(error instanceof Error ? error.message : 'Terjadi kesalahan');
         setMessage(null);
       } finally {
         setIsLoading(false);
       }
     };
-
-    if (params.id) fetchMessage();
+  
+    fetchMessage();
   }, [params.id]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <p className="text-xl font-semibold text-gray-600 mb-4">{error}</p>
-        <Button onClick={() => router.push('/')}>Kembali ke Beranda</Button>
+        <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
   }
@@ -104,9 +71,7 @@ export default function MessagePage() {
     );
   }
 
-  const formattedDate = dayjs.utc(message.created_at)
-    .tz("Asia/Jakarta")
-    .format("DD MMM YYYY, HH:mm");
+  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
@@ -124,30 +89,26 @@ export default function MessagePage() {
               <p className="text-sm text-gray-500">To: {message.recipient}</p>
               <p className="text-sm text-gray-500">From: {message.sender}</p>
             </div>
-
-            <div className="border-t border-b border-gray-200 py-6 space-y-6">
-              <p className="text-sm text-gray-500 italic">
-                There's someone sending you a song, they want you to hear this song that maybe you'll like :)
-              </p>
-
+            <div className="border-t border-b border-gray-200 py-6">
+            <p className="text-sm text-gray-500 italic">
+                  Seseorang mengirimkan lagu untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
+                </p>
               <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
                 {message.message}
               </p>
-
               {message.track?.spotify_embed_link && (
-                <iframe
+                <iframe 
                   key={message.track.spotify_embed_link}
-                  src={`${message.track.spotify_embed_link}?utm_source=generator&theme=0`}
-                  width="100%"
-                  height="153"
-                  allowFullScreen
-                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  src={message.track.spotify_embed_link} 
+                  width="100%" 
+                  height="150" 
+                  allowFullScreen 
+                  allow="encrypted-media"
+                  allow="autoplay;
                   className="rounded-lg mt-6"
-                  title="Spotify Music Player"
                 />
               )}
             </div>
-
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
             </div>
