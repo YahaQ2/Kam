@@ -62,6 +62,7 @@ export default function MessagePage() {
       </div>
     );
   }
+  
 
   if (!message) {
     return (
@@ -89,6 +90,7 @@ export default function MessagePage() {
               <p className="text-sm text-gray-500">To: {message.recipient}</p>
               <p className="text-sm text-gray-500">From: {message.sender}</p>
             </div>
+            <pThere"s someone sending you a song, they want you to hear this song that maybe you'll like :)"</p>
             <div className="border-t border-b border-gray-200 py-6">
               <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
                 {message.message}
