@@ -104,7 +104,7 @@ export default function MessagePage() {
                   height="150" 
                   allowFullScreen 
                   allow="encrypted-media"
-                  allow="autoplay;
+              
                   className="rounded-lg mt-6"
                 />
               )}
