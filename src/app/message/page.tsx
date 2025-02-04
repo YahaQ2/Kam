@@ -182,7 +182,7 @@ export default function MulaiBerceritaPage() {
           recipient: formState.to,
           message: formState.message,
           spotify_id: formState.spotifyId,
-          gifUrl: formState.gifUrl, // Key diubah ke camelCase
+          gif_url: formState.gifUrl, // Key diubah ke camelCase
         }),
       });
 
