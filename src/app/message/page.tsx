@@ -23,13 +23,13 @@ export default function MulaiBerceritaPage() {
   const [to, setTo] = useState("");
   const [message, setMessage] = useState("");
   const [song, setSong] = useState("");
+  const [gifUrl, setGifUrl] = useState("");
   const [spotifyId, setSpotifyId] = useState("");
   const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-
 
   useEffect(() => {
     if (selectedTrack) return;
@@ -84,6 +84,7 @@ export default function MulaiBerceritaPage() {
       recipient: to,
       message: message,
       spotify_id: spotifyId,
+      gif_url: gifUrl,
     });
   
     try {
@@ -97,11 +98,12 @@ export default function MulaiBerceritaPage() {
           recipient: to,
           message: message,
           spotify_id: spotifyId,
+          gif_url: gifUrl,
         }),
       });
-  
+
       if (!response.ok) {
-        throw new Error("Failed to submit form");
+        throw new Error("Gagal mengirim formulir");
       }
 
       setIsSuccessModalOpen(true);
@@ -109,6 +111,7 @@ export default function MulaiBerceritaPage() {
       setTo("");
       setMessage("");
       setSong("");
+      setGifUrl("");
       setSpotifyId("");
       setSelectedTrack(null);
     } catch (error) {
@@ -127,47 +130,83 @@ export default function MulaiBerceritaPage() {
           <div className="mb-6 md:flex md:space-x-4">
             <div className="md:w-1/2 mb-4 md:mb-0">
               <Label htmlFor="from" className="block text-sm font-medium text-gray-700 mb-1">
-                From
+                Dari
               </Label>
               <Input
                 id="from"
                 value={from}
                 onChange={(e) => setFrom(e.target.value)}
                 className="w-full"
-                placeholder="Your name or alias"
+                placeholder="Nama atau alias kamu"
                 disabled={isLoading}
               />
             </div>
             <div className="md:w-1/2">
               <Label htmlFor="to" className="block text-sm font-medium text-gray-700 mb-1">
-                To
+                Untuk
               </Label>
               <Input
                 id="to"
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
                 className="w-full"
-                placeholder="Recipient's name"
+                placeholder="Nama penerima"
                 disabled={isLoading}
               />
             </div>
           </div>
+          
           <div className="mb-6">
             <Label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-              Message
+              Pesan
             </Label>
             <Textarea
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="w-full h-40"
-              placeholder="Share your story..."
+              placeholder="Tulis pesanmu disini..."
               disabled={isLoading}
             />
           </div>
+
+          <div className="mb-6">
+            <Label htmlFor="gif" className="block text-sm font-medium text-gray-700 mb-1">
+              Tambahkan GIF (opsional)
+            </Label>
+            <div className="flex items-center">
+              <Input
+                id="gif"
+                value={gifUrl}
+                onChange={(e) => setGifUrl(e.target.value)}
+                className="w-full"
+                placeholder="Tempelkan link GIF disini..."
+                disabled={isLoading}
+              />
+              {gifUrl && (
+                <Button 
+                  onClick={() => setGifUrl("")} 
+                  className="ml-2"
+                  variant="ghost"
+                >
+                  ✕
+                </Button>
+              )}
+            </div>
+            {gifUrl && (
+              <div className="mt-4">
+                <img
+                  src={gifUrl}
+                  alt="Preview GIF"
+                  className="max-w-xs rounded-md border border-gray-200"
+                />
+              </div>
+            )}
+          </div>
+
           <div className="mb-6 relative">
             <Label htmlFor="song" className="block text-sm font-medium text-gray-700 mb-1">
-              Search Song
+              Cari Lagu
             </Label>
             <div className="flex items-center">
               <Input
@@ -175,7 +214,7 @@ export default function MulaiBerceritaPage() {
                 value={song}
                 onChange={(e) => setSong(e.target.value)}
                 className="w-full"
-                placeholder="Type song title..."
+                placeholder="Ketik judul lagu..."
                 disabled={isLoading || isSearching || !!selectedTrack}
               />
               {selectedTrack && (
@@ -185,7 +224,7 @@ export default function MulaiBerceritaPage() {
               )}
             </div>
             {tracks.length > 0 && !selectedTrack && (
-              <div className="absolute z-10 w-full bg-white border rounded-md shadow-lg mt-1">
+              <div className="absolute z-10 w-full bg-white border rounded-md shadow-lg mt-1 max-h-80 overflow-y-auto">
                 {tracks.map((track) => (
                   <div
                     key={track.id}
@@ -195,47 +234,50 @@ export default function MulaiBerceritaPage() {
                     <img
                       src={track.cover_url}
                       alt={track.name}
-                      className="w-12 h-12 mr-4 object-cover"
+                      className="w-12 h-12 mr-4 object-cover rounded"
                     />
                     <div>
-                      <div className="font-medium">{track.name}</div>
-                      <div className="text-sm text-gray-500">{track.artist}</div>
+                      <div className="font-medium line-clamp-1">{track.name}</div>
+                      <div className="text-sm text-gray-500 line-clamp-1">{track.artist}</div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Display selected song details */}
             {selectedTrack && (
               <div className="mt-4 flex items-center">
                 {selectedTrack.cover_url && (
                   <img
                     src={selectedTrack.cover_url}
                     alt={selectedTrack.name}
-                    className="w-12 h-12 mr-4 object-cover"
+                    className="w-12 h-12 mr-4 object-cover rounded"
                   />
                 )}
                 <div>
-                  <div className="font-medium">{selectedTrack.name}</div>
-                  <div className="text-sm text-gray-500">{selectedTrack.artist}</div>
+                  <div className="font-medium line-clamp-1">{selectedTrack.name}</div>
+                  <div className="text-sm text-gray-500 line-clamp-1">{selectedTrack.artist}</div>
                 </div>
               </div>
             )}
           </div>
+
           <div className="text-center">
             <Button
               type="submit"
-              className="bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-gray-900 transition-colors"
+              className="bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-gray-900 transition-colors text-lg"
               disabled={isLoading}
             >
-              {isLoading ? "Submitting..." : "Submit"}
+              {isLoading ? "Mengirim..." : "Kirim Sekarang"}
             </Button>
           </div>
         </form>
       </main>
       <Footer />
-      <SuccessModal isOpen={isSuccessModalOpen} onClose={() => setIsSuccessModalOpen(false)} />
+      <SuccessModal 
+        isOpen={isSuccessModalOpen} 
+        onClose={() => setIsSuccessModalOpen(false)} 
+      />
     </div>
   );
 }
