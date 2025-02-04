@@ -158,6 +158,12 @@ export default function MulaiBerceritaPage() {
     e.preventDefault();
     setError(null);
 
+    // Validasi URL GIF
+    if (formState.gifUrl && !formState.gifUrl.match(/\.(gif|webp)(\?.*)?$/i)) {
+      setError("Harap masukkan URL GIF yang valid (akhiran .gif atau .webp)");
+      return;
+    }
+
     if (!formState.from || !formState.to || !formState.message || !formState.spotifyId) {
       setError("Harap isi semua field wajib!");
       return;
@@ -176,7 +182,7 @@ export default function MulaiBerceritaPage() {
           recipient: formState.to,
           message: formState.message,
           spotify_id: formState.spotifyId,
-          gif_url: formState.gifUrl,
+          gifUrl: formState.gifUrl, // Key diubah ke camelCase
         }),
       });
 
@@ -265,7 +271,7 @@ export default function MulaiBerceritaPage() {
                 id="gif"
                 value={formState.gifUrl}
                 onChange={(e) => handleChange('gifUrl', e.target.value)}
-                placeholder="Tempelkan link GIF disini..."
+                placeholder="Tempelkan link GIF langsung (contoh: https://example.com/image.gif)"
                 disabled={isLoading}
               />
               {formState.gifUrl && (
@@ -284,6 +290,10 @@ export default function MulaiBerceritaPage() {
                   src={formState.gifUrl}
                   alt="Preview GIF"
                   className="max-w-xs rounded-md border border-gray-200"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    setError('URL GIF tidak valid atau tidak dapat dimuat');
+                  }}
                 />
               </div>
             )}
@@ -291,7 +301,9 @@ export default function MulaiBerceritaPage() {
               asChild
               className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors mt-2"
             >
-              <Link href="https://gifunand.vercel.app">Cari GIF</Link>
+              <Link href="https://gifunand.vercel.app" target="_blank">
+                Cari GIF
+              </Link>
             </Button>
           </div>
 
