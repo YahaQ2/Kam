@@ -18,9 +18,9 @@ type MessageType = {
   sender: string;
   recipient: string;
   message: string;
+  gif_url: string;
   track?: {
     spotify_embed_link?: string;
-    gif_url: gifUrl,
   };
   created_at: string;
 };
@@ -91,12 +91,20 @@ export default function MessagePage() {
               <p className="text-sm text-gray-500">From: {message.sender}</p>
             </div>
             <div className="border-t border-b border-gray-200 py-6">
-            <p className="text-sm text-gray-500 italic">
-                  Seseorang mengirimkan lagu dan pesan untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
-                </p>
+              <p className="text-sm text-gray-500 italic">
+                Seseorang mengirimkan lagu dan pesan untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
+              </p>
               <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
                 {message.message}
               </p>
+              {/* Bagian tambahan untuk menampilkan GIF */}
+              {message.gif_url && (
+                <img 
+                  src={message.gif_url}
+                  alt="Gift from sender"
+                  className="mx-auto my-4 max-w-full h-auto rounded-lg"
+                />
+              )}
               {message.track?.spotify_embed_link && (
                 <iframe 
                   key={message.track.spotify_embed_link}
@@ -104,9 +112,7 @@ export default function MessagePage() {
                   width="100%" 
                   height="180" 
                   allowFullScreen 
-                
                   allow="encrypted-media"
-              
                   className="rounded-lg mt-6"
                 />
               )}
