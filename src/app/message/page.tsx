@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -45,7 +44,6 @@ export default function MulaiBerceritaPage() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load saved state from localStorage
   useEffect(() => {
     const savedState = localStorage.getItem("menfessFormState");
     if (savedState) {
@@ -60,7 +58,6 @@ export default function MulaiBerceritaPage() {
     }
   }, []);
 
-  // Save state to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("menfessFormState", JSON.stringify(formState));
   }, [formState]);
@@ -150,7 +147,6 @@ export default function MulaiBerceritaPage() {
       }
 
       setIsSuccessModalOpen(true);
-      // Clear form and localStorage after successful submission
       setFormState({
         from: "",
         to: "",
