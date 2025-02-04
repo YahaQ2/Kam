@@ -35,9 +35,8 @@ export default function MessagePage() {
       setIsLoading(true);
       try {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-        const text = await response.text();
-        const data = JSON.parse(text);
-        
+        const data = await response.json();
+
         if (data && data.status && data.data && data.data.length > 0) {
           setMessage(data.data[0]);
         } else {
@@ -51,7 +50,7 @@ export default function MessagePage() {
         setIsLoading(false);
       }
     };
-  
+
     fetchMessage();
   }, [params.id]);
 
@@ -62,7 +61,6 @@ export default function MessagePage() {
       </div>
     );
   }
-  
 
   if (!message) {
     return (
@@ -92,17 +90,17 @@ export default function MessagePage() {
             </div>
 
             <div className="border-t border-b border-gray-200 py-6">
-                        <p"There's someone sending you a song, they want you to hear this song that maybe you'll like :)"</p>
+              <p className="text-sm text-gray-500">There's someone sending you a song, they want you to hear this song that maybe you'll like :)</p>
               <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
                 {message.message}
               </p>
               {message.track?.spotify_embed_link && (
-                <iframe 
+                <iframe
                   key={message.track.spotify_embed_link}
-                  src={message.track.spotify_embed_link} 
-                  width="100%" 
-                  height="202" 
-                  allowFullScreen 
+                  src={message.track.spotify_embed_link}
+                  width="100%"
+                  height="202"
+                  allowFullScreen
                   allow="encrypted-media"
                   className="rounded-lg mt-6"
                 />
