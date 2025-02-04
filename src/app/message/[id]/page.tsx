@@ -35,45 +35,40 @@ export default function MessagePage() {
     const fetchMessage = async () => {
       setIsLoading(true);
       try {
-        if (!params?.id) {
-          throw new Error('ID pesan tidak valid');
-        }
-
-        const response = await fetch(
-          `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
-        );
+        const response = await fetch(`https://solifess.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
         
-        console.log('API Response:', response.status, response.statusText);
+        // Handle non-JSON responses
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
 
         if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error('Pesan tidak ditemukan');
-          }
-          throw new Error(`Gagal memuat pesan (Status: ${response.status})`);
+          throw new Error(data.message || `HTTP error! status: ${response.status}`);
         }
-
-        const data = await response.json();
-        console.log('API Data:', data);
 
         // Handle different response structures
         const messageData = data.data?.length > 0 ? data.data[0] : data.data;
         
-        if (!messageData || !messageData.id) {
-          throw new Error('Format data tidak valid');
+        if (!messageData) {
+          throw new Error('Message data not found in response');
         }
+
+        // Transform Spotify embed URL if needed
+        const transformedTrack = messageData.track?.spotify_embed_link 
+          ? {
+              ...messageData.track,
+              spotify_embed_link: messageData.track.spotify_embed_link
+                .replace('/track/', '/embed/track/')
+                .replace('https://open.spotify.com/', 'https://open.spotify.com/embed/')
+            }
+          : null;
 
         setMessage({
           ...messageData,
-          track: {
-            spotify_embed_link: messageData.track?.spotify_embed_link?.replace(
-              '/track/',
-              '/embed/track/'
-            )
-          }
+          track: transformedTrack
         });
 
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error fetching message:", error);
         setError(error instanceof Error ? error.message : 'Terjadi kesalahan');
         setMessage(null);
       } finally {
@@ -81,7 +76,7 @@ export default function MessagePage() {
       }
     };
 
-    fetchMessage();
+    if (params.id) fetchMessage();
   }, [params.id]);
 
   if (isLoading) {
@@ -104,7 +99,7 @@ export default function MessagePage() {
   if (!message) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl font-semibold text-gray-600">Pesan tidak tersedia</p>
+        <p className="text-xl font-semibold text-gray-600">Message not found</p>
       </div>
     );
   }
@@ -116,60 +111,49 @@ export default function MessagePage() {
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
-      
-      <main className="flex-1 container mx-auto px-4 py-12 md:py-16">
-        <div className="max-w-2xl mx-auto">
-          <Button
-            onClick={() => router.back()}
-            variant="outline"
-            className="mb-8 hover:bg-gray-50"
-          >
-            ← Kembali
-          </Button>
+      <main className="flex-grow container mx-auto px-4 py-32">
+        <Button
+          onClick={() => router.back()}
+          className="mb-8 bg-gray-800 text-white hover:bg-gray-900"
+        >
+          Back
+        </Button>
+        <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="p-8">
+            <div className="mb-6">
+              <p className="text-sm text-gray-500">To: {message.recipient}</p>
+              <p className="text-sm text-gray-500">From: {message.sender}</p>
+            </div>
 
-          <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
-            <div className="p-6 md:p-8 space-y-6">
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500">
-                  Untuk: <span className="font-medium text-gray-700">{message.recipient}</span>
-                </p>
-                <p className="text-sm text-gray-500">
-                  Dari: <span className="font-medium text-gray-700">{message.sender}</span>
-                </p>
-              </div>
+            <div className="border-t border-b border-gray-200 py-6 space-y-6">
+              <p className="text-sm text-gray-500 italic">
+                There's someone sending you a song, they want you to hear this song that maybe you'll like :)
+              </p>
 
-              <div className="space-y-6 border-t border-gray-200 pt-6">
-                <p className="text-sm text-gray-500 italic">
-                  Seseorang mengirimkan lagu untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
-                </p>
+              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
+                {message.message}
+              </p>
 
-                <p className="font-['Reenie_Beanie'] text-4xl leading-tight text-gray-900">
-                  {message.message}
-                </p>
+              {message.track?.spotify_embed_link && (
+                <iframe
+                  key={message.track.spotify_embed_link}
+                  src={`${message.track.spotify_embed_link}?utm_source=generator&theme=0`}
+                  width="100%"
+                  height="153"
+                  allowFullScreen
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  className="rounded-lg mt-6"
+                  title="Spotify Music Player"
+                />
+              )}
+            </div>
 
-                {message.track?.spotify_embed_link && (
-                  <div className="mt-6">
-                    <iframe
-                      src={`${message.track.spotify_embed_link}?utm_source=generator&theme=0`}
-                      width="100%"
-                      height="152"
-                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                      className="rounded-lg shadow-sm"
-                      title="Spotify Track Embed"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="text-sm text-gray-500 text-right">
-                Dikirim pada: {formattedDate} WIB
-              </div>
+            <div className="mt-4 text-right">
+              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
             </div>
           </div>
         </div>
       </main>
-
       <Footer />
     </div>
   );
