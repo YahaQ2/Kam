@@ -91,7 +91,7 @@ export default function MessagePage() {
             </div>
             <div className="border-t border-b border-gray-200 py-6">
             <p className="text-sm text-gray-500 italic">
-                  Seseorang mengirimkan lagu untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
+                  Seseorang mengirimkan lagu dan pesan untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
                 </p>
               <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
                 {message.message}
@@ -101,7 +101,7 @@ export default function MessagePage() {
                   key={message.track.spotify_embed_link}
                   src={message.track.spotify_embed_link} 
                   width="100%" 
-                  height="150" 
+                  height="180" 
                   allowFullScreen 
                   allow="encrypted-media"
               
