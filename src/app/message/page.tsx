@@ -288,15 +288,9 @@ export default function MulaiBerceritaPage() {
             )}
             <Button
               asChild
-              className="mt-2 bg-gray-800 text-white hover:bg-gray-900"
+              className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
             >
-              <p
-                href="https://gifunand.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Cari GIF
-              </p>
+              <Link href="https://gifunand.vercel.app">cari gif</Link>
             </Button>
           </div>
 
