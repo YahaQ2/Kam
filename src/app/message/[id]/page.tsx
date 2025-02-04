@@ -100,7 +100,7 @@ export default function MessagePage() {
                   key={message.track.spotify_embed_link}
                   src={message.track.spotify_embed_link} 
                   width="100%" 
-                  height="252" 
+                  height="202" 
                   allowFullScreen 
                   allow="encrypted-media"
                   className="rounded-lg mt-6"
