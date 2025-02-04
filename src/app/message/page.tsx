@@ -49,7 +49,14 @@ export default function MulaiBerceritaPage() {
   useEffect(() => {
     const savedState = localStorage.getItem("menfessFormState");
     if (savedState) {
-      setFormState(JSON.parse(savedState));
+      try {
+        const parsedState = JSON.parse(savedState);
+        if (isValidFormState(parsedState)) {
+          setFormState(parsedState);
+        }
+      } catch (e) {
+        console.error("Failed to parse saved state from localStorage", e);
+      }
     }
   }, []);
 
@@ -72,9 +79,9 @@ export default function MulaiBerceritaPage() {
         const response = await fetch(
           `https://unand.vercel.app/v1/api/search-spotify-song?song=${encodeURIComponent(formState.song)}`
         );
-        
+
         if (!response.ok) throw new Error("Gagal mencari lagu");
-        
+
         const result = await response.json();
 
         if (result.success) {
@@ -114,14 +121,14 @@ export default function MulaiBerceritaPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+
     if (!formState.from || !formState.to || !formState.message || !formState.spotifyId) {
       setError("Harap isi semua field wajib!");
       return;
     }
 
     setIsLoading(true);
-  
+
     try {
       const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify", {
         method: "POST",
@@ -169,6 +176,24 @@ export default function MulaiBerceritaPage() {
     }));
   };
 
+  const isValidFormState = (state: any): state is FormState => {
+    return (
+      typeof state.from === "string" &&
+      typeof state.to === "string" &&
+      typeof state.message === "string" &&
+      typeof state.song === "string" &&
+      typeof state.gifUrl === "string" &&
+      typeof state.spotifyId === "string" &&
+      (state.selectedTrack === null || (
+        typeof state.selectedTrack.id === "string" &&
+        typeof state.selectedTrack.name === "string" &&
+        typeof state.selectedTrack.artist === "string" &&
+        typeof state.selectedTrack.album === "string" &&
+        typeof state.selectedTrack.cover_url === "string"
+      ))
+    );
+  };
+
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
@@ -203,7 +228,7 @@ export default function MulaiBerceritaPage() {
               />
             </div>
           </div>
-          
+
           <div className="mb-6">
             <Label htmlFor="message">Pesan</Label>
             <Textarea
@@ -227,8 +252,8 @@ export default function MulaiBerceritaPage() {
                 disabled={isLoading}
               />
               {formState.gifUrl && (
-                <Button 
-                  onClick={() => handleChange('gifUrl', "")} 
+                <Button
+                  onClick={() => handleChange('gifUrl', "")}
                   className="ml-2"
                   variant="ghost"
                 >
@@ -249,8 +274,8 @@ export default function MulaiBerceritaPage() {
               asChild
               className="mt-2 bg-gray-800 text-white hover:bg-gray-900"
             >
-              <a 
-                href="https://gifunand.vercel.app" 
+              <a
+                href="https://gifunand.vercel.app"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -275,7 +300,7 @@ export default function MulaiBerceritaPage() {
                 </Button>
               )}
             </div>
-            
+
             {isSearching && (
               <div className="absolute z-10 w-full bg-white p-2 text-sm text-gray-500">
                 Mencari lagu...
@@ -337,9 +362,9 @@ export default function MulaiBerceritaPage() {
         </form>
       </main>
       <Footer />
-      <SuccessModal 
-        isOpen={isSuccessModalOpen} 
-        onClose={() => setIsSuccessModalOpen(false)} 
+      <SuccessModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
       />
     </div>
   );
