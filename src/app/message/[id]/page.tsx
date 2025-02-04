@@ -35,10 +35,16 @@ export default function MessagePage() {
     const fetchMessage = async () => {
       setIsLoading(true);
       try {
+        if (!params?.id) {
+          throw new Error('ID pesan tidak valid');
+        }
+
         const response = await fetch(
           `https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`
         );
         
+        console.log('API Response:', response.status, response.statusText);
+
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Pesan tidak ditemukan');
@@ -47,12 +53,25 @@ export default function MessagePage() {
         }
 
         const data = await response.json();
+        console.log('API Data:', data);
 
-        if (data?.status && data.data) {
-          setMessage(data.data); // Asumsi API mengembalikan objek langsung
-        } else {
-          throw new Error('Format respons tidak valid');
+        // Handle different response structures
+        const messageData = data.data?.length > 0 ? data.data[0] : data.data;
+        
+        if (!messageData || !messageData.id) {
+          throw new Error('Format data tidak valid');
         }
+
+        setMessage({
+          ...messageData,
+          track: {
+            spotify_embed_link: messageData.track?.spotify_embed_link?.replace(
+              '/track/',
+              '/embed/track/'
+            )
+          }
+        });
+
       } catch (error) {
         console.error("Error:", error);
         setError(error instanceof Error ? error.message : 'Terjadi kesalahan');
@@ -62,7 +81,7 @@ export default function MessagePage() {
       }
     };
 
-    if (params.id) fetchMessage();
+    fetchMessage();
   }, [params.id]);
 
   if (isLoading) {
@@ -85,7 +104,7 @@ export default function MessagePage() {
   if (!message) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl font-semibold text-gray-600">Pesan tidak ditemukan</p>
+        <p className="text-xl font-semibold text-gray-600">Pesan tidak tersedia</p>
       </div>
     );
   }
@@ -131,12 +150,13 @@ export default function MessagePage() {
                 {message.track?.spotify_embed_link && (
                   <div className="mt-6">
                     <iframe
-                      src={message.track.spotify_embed_link}
+                      src={`${message.track.spotify_embed_link}?utm_source=generator&theme=0`}
                       width="100%"
                       height="152"
-                      allow="encrypted-media"
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                       className="rounded-lg shadow-sm"
-                      title="Spotify Embed"
+                      title="Spotify Track Embed"
+                      loading="lazy"
                     />
                   </div>
                 )}
