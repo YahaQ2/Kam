@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -288,9 +289,9 @@ export default function MulaiBerceritaPage() {
             )}
             <Button
               asChild
-              className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
+              className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors mt-2"
             >
-              <Link href="https://gifunand.vercel.app">cari gif</Link>
+              <Link href="https://gifunand.vercel.app">Cari GIF</Link>
             </Button>
           </div>
 
