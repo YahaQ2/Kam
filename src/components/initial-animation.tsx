@@ -1,4 +1,4 @@
-"use client"
+ "use client"
 
 import { motion } from "framer-motion"
 import { useState } from "react"
@@ -10,27 +10,35 @@ export function InitialAnimation() {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-gradient-to-b from-blue-500 to-white"
       initial={{ opacity: 1 }}
       animate={{ opacity: 0 }}
       transition={{ duration: 1, delay: 2 }}
       onAnimationComplete={() => setIsVisible(false)}
     >
-      <div className="relative w-full h-full">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 animate-background"></div>
+      {/* Background salju dengan CSS */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/snow.gif')] opacity-30"></div>
+      </div>
+
+      {/* Kontainer animasi */}
+      <div className="relative flex flex-col items-center">
+        {/* Animasi GIF */}
         <motion.img
           src="https://res.cloudinary.com/depbfbxtm/image/upload/v1738711994/hg1ktziu6chtoe41fvba.gif"
           alt="GIF"
-          className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-48"
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
+          className="w-48 h-48"
+          initial={{ opacity: 0, y: -50, scale: 0.8 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 1 }}
         />
+
+        {/* Animasi teks */}
         <motion.h1
-          className="relative text-6xl font-bold text-gray-800 font-['Reenie_Beanie'] z-10"
+          className="text-6xl font-bold text-gray-800 font-['Poppins'] mt-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
         >
           Unand Bercerita
         </motion.h1>
