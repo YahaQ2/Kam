@@ -1,102 +1,110 @@
-"use client";
+"use client"
 
-import { useRouter, useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/ui/navbar";
-import { Footer } from "@/components/ui/footer";
-import { useEffect, useState } from "react";
-import dayjs from "dayjs";
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import { Loader2 } from 'lucide-react';
+import { useRouter, useParams } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Navbar } from "@/components/ui/navbar"
+import { Footer } from "@/components/ui/footer"
+import { useEffect, useState, useRef } from "react"
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+import { Loader2 } from "lucide-react"
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+declare global {
+  interface Window {
+    onSpotifyIframeApiReady: (IFrameAPI: any) => void
+  }
+}
 
 type MessageType = {
-  id: number;
-  sender: string;
-  recipient: string;
-  message: string;
-  gif_url: string;
+  id: number
+  sender: string
+  recipient: string
+  message: string
+  gif_url: string
   track?: {
-    spotify_embed_link?: string;
-  };
-  created_at: string;
-};
+    spotify_embed_link?: string
+  }
+  created_at: string
+}
 
 function extractTrackId(embedLink: string) {
-  const match = embedLink.match(/track\/([a-zA-Z0-9]+)/);
-  return match ? match[1] : null;
+  const match = embedLink.match(/track\/([a-zA-Z0-9]+)/)
+  return match ? match[1] : null
+}
+
+const SpotifyEmbed = ({ trackId }: { trackId: string }) => {
+  const embedRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const script = document.createElement("script")
+    script.src = "https://open.spotify.com/embed/iframe-api/v1"
+    script.async = true
+    document.body.appendChild(script)
+
+    script.onload = () => {
+      window.onSpotifyIframeApiReady = (IFrameAPI) => {
+        if (embedRef.current) {
+          IFrameAPI.createController(embedRef.current, {
+            uri: `spotify:track:${trackId}`,
+            width: "100%",
+            height: "180",
+          })
+        }
+      }
+    }
+
+    return () => {
+      document.body.removeChild(script)
+      delete window.onSpotifyIframeApiReady
+    }
+  }, [trackId])
+
+  return <div ref={embedRef} className="rounded-lg mt-6" />
 }
 
 export default function MessagePage() {
-  const router = useRouter();
-  const params = useParams();
-  const [message, setMessage] = useState<MessageType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter()
+  const { id } = useParams()
+  const [message, setMessage] = useState<MessageType | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchMessage = async () => {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
-        const text = await response.text();
-        const data = JSON.parse(text);
+        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`)
+        const text = await response.text()
+        const data = JSON.parse(text)
 
-        console.log('Fetched message:', data.data[0]);
+        console.log("Fetched message:", data.data[0])
 
         if (data && data.status && data.data && data.data.length > 0) {
-          setMessage(data.data[0]);
+          setMessage(data.data[0])
         } else {
-          console.error("Failed to fetch message:", data.message);
-          setMessage(null);
+          console.error("Failed to fetch message:", data.message)
+          setMessage(null)
         }
       } catch (error) {
-        console.error("Error fetching message:", error);
-        setMessage(null);
+        console.error("Error fetching message:", error)
+        setMessage(null)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
-
-    fetchMessage();
-  }, [params.id]);
-
-  useEffect(() => {
-    if (message?.track?.spotify_embed_link) {
-      const trackId = extractTrackId(message.track.spotify_embed_link);
-      if (!trackId) return;
-
-      window.onSpotifyIframeApiReady = (IFrameAPI) => {
-        const element = document.getElementById('spotify-embed');
-        if (element) {
-          IFrameAPI.createController(element, {
-            uri: `spotify:track:${trackId}`,
-            width: '100%',
-            height: '180',
-          });
-        }
-      };
-
-      const script = document.createElement('script');
-      script.src = 'https://open.spotify.com/embed/iframe-api/v1';
-      script.async = true;
-      document.body.appendChild(script);
-
-      return () => {
-        document.body.removeChild(script);
-        delete window.onSpotifyIframeApiReady;
-      };
     }
-  }, [message?.track?.spotify_embed_link]);
+
+    fetchMessage()
+  }, [id])
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin" />
       </div>
-    );
+    )
   }
 
   if (!message) {
@@ -104,19 +112,16 @@ export default function MessagePage() {
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-xl font-semibold text-gray-600">Message not found</p>
       </div>
-    );
+    )
   }
 
-  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
+  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm")
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
-        <Button
-          onClick={() => router.back()}
-          className="mb-8 bg-gray-800 text-white hover:bg-gray-900"
-        >
+        <Button onClick={() => router.back()} className="mb-8 bg-gray-800 text-white hover:bg-gray-900">
           Back
         </Button>
         <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
@@ -129,18 +134,16 @@ export default function MessagePage() {
               <p className="text-sm text-gray-500 italic">
                 Seseorang mengirimkan lagu dan pesan untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
               </p>
-              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
-                {message.message}
-              </p>
+              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">{message.message}</p>
               {message.gif_url && (
                 <img
-                  src={message.gif_url}
+                  src={message.gif_url || "/placeholder.svg"}
                   alt="Gift from sender"
                   className="mx-auto my-4 max-w-full h-auto rounded-lg"
                 />
               )}
               {message.track?.spotify_embed_link && (
-                <div id="spotify-embed" className="rounded-lg mt-6" />
+                <SpotifyEmbed trackId={extractTrackId(message.track.spotify_embed_link) || ""} />
               )}
             </div>
             <div className="mt-4 text-right">
@@ -151,5 +154,6 @@ export default function MessagePage() {
       </main>
       <Footer />
     </div>
-  );
+  )
 }
+
