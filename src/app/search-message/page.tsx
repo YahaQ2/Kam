@@ -42,7 +42,7 @@ interface Menfess {
 
 export default function SearchMessagesPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchResults, setSearchResults] = useState<Menfess[] | null>(null)
+  const [searchResults, setSearchResults] = useState<Menfess[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searchBy, setSearchBy] = useState<'recipient' | 'sender'>('recipient')
   const [date, setDate] = useState<Date | undefined>(undefined)
@@ -104,13 +104,9 @@ export default function SearchMessagesPage() {
   }, [searchTerm, searchBy, date, sortOrder])
 
   useEffect(() => {
-    if (searchTerm.trim() || date || currentPage > 1) {
-      debouncedFetchMessages()
-    } else {
-      setSearchResults(null)
-    }
+    debouncedFetchMessages()
     return () => debouncedFetchMessages.cancel()
-  }, [searchTerm, searchBy, date, sortOrder, currentPage, debouncedFetchMessages])
+  }, [debouncedFetchMessages])
 
   const Pagination = () => (
     <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between w-full">
@@ -145,7 +141,7 @@ export default function SearchMessagesPage() {
         <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">Cari Menfess</h1>
         <div className="flex justify-center mb-4 sm:mb-6">
           <Link
-            href="https://www.instagram.com/unandfess.xyz?igsh=Mzk4YWR5NW9qajFl"
+            href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw"
             className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
             <span>saran/masukan/fitur baru</span>
@@ -236,7 +232,7 @@ export default function SearchMessagesPage() {
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center">
-              {searchResults === null ? null : searchResults.length > 0 ? (
+              {searchResults.length > 0 ? (
                 searchResults.map((msg) => (
                   <Link 
                     href={`/message/${msg.id}`} 
@@ -255,14 +251,14 @@ export default function SearchMessagesPage() {
                 ))
               ) : (
                 <div className="col-span-full text-center text-gray-500">
-                  {searchTerm || date 
-                    ? `Yahh menfess yang kamu cari gaada (${totalItems} menfess) jangan terlalu berharap yah!! nanti sakit :(` 
-                    : "Silahkan masukkan kata kunci pencarian"}
+                  {totalItems === 0 
+                    ? "Belum ada menfess yang tersedia" 
+                    : "Yahh menfess yang kamu cari gaada, jangan terlalu berharap yah!! nanti sakit :("}
                 </div>
               )}
             </div>
             
-            {searchResults && searchResults.length > 0 && (
+            {searchResults.length > 0 && (
               <Pagination />
             )}
           </>
