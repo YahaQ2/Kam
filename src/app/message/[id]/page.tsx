@@ -96,6 +96,7 @@ export default function MessagePage() {
             }
           }
         } else {
+          console.log('🎵 Initializing Spotify Embed for track:', trackId);
           console.error("Failed to fetch message:", data.message);
           setMessage(null);
         }
@@ -174,3 +175,6 @@ export default function MessagePage() {
     </div>
   );
 }
+
+
+
