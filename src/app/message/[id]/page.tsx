@@ -5,30 +5,14 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Loader2 } from "lucide-react";
-import { getTrackInfo } from "@/lib/spotify";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
-declare global {
-  interface Window {
-    onSpotifyIframeApiReady?: (IFrameAPI: {
-      createController: (
-        element: HTMLDivElement,
-        options: {
-          uri: string;
-          width: string;
-          height: string;
-        }
-      ) => void;
-    }) => void;
-  }
-}
 
 type MessageType = {
   id: number;
@@ -44,46 +28,23 @@ type MessageType = {
 
 const extractTrackId = (embedLink?: string) => {
   if (!embedLink) return null;
-  const match = embedLink.match(/track\/([a-zA-Z0-9]+)/);
+  const match = embedLink.match(/track\/([a-zA-Z0-9]{22})/);
   return match ? match[1] : null;
 };
 
 const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
-  const embedRef = useRef<HTMLDivElement>(null);
+  if (!trackId) return null;
 
-  useEffect(() => {
-    if (!trackId) return;
-
-    const script = document.createElement("script");
-    script.src = "https://open.spotify.com/embed/iframe-api/v1";
-    script.async = true;
-
-    const existingScript = document.querySelector(
-      'script[src="https://open.spotify.com/embed/iframe-api/v1"]'
-    );
-    if (existingScript) return;
-
-    document.body.appendChild(script);
-
-    script.onload = () => {
-      window.onSpotifyIframeApiReady = (IFrameAPI) => {
-        if (embedRef.current) {
-          IFrameAPI.createController(embedRef.current, {
-            uri: `spotify:track:${trackId}`,
-            width: "100%",
-            height: "180",
-          });
-        }
-      };
-    };
-
-    return () => {
-      document.body.removeChild(script);
-      delete window.onSpotifyIframeApiReady;
-    };
-  }, [trackId]);
-
-  return trackId ? <div ref={embedRef} className="rounded-lg mt-6" /> : null;
+  return (
+    <iframe
+      src={`https://open.spotify.com/embed/track/${trackId}?utm_source=generator`}
+      width="100%"
+      height="152"
+      className="rounded-lg mt-6"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      loading="lazy"
+    />
+  );
 };
 
 export default function MessagePage() {
@@ -91,9 +52,7 @@ export default function MessagePage() {
   const { id } = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [trackInfo, setTrackInfo] = useState<SpotifyApi.TrackObjectFull | null>(
-    null
-  );
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchMessage = async () => {
@@ -109,22 +68,22 @@ export default function MessagePage() {
 
         const data = await response.json();
 
-        if (data?.status && data?.data?.[0]) {
-          const messageData = data.data[0];
-          setMessage(messageData);
+        if (!data?.status || !data?.data?.[0]) {
+          throw new Error("Invalid data format");
+        }
 
-          if (messageData.track?.spotify_embed_link) {
-            const trackId = extractTrackId(
-              messageData.track.spotify_embed_link
-            );
-            if (trackId) {
-              const trackData = await getTrackInfo(trackId);
-              if (trackData) {
-                setTrackInfo(trackData); // Perbaikan di sini
-              }
-            }
+        const messageData = data.data[0];
+        
+        // Validasi URL Spotify
+        if (messageData.track?.spotify_embed_link) {
+          const trackId = extractTrackId(messageData.track.spotify_embed_link);
+          if (!trackId) {
+            console.error('Invalid Spotify URL format');
+            delete messageData.track; // Hapus track jika invalid
           }
         }
+
+        setMessage(messageData);
       } catch (error) {
         console.error("Error fetching message:", error);
         setMessage(null);
@@ -157,6 +116,8 @@ export default function MessagePage() {
     .tz("Asia/Jakarta")
     .format("DD MMM YYYY, HH:mm");
 
+  const trackId = extractTrackId(message.track?.spotify_embed_link);
+
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
@@ -181,34 +142,21 @@ export default function MessagePage() {
               <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
                 {message.message}
               </p>
-              {message.gif_url && (
-                <div className="relative w-full h-64 my-4">
-                  <Image
-                    src={message.gif_url}
-                    alt="Gift from sender"
-                    fill
-                    className="rounded-lg object-contain"
-                    placeholder="blur"
-                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkqAcAAIUAgUW0RjgAAAAASUVORK5CYII="
-                  />
-                </div>
-              )}
-              {message.track?.spotify_embed_link && (
-                <SpotifyEmbed
-                  trackId={extractTrackId(message.track.spotify_embed_link)}
-                />
-              )}
-              {trackInfo && (
-                <div className="mt-4">
-                  <h2 className="text-xl font-semibold">{trackInfo.name}</h2>
-                  <p className="text-gray-500">
-                    {trackInfo.artists
-                      ?.map((artist) => artist.name)
-                      .join(", ")}
-                  </p>
-                  <p className="text-gray-500">{trackInfo.album?.name}</p>
-                </div>
-              )}
+              {message.gif_url && !imageError && (
+  <div className="w-[240px] h-[240px] mx-auto my-6 relative">
+    <Image
+      src={message.gif_url}
+      alt="Gift from sender"
+      fill
+      className="rounded-lg object-cover"
+      onError={() => setImageError(true)}
+      unoptimized
+      sizes="240px"
+    />
+  </div>
+)}
+
+              {trackId && <SpotifyEmbed trackId={trackId} />}
             </div>
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
