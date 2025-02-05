@@ -56,28 +56,33 @@ export default function SearchMessagesPage() {
   const fetchMessages = useCallback(async (page: number) => {
     setIsLoading(true)
     
-    const params = new URLSearchParams()
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      sort: sortOrder === 'newest' ? 'desc' : 'asc'
+    })
+    
     if (searchTerm) params.append(searchBy, searchTerm)
     if (date) params.append('date', format(date, 'yyyy-MM-dd'))
-    params.append('sort', sortOrder === 'newest' ? 'desc' : 'asc')
-    params.append('page', page.toString())
-    params.append('limit', limit.toString())
 
     try {
       const response = await fetch(
         `https://unand.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`
       )
 
-      if (!response.ok) throw new Error('Error fetching messages')
-
-      const result = await response.json()
-      const data: Menfess[] = result.data || []
+      if (!response.ok) throw new Error('Gagal memuat pesan')
       
-      setTotalPages(result.totalPages || 1)
-      setTotalItems(result.totalItems || 0)
+      const result = await response.json()
+      
+      if (!result.data || !result.totalPages || !result.totalItems) {
+        throw new Error('Format respons tidak valid')
+      }
+
+      setTotalPages(result.totalPages)
+      setTotalItems(result.totalItems)
       setCurrentPage(page)
 
-      const sortedMessages = data.map(menfess => ({
+      const formattedData = result.data.map((menfess: Menfess) => ({
         ...menfess,
         song: menfess.track ? {
           title: menfess.track.title,
@@ -86,19 +91,19 @@ export default function SearchMessagesPage() {
         } : undefined
       }))
 
-      setSearchResults(sortedMessages)
+      setSearchResults(formattedData)
     } catch (error) {
-      console.error('Error searching messages:', error)
+      console.error('Error:', error)
       setSearchResults([])
+      setTotalPages(1)
+      setTotalItems(0)
     } finally {
       setIsLoading(false)
     }
   }, [searchTerm, searchBy, date, sortOrder])
 
   const debouncedSearch = useCallback(
-    debounce(() => {
-      fetchMessages(1)
-    }, 500),
+    debounce(() => fetchMessages(1), 500),
     [fetchMessages]
   )
 
@@ -115,14 +120,14 @@ export default function SearchMessagesPage() {
   const Pagination = () => (
     <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between w-full">
       <div className="text-sm text-gray-600">
-        Halaman {currentPage} dari {totalPages} ({totalItems} menfess)
+        Halaman {currentPage} dari {totalPages} ({totalItems} total menfess)
       </div>
       
       <div className="flex gap-2">
         <Button
           variant="default"
           onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
+          disabled={currentPage === 1 || isLoading}
           className="gap-1"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -132,7 +137,7 @@ export default function SearchMessagesPage() {
         <Button
           variant="default"
           onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
+          disabled={currentPage === totalPages || isLoading}
           className="gap-1"
         >
           Selanjutnya
@@ -266,7 +271,7 @@ export default function SearchMessagesPage() {
               )}
             </div>
             
-            {searchResults.length > 0 && (
+            {searchResults.length > 0 && totalPages > 1 && (
               <Pagination />
             )}
           </>
