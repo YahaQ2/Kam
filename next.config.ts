@@ -1,30 +1,21 @@
 // next.config.js
-import type { NextConfig } from 'next'
-
-const nextConfig: NextConfig = {
+const nextConfig = {
   experimental: {
-    // Jika menggunakan unstable_cache atau fitur experimental lain
-    unstable_cache: true,
-    serverActions: true,
-    optimizeCss: true,
-    incrementalCacheHandlerPath: process.env.CUSTOM_CACHE_HANDLER
+    // Nonaktifkan fitur experimental jika tidak digunakan
+    serverActions: false,
+    optimizeCss: false,
+    incrementalCacheHandlerPath: undefined
   },
   typescript: {
-    ignoreBuildErrors: true // Sementara untuk melewati error type
+    ignoreBuildErrors: true
   },
   eslint: {
-    ignoreDuringBuilds: true // Sementara untuk melewati error ESLint
+    ignoreDuringBuilds: true
   },
-  staticPageGenerationTimeout: 300,
-  images: {
-    formats: ['image/avif', 'image/webp'],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.unandfess.xyz'
-      }
-    ]
-  }
+  staticPageGenerationTimeout: 3600,
+  swcMinify: true,
+  compress: true,
+  productionBrowserSourceMaps: false
 }
 
-export default nextConfig
+module.exports = nextConfig
