@@ -8,7 +8,7 @@ import { Footer } from "@/components/ui/footer"
 import { CarouselCard } from "@/components/carousel-card"
 import { ScrollToTopButton } from "@/components/scroll-to-top-button"
 import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, ArrowLeft, ArrowRight } from 'lucide-react'
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
@@ -51,7 +51,7 @@ export default function SearchMessagesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
-  const limit = 12
+  const limit = 10
 
   const fetchMessages = useCallback(async () => {
     setIsLoading(true)
@@ -116,19 +116,23 @@ export default function SearchMessagesPage() {
       
       <div className="flex gap-2">
         <Button
-          variant="outline"
+          variant="default"
           onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
           disabled={currentPage === 1}
+          className="gap-1"
         >
+          <ArrowLeft className="h-4 w-4" />
           Sebelumnya
         </Button>
         
         <Button
-          variant="outline"
+          variant="default"
           onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
           disabled={currentPage === totalPages}
+          className="gap-1"
         >
           Selanjutnya
+          <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
     </div>
