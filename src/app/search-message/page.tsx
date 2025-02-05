@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
@@ -42,36 +42,27 @@ interface Menfess {
 
 export default function SearchMessagesPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchResults, setSearchResults] = useState<Menfess[]>([])
+  const [searchResults, setSearchResults] = useState<Menfess[] | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [searchBy, setSearchBy] = useState<'recipient' | 'sender'>('recipient')
   const [date, setDate] = useState<Date | undefined>(undefined)
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
-  const constructQueryParams = useCallback(() => {
-    const params = new URLSearchParams()
-    if (searchTerm) params.append('search', searchTerm)
-    params.append('search_by', searchBy)
-    if (date) params.append('date', date.toISOString())
-    params.append('sort', sortOrder === 'newest' ? 'desc' : 'asc')
-    return params
-  }, [searchTerm, searchBy, date, sortOrder])
-
   const fetchMessages = useCallback(async () => {
-    if (!searchTerm.trim() && !date) {
-      setSearchResults([])
-      return
-    }
-
     setIsLoading(true)
+    
+    const params = new URLSearchParams()
+    if (searchTerm) params.append(searchBy, searchTerm)
+    if (date) params.append('date', format(date, 'yyyy-MM-dd'))
+    params.append('sort', sortOrder === 'newest' ? 'desc' : 'asc')
+
     try {
-      const params = constructQueryParams()
       const response = await fetch(
         `https://unand.vercel.app/v1/api/menfess-spotify-search?${params.toString()}`
       )
 
-      if (!response.ok) throw new Error('Gagal mengambil data')
+      if (!response.ok) throw new Error('Error fetching messages')
 
       const result = await response.json()
       const data: Menfess[] = result.data || []
@@ -87,39 +78,41 @@ export default function SearchMessagesPage() {
 
       setSearchResults(sortedMessages)
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error searching messages:', error)
       setSearchResults([])
     } finally {
       setIsLoading(false)
     }
-  }, [constructQueryParams, searchTerm, date])
+  }, [searchTerm, searchBy, date, sortOrder])
 
-  const debouncedFetch = useCallback(
+  const debouncedFetchMessages = useCallback(
     debounce(fetchMessages, 500),
     [fetchMessages]
   )
 
   useEffect(() => {
-    debouncedFetch()
-    return () => debouncedFetch.cancel()
-  }, [debouncedFetch])
+    if (searchTerm.trim() || date) {
+      debouncedFetchMessages()
+    } else {
+      setSearchResults(null)
+    }
+    return () => debouncedFetchMessages.cancel()
+  }, [searchTerm, searchBy, date, sortOrder, debouncedFetchMessages])
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 sm:py-12 md:py-16 max-w-6xl">
         <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">Cari Menfess</h1>
-        
         <div className="flex justify-center mb-4 sm:mb-6">
           <Link
-            href="https://unandfess.xyz/"
+            href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw"
             className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
             <span>saran/masukan/fitur baru</span>
             <ArrowUpRight className="ml-2 h-4 w-4" />
           </Link>
         </div>
-
         <div className="max-w-3xl mx-auto mb-6">
           <div className="flex flex-col space-y-4">
             <div className="relative">
@@ -140,7 +133,6 @@ export default function SearchMessagesPage() {
                 />
               </div>
             </div>
-
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
               <div className="flex w-full sm:w-auto space-x-2">
                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
@@ -182,7 +174,6 @@ export default function SearchMessagesPage() {
                   Reset
                 </Button>
               </div>
-
               <Select 
                 value={sortOrder} 
                 onValueChange={(value: 'newest' | 'oldest') => setSortOrder(value)}
@@ -198,7 +189,6 @@ export default function SearchMessagesPage() {
             </div>
           </div>
         </div>
-
         {isLoading ? (
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -206,7 +196,7 @@ export default function SearchMessagesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center">
-            {searchResults.length > 0 ? (
+            {searchResults === null ? null : searchResults.length > 0 ? (
               searchResults.map((msg) => (
                 <Link 
                   href={`/message/${msg.id}`} 
@@ -233,7 +223,6 @@ export default function SearchMessagesPage() {
           </div>
         )}
       </main>
-      
       <Footer />
       <ScrollToTopButton />
     </div>
