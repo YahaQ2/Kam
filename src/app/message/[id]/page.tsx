@@ -14,8 +14,72 @@ import { getTrackInfo } from "@/lib/spotify";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-// Define the Spotify IFrame API interface
 declare global {
+  namespace SpotifyApi {
+    interface ExternalUrlObject {
+      spotify: string;
+    }
+
+    interface ImageObject {
+      height?: number;
+      url: string;
+      width?: number;
+    }
+
+    interface ArtistObjectSimplified {
+      external_urls: ExternalUrlObject;
+      href: string;
+      id: string;
+      name: string;
+      type: "artist";
+      uri: string;
+    }
+
+    interface AlbumObjectSimplified {
+      album_type: "album" | "single" | "compilation";
+      artists: ArtistObjectSimplified[];
+      available_markets?: string[];
+      external_urls: ExternalUrlObject;
+      href: string;
+      id: string;
+      images: ImageObject[];
+      name: string;
+      release_date: string;
+      release_date_precision: "year" | "month" | "day";
+      type: "album";
+      uri: string;
+    }
+
+    interface TrackObjectFull {
+      album: AlbumObjectSimplified;
+      artists: ArtistObjectSimplified[];
+      available_markets?: string[];
+      disc_number: number;
+      duration_ms: number;
+      explicit: boolean;
+      external_ids: {
+        isrc?: string;
+        ean?: string;
+        upc?: string;
+      };
+      external_urls: ExternalUrlObject;
+      href: string;
+      id: string;
+      is_playable?: boolean;
+      linked_from?: {};
+      restrictions?: {
+        reason: string;
+      };
+      name: string;
+      popularity: number;
+      preview_url: string | null;
+      track_number: number;
+      type: "track";
+      uri: string;
+      is_local: boolean;
+    }
+  }
+
   interface IFrameAPI {
     createController: (
       element: HTMLDivElement,
@@ -28,7 +92,7 @@ declare global {
   }
 
   interface Window {
-    onSpotifyIframeApiReady?: (IFrameAPI: IFrameAPI) => void; // Make it optional
+    onSpotifyIframeApiReady?: (IFrameAPI: IFrameAPI) => void;
   }
 }
 
@@ -44,7 +108,6 @@ type MessageType = {
   created_at: string;
 };
 
-// Function to extract the track ID from the Spotify embed link
 function extractTrackId(embedLink?: string) {
   if (!embedLink) return null;
   const match = embedLink.match(/track\/([a-zA-Z0-9]+)/);
@@ -82,15 +145,11 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
 
     return () => {
       document.body.removeChild(script);
-      if (window.onSpotifyIframeApiReady) {
-        delete window.onSpotifyIframeApiReady;
-      }
+      delete window.onSpotifyIframeApiReady;
     };
   }, [trackId]);
 
-  if (!trackId) return null;
-
-  return <div ref={embedRef} className="rounded-lg mt-6" />;
+  return trackId ? <div ref={embedRef} className="rounded-lg mt-6" /> : null;
 };
 
 export default function MessagePage() {
@@ -110,9 +169,7 @@ export default function MessagePage() {
           `https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`
         );
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
 
@@ -120,23 +177,16 @@ export default function MessagePage() {
           const messageData = data.data[0];
           setMessage(messageData);
 
-          // Handle Spotify track
           if (messageData.track?.spotify_embed_link) {
-            try {
-              const trackId = extractTrackId(
-                messageData.track.spotify_embed_link
-              );
-              if (trackId) {
-                const trackData = await getTrackInfo(trackId);
-                if (trackData) setTrackInfo(trackData);
-              }
-            } catch (error) {
-              console.error("Error fetching track info:", error);
+            const trackId = extractTrackId(messageData.track.spotify_embed_link);
+            if (trackId) {
+              const trackData = await getTrackInfo(trackId);
+              trackData && setTrackInfo(trackData);
             }
           }
         }
       } catch (error) {
-        console.error("Error fetching message:", error);
+        console.error("Error:", error);
         setMessage(null);
       } finally {
         setIsLoading(false);
