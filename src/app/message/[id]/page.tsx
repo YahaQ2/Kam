@@ -11,25 +11,36 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Loader2 } from "lucide-react";
 import { getTrackInfo } from "@/lib/spotify";
-import type { TrackObjectFull } from "spotify-api";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+// Deklarasi tipe Spotify API
 declare global {
-  interface IFrameAPI {
-    createController: (
-      element: HTMLDivElement,
-      options: {
-        uri: string;
-        width: string;
-        height: string;
-      }
-    ) => void;
-  }
-
   interface Window {
-    onSpotifyIframeApiReady?: (IFrameAPI: IFrameAPI) => void;
+    onSpotifyIframeApiReady?: (IFrameAPI: {
+      createController: (
+        element: HTMLDivElement,
+        options: {
+          uri: string;
+          width: string;
+          height: string;
+        }
+      ) => void;
+    }) => void;
+  }
+}
+
+// Deklarasi modul untuk types Spotify API
+declare module "spotify-api" {
+  export interface TrackObjectFull {
+    album: {
+      name: string;
+      artists: Array<{ name: string }>;
+    };
+    artists: Array<{ name: string }>;
+    name: string;
+    // ... tambahkan properti lain sesuai kebutuhan
   }
 }
 
@@ -57,55 +68,32 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
   useEffect(() => {
     if (!trackId) return;
 
-    const loadScript = () => {
-      const script = document.createElement("script");
-      script.src = "https://open.spotify.com/embed/iframe-api/v1";
-      script.async = true;
-
-      script.onload = () => {
-        window.onSpotifyIframeApiReady = (IFrameAPI) => {
-          if (embedRef.current) {
-            IFrameAPI.createController(embedRef.current, {
-              uri: `spotify:track:${trackId}`,
-              width: "100%",
-              height: "180",
-            });
-          }
-        };
-      };
-
-      document.body.appendChild(script);
-      return () => {
-        document.body.removeChild(script);
-      };
-    };
+    const script = document.createElement("script");
+    script.src = "https://open.spotify.com/embed/iframe-api/v1";
+    script.async = true;
 
     const existingScript = document.querySelector(
       'script[src="https://open.spotify.com/embed/iframe-api/v1"]'
     );
+    if (existingScript) return;
 
-    if (!existingScript) {
-      loadScript();
-    } else if (window.onSpotifyIframeApiReady) {
-      window.onSpotifyIframeApiReady({
-        createController: (element, options) => {
-          if (embedRef.current) {
-            // Reuse existing API
-            embedRef.current.innerHTML = '';
-            const iframe = document.createElement('iframe');
-            iframe.style.width = options.width;
-            iframe.style.height = options.height;
-            iframe.src = `https://open.spotify.com/embed/track/${trackId}`;
-            embedRef.current.appendChild(iframe);
-          }
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      window.onSpotifyIframeApiReady = (IFrameAPI) => {
+        if (embedRef.current) {
+          IFrameAPI.createController(embedRef.current, {
+            uri: `spotify:track:${trackId}`,
+            width: "100%",
+            height: "180",
+          });
         }
-      });
-    }
+      };
+    };
 
     return () => {
-      if (window.onSpotifyIframeApiReady) {
-        delete window.onSpotifyIframeApiReady;
-      }
+      document.body.removeChild(script);
+      delete window.onSpotifyIframeApiReady;
     };
   }, [trackId]);
 
@@ -117,7 +105,9 @@ export default function MessagePage() {
   const { id } = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [trackInfo, setTrackInfo] = useState<TrackObjectFull | null>(null);
+  const [trackInfo, setTrackInfo] = useState<SpotifyApi.TrackObjectFull | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchMessage = async () => {
@@ -127,9 +117,7 @@ export default function MessagePage() {
           `https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`
         );
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
 
@@ -141,14 +129,12 @@ export default function MessagePage() {
             const trackId = extractTrackId(messageData.track.spotify_embed_link);
             if (trackId) {
               const trackData = await getTrackInfo(trackId);
-              if (trackData) {
-                setTrackInfo(trackData);
-              }
+              trackData && setTrackInfo(trackData);
             }
           }
         }
       } catch (error) {
-        console.error("Error fetching message:", error);
+        console.error("Error:", error);
         setMessage(null);
       } finally {
         setIsLoading(false);
@@ -211,10 +197,7 @@ export default function MessagePage() {
                     fill
                     className="rounded-lg object-contain"
                     placeholder="blur"
-                    blurDataURL="/placeholder.svg"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/placeholder.svg";
-                    }}
+                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkqAcAAIUAgUW0RjgAAAAASUVORK5CYII="
                   />
                 </div>
               )}
@@ -231,7 +214,7 @@ export default function MessagePage() {
                       ?.map((artist) => artist.name)
                       .join(", ")}
                   </p>
-                  <p className="text-gray-500">{trackInfo.album.name}</p>
+                  <p className="text-gray-500">{trackInfo.album?.name}</p>
                 </div>
               )}
             </div>
