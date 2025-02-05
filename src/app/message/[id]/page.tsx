@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Loader2 } from "lucide-react";
-import { getTrackInfo } from "@/lib/spotify"; // Import fungsi Spotify API
+import { getTrackInfo } from "@/lib/spotify";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -32,18 +32,26 @@ type MessageType = {
   created_at: string;
 };
 
-function extractTrackId(embedLink: string) {
+// Fungsi untuk mengekstrak track ID dengan error handling
+function extractTrackId(embedLink?: string) {
+  if (!embedLink) return null;
   const match = embedLink.match(/track\/([a-zA-Z0-9]+)/);
   return match ? match[1] : null;
 }
 
-const SpotifyEmbed = ({ trackId }: { trackId: string }) => {
+const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
   const embedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!trackId) return;
+
     const script = document.createElement("script");
     script.src = "https://open.spotify.com/embed/iframe-api/v1";
     script.async = true;
+    
+    const existingScript = document.querySelector('script[src="https://open.spotify.com/embed/iframe-api/v1"]');
+    if (existingScript) return;
+
     document.body.appendChild(script);
 
     script.onload = () => {
@@ -64,6 +72,8 @@ const SpotifyEmbed = ({ trackId }: { trackId: string }) => {
     };
   }, [trackId]);
 
+  if (!trackId) return null;
+
   return <div ref={embedRef} className="rounded-lg mt-6" />;
 };
 
@@ -72,33 +82,36 @@ export default function MessagePage() {
   const { id } = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [trackInfo, setTrackInfo] = useState(null); // State untuk menyimpan info track
+  const [trackInfo, setTrackInfo] = useState<SpotifyApi.TrackObjectFull | null>(null);
 
   useEffect(() => {
     const fetchMessage = async () => {
       setIsLoading(true);
       try {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`);
-        const text = await response.text();
-        const data = JSON.parse(text);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        console.log("Fetched message:", data.data[0]);
+        const data = await response.json();
 
-        if (data && data.status && data.data && data.data.length > 0) {
-          setMessage(data.data[0]);
+        if (data?.status && data?.data?.[0]) {
+          const messageData = data.data[0];
+          setMessage(messageData);
 
-          // Ambil info track Spotify jika ada embed link
-          if (data.data[0].track?.spotify_embed_link) {
-            const trackId = extractTrackId(data.data[0].track.spotify_embed_link);
-            if (trackId) {
-              const trackData = await getTrackInfo(trackId);
-              setTrackInfo(trackData);
+          // Handle Spotify track
+          if (messageData.track?.spotify_embed_link) {
+            try {
+              const trackId = extractTrackId(messageData.track.spotify_embed_link);
+              if (trackId) {
+                const trackData = await getTrackInfo(trackId);
+                if (trackData) setTrackInfo(trackData);
+              }
+            } catch (error) {
+              console.error("Error fetching track info:", error);
             }
           }
-        } else {
-          console.log('🎵 Initializing Spotify Embed for track:', trackId);
-          console.error("Failed to fetch message:", data.message);
-          setMessage(null);
         }
       } catch (error) {
         console.error("Error fetching message:", error);
@@ -149,19 +162,24 @@ export default function MessagePage() {
               <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">{message.message}</p>
               {message.gif_url && (
                 <img
-                  src={message.gif_url || "/placeholder.svg"}
+                  src={message.gif_url}
                   alt="Gift from sender"
                   className="mx-auto my-4 max-w-full h-auto rounded-lg"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                  }}
                 />
               )}
               {message.track?.spotify_embed_link && (
-                <SpotifyEmbed trackId={extractTrackId(message.track.spotify_embed_link) || ""} />
+                <SpotifyEmbed trackId={extractTrackId(message.track.spotify_embed_link)} />
               )}
               {trackInfo && (
                 <div className="mt-4">
                   <h2 className="text-xl font-semibold">{trackInfo.name}</h2>
-                  <p className="text-gray-500">{trackInfo.artists.map(artist => artist.name).join(', ')}</p>
-                  <p className="text-gray-500">{trackInfo.album.name}</p>
+                  <p className="text-gray-500">
+                    {trackInfo.artists?.map(artist => artist.name).join(', ')}
+                  </p>
+                  <p className="text-gray-500">{trackInfo.album?.name}</p>
                 </div>
               )}
             </div>
@@ -175,6 +193,3 @@ export default function MessagePage() {
     </div>
   );
 }
-
-
-
