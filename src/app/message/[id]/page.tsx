@@ -43,7 +43,9 @@ export default function MessagePage() {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${params.id}`);
         const text = await response.text();
         const data = JSON.parse(text);
-        
+
+        console.log('Fetched message:', data.data[0]);
+
         if (data && data.status && data.data && data.data.length > 0) {
           setMessage(data.data[0]);
         } else {
@@ -57,7 +59,7 @@ export default function MessagePage() {
         setIsLoading(false);
       }
     };
-  
+
     fetchMessage();
   }, [params.id]);
 
@@ -66,7 +68,6 @@ export default function MessagePage() {
       const trackId = extractTrackId(message.track.spotify_embed_link);
       if (!trackId) return;
 
-      // Define Spotify API callback
       window.onSpotifyIframeApiReady = (IFrameAPI) => {
         const element = document.getElementById('spotify-embed');
         if (element) {
@@ -78,7 +79,6 @@ export default function MessagePage() {
         }
       };
 
-      // Load Spotify script
       const script = document.createElement('script');
       script.src = 'https://open.spotify.com/embed/iframe-api/v1';
       script.async = true;
@@ -133,7 +133,7 @@ export default function MessagePage() {
                 {message.message}
               </p>
               {message.gif_url && (
-                <img 
+                <img
                   src={message.gif_url}
                   alt="Gift from sender"
                   className="mx-auto my-4 max-w-full h-auto rounded-lg"
