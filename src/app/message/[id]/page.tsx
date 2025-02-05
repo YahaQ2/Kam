@@ -25,6 +25,11 @@ type MessageType = {
   created_at: string;
 };
 
+function extractTrackId(embedLink: string) {
+  const match = embedLink.match(/track\/([a-zA-Z0-9]+)/);
+  return match ? match[1] : null;
+}
+
 export default function MessagePage() {
   const router = useRouter();
   const params = useParams();
@@ -55,6 +60,36 @@ export default function MessagePage() {
   
     fetchMessage();
   }, [params.id]);
+
+  useEffect(() => {
+    if (message?.track?.spotify_embed_link) {
+      const trackId = extractTrackId(message.track.spotify_embed_link);
+      if (!trackId) return;
+
+      // Define Spotify API callback
+      window.onSpotifyIframeApiReady = (IFrameAPI) => {
+        const element = document.getElementById('spotify-embed');
+        if (element) {
+          IFrameAPI.createController(element, {
+            uri: `spotify:track:${trackId}`,
+            width: '100%',
+            height: '180',
+          });
+        }
+      };
+
+      // Load Spotify script
+      const script = document.createElement('script');
+      script.src = 'https://open.spotify.com/embed/iframe-api/v1';
+      script.async = true;
+      document.body.appendChild(script);
+
+      return () => {
+        document.body.removeChild(script);
+        delete window.onSpotifyIframeApiReady;
+      };
+    }
+  }, [message?.track?.spotify_embed_link]);
 
   if (isLoading) {
     return (
@@ -97,7 +132,6 @@ export default function MessagePage() {
               <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
                 {message.message}
               </p>
-              {/* Bagian tambahan untuk menampilkan GIF */}
               {message.gif_url && (
                 <img 
                   src={message.gif_url}
@@ -106,15 +140,7 @@ export default function MessagePage() {
                 />
               )}
               {message.track?.spotify_embed_link && (
-                <iframe 
-                  key={message.track.spotify_embed_link}
-                  src={message.track.spotify_embed_link} 
-                  width="100%" 
-                  height="180" 
-                  allowFullScreen 
-                  allow="encrypted-media"
-                  className="rounded-lg mt-6"
-                />
+                <div id="spotify-embed" className="rounded-lg mt-6" />
               )}
             </div>
             <div className="mt-4 text-right">
