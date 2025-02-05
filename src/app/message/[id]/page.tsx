@@ -14,9 +14,21 @@ import { getTrackInfo } from "@/lib/spotify";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+// Define the Spotify IFrame API interface
 declare global {
+  interface IFrameAPI {
+    createController: (
+      element: HTMLDivElement,
+      options: {
+        uri: string;
+        width: string;
+        height: string;
+      }
+    ) => void;
+  }
+
   interface Window {
-    onSpotifyIframeApiReady: (IFrameAPI: any) => void;
+    onSpotifyIframeApiReady: (IFrameAPI: IFrameAPI) => void;
   }
 }
 
@@ -31,8 +43,7 @@ type MessageType = {
   };
   created_at: string;
 };
-
-// Fungsi untuk mengekstrak track ID dengan error handling
+// Function to extract the track ID from the Spotify embed link
 function extractTrackId(embedLink?: string) {
   if (!embedLink) return null;
   const match = embedLink.match(/track\/([a-zA-Z0-9]+)/);
@@ -48,8 +59,9 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
     const script = document.createElement("script");
     script.src = "https://open.spotify.com/embed/iframe-api/v1";
     script.async = true;
-    
-    const existingScript = document.querySelector('script[src="https://open.spotify.com/embed/iframe-api/v1"]');
+const existingScript = document.querySelector(
+      'script[src="https://open.spotify.com/embed/iframe-api/v1"]'
+    );
     if (existingScript) return;
 
     document.body.appendChild(script);
@@ -67,7 +79,7 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
     };
 
     return () => {
-      document.body.removeChild(script);
+    document.body.removeChild(script);
       delete window.onSpotifyIframeApiReady;
     };
   }, [trackId]);
@@ -82,14 +94,17 @@ export default function MessagePage() {
   const { id } = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [trackInfo, setTrackInfo] = useState<SpotifyApi.TrackObjectFull | null>(null);
-
+  const [trackInfo, setTrackInfo] = useState<SpotifyApi.TrackObjectFull | null>(
+    null
+  );
   useEffect(() => {
     const fetchMessage = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`);
-        
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -99,11 +114,13 @@ export default function MessagePage() {
         if (data?.status && data?.data?.[0]) {
           const messageData = data.data[0];
           setMessage(messageData);
-
+          
           // Handle Spotify track
           if (messageData.track?.spotify_embed_link) {
             try {
-              const trackId = extractTrackId(messageData.track.spotify_embed_link);
+              const trackId = extractTrackId(
+                messageData.track.spotify_embed_link
+              );
               if (trackId) {
                 const trackData = await getTrackInfo(trackId);
                 if (trackData) setTrackInfo(trackData);
@@ -120,7 +137,7 @@ export default function MessagePage() {
         setIsLoading(false);
       }
     };
-
+    
     fetchMessage();
   }, [id]);
 
@@ -140,13 +157,19 @@ export default function MessagePage() {
     );
   }
 
-  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
-
-  return (
+  const formattedDate = dayjs
+    .utc(message.created_at)
+    .tz("Asia/Jakarta")
+    .format("DD MMM YYYY, HH:mm");
+    
+    return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
-        <Button onClick={() => router.back()} className="mb-8 bg-gray-800 text-white hover:bg-gray-900">
+        <Button
+          onClick={() => router.back()}
+          className="mb-8 bg-gray-800 text-white hover:bg-gray-900"
+        >
           Back
         </Button>
         <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
@@ -155,30 +178,39 @@ export default function MessagePage() {
               <p className="text-sm text-gray-500">To: {message.recipient}</p>
               <p className="text-sm text-gray-500">From: {message.sender}</p>
             </div>
-            <div className="border-t border-b border-gray-200 py-6">
+            <div 
+            
+className="border-t border-b border-gray-200 py-6">
               <p className="text-sm text-gray-500 italic">
-                Seseorang mengirimkan lagu dan pesan untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
+                Seseorang mengirimkan lagu dan pesan untukmu, mungkin ini adalah
+                lagu yang akan kamu sukai :)
               </p>
-              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">{message.message}</p>
+              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">
+                {message.message}
+              </p>
               {message.gif_url && (
                 <img
                   src={message.gif_url}
                   alt="Gift from sender"
                   className="mx-auto my-4 max-w-full h-auto rounded-lg"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                  (e.target as HTMLImageElement).src = "/placeholder.svg";
                   }}
                 />
               )}
               {message.track?.spotify_embed_link && (
-                <SpotifyEmbed trackId={extractTrackId(message.track.spotify_embed_link)} />
+                <SpotifyEmbed
+                  trackId={extractTrackId(message.track.spotify_embed_link)}
+                />
               )}
               {trackInfo && (
                 <div className="mt-4">
                   <h2 className="text-xl font-semibold">{trackInfo.name}</h2>
                   <p className="text-gray-500">
-                    {trackInfo.artists?.map(artist => artist.name).join(', ')}
-                  </p>
+                    {trackInfo.artists
+                      ?.map((artist) => artist.name)
+                      .join(", ")}
+                      </p>
                   <p className="text-gray-500">{trackInfo.album?.name}</p>
                 </div>
               )}
@@ -193,3 +225,4 @@ export default function MessagePage() {
     </div>
   );
 }
+    
