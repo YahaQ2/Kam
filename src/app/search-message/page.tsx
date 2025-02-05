@@ -53,14 +53,14 @@ export default function SearchMessagesPage() {
   const [totalItems, setTotalItems] = useState(0)
   const limit = 10
 
-  const fetchMessages = useCallback(async () => {
+  const fetchMessages = useCallback(async (page: number) => {
     setIsLoading(true)
     
     const params = new URLSearchParams()
     if (searchTerm) params.append(searchBy, searchTerm)
     if (date) params.append('date', format(date, 'yyyy-MM-dd'))
     params.append('sort', sortOrder === 'newest' ? 'desc' : 'asc')
-    params.append('page', currentPage.toString())
+    params.append('page', page.toString())
     params.append('limit', limit.toString())
 
     try {
@@ -75,6 +75,7 @@ export default function SearchMessagesPage() {
       
       setTotalPages(result.totalPages || 1)
       setTotalItems(result.totalItems || 0)
+      setCurrentPage(page)
 
       const sortedMessages = data.map(menfess => ({
         ...menfess,
@@ -92,21 +93,24 @@ export default function SearchMessagesPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [searchTerm, searchBy, date, sortOrder, currentPage])
+  }, [searchTerm, searchBy, date, sortOrder])
 
-  const debouncedFetchMessages = useCallback(
-    debounce(fetchMessages, 500),
+  const debouncedSearch = useCallback(
+    debounce(() => {
+      fetchMessages(1)
+    }, 500),
     [fetchMessages]
   )
 
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, searchBy, date, sortOrder])
+    debouncedSearch()
+    return () => debouncedSearch.cancel()
+  }, [debouncedSearch])
 
-  useEffect(() => {
-    debouncedFetchMessages()
-    return () => debouncedFetchMessages.cancel()
-  }, [debouncedFetchMessages])
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return
+    fetchMessages(newPage)
+  }
 
   const Pagination = () => (
     <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between w-full">
@@ -117,7 +121,7 @@ export default function SearchMessagesPage() {
       <div className="flex gap-2">
         <Button
           variant="default"
-          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
           className="gap-1"
         >
@@ -127,7 +131,7 @@ export default function SearchMessagesPage() {
         
         <Button
           variant="default"
-          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
           className="gap-1"
         >
