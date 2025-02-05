@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
@@ -20,16 +21,8 @@ type MessageType = {
   recipient: string;
   message: string;
   gif_url: string;
-  track?: {
-    spotify_embed_link?: string;
-  };
+  spotify_id?: string;
   created_at: string;
-};
-
-const extractTrackId = (embedLink?: string) => {
-  if (!embedLink) return null;
-  const match = embedLink.match(/track\/([a-zA-Z0-9]{22})/);
-  return match ? match[1] : null;
 };
 
 const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
@@ -73,16 +66,6 @@ export default function MessagePage() {
         }
 
         const messageData = data.data[0];
-        
-        // Validasi URL Spotify
-        if (messageData.track?.spotify_embed_link) {
-          const trackId = extractTrackId(messageData.track.spotify_embed_link);
-          if (!trackId) {
-            console.error('Invalid Spotify URL format');
-            delete messageData.track; // Hapus track jika invalid
-          }
-        }
-
         setMessage(messageData);
       } catch (error) {
         console.error("Error fetching message:", error);
@@ -116,8 +99,6 @@ export default function MessagePage() {
     .tz("Asia/Jakarta")
     .format("DD MMM YYYY, HH:mm");
 
-  const trackId = extractTrackId(message.track?.spotify_embed_link);
-
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
@@ -143,21 +124,19 @@ export default function MessagePage() {
                 {message.message}
               </p>
               {message.gif_url && !imageError && (
-  <div className="w-[240px] h-[240px] mx-auto my-6 relative">
-    <Image
-      src={message.gif_url}
-      alt="Gift from sender"
-      fill
-      className="rounded-lg object-cover"
-      onError={() => setImageError(true)}
-      unoptimized
-      sizes="240px"
-    />
-  </div>
-)}
-
-
-              {trackId && <SpotifyEmbed trackId={trackId} />}
+                <div className="w-[240px] h-[240px] mx-auto my-6 relative">
+                  <Image
+                    src={message.gif_url}
+                    alt="Gift from sender"
+                    fill
+                    className="rounded-lg object-cover"
+                    onError={() => setImageError(true)}
+                    unoptimized
+                    sizes="240px"
+                  />
+                </div>
+              )}
+              {message.spotify_id && <SpotifyEmbed trackId={message.spotify_id} />}
             </div>
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
