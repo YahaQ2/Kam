@@ -1,20 +1,28 @@
-const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID;
-const clientSecret = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET;
-const tokenEndpoint = "https://accounts.spotify.com/api/token";
+interface AccessTokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+}
 
-let accessToken = "";
-let tokenExpiry = 0;
+let accessToken: string | null = null;
+let tokenExpirationTime: number = 0;
 
-// Fungsi untuk mendapatkan token akses Spotify
-async function getAccessToken() {
-  if (accessToken && tokenExpiry > Date.now()) {
+async function getAccessToken(): Promise<string> {
+  if (accessToken && Date.now() < tokenExpirationTime) {
     return accessToken;
+  }
+
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error("Missing Spotify client credentials");
   }
 
   const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
   try {
-    const response = await fetch(tokenEndpoint, {
+    const response = await fetch("https://accounts.spotify.com/api/token", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -24,33 +32,41 @@ async function getAccessToken() {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to get Spotify access token");
+      throw new Error(`Failed to get access token: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: AccessTokenResponse = await response.json();
     accessToken = data.access_token;
-    tokenExpiry = Date.now() + data.expires_in * 1000;
+    tokenExpirationTime = Date.now() + data.expires_in * 1000 - 60000;
 
     return accessToken;
   } catch (error) {
-    console.error("Error fetching Spotify access token:", error);
+    console.error("Error getting access token:", error);
     throw error;
   }
 }
 
-// Fungsi untuk mendapatkan informasi track berdasarkan ID
-export async function getTrackInfo(trackId: string): Promise<SpotifyApi.TrackObjectFull | null> {
-  const token = await getAccessToken();
-  
+export async function getTrackInfo(
+  trackId: string
+): Promise<SpotifyApi.TrackObjectFull | null> {
   try {
-    const response = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const accessToken = await getAccessToken();
+
+    const response = await fetch(
+      `https://api.spotify.com/v1/tracks/${trackId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch track info");
+      if (response.status === 401) {
+        accessToken = null;
+        return getTrackInfo(trackId);
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     return await response.json();
