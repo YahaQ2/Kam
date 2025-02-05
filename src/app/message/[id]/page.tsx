@@ -15,7 +15,6 @@ import { getTrackInfo } from "@/lib/spotify";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-// Deklarasi tipe Spotify API
 declare global {
   interface Window {
     onSpotifyIframeApiReady?: (IFrameAPI: {
@@ -28,19 +27,6 @@ declare global {
         }
       ) => void;
     }) => void;
-  }
-}
-
-// Deklarasi modul untuk types Spotify API
-declare module "spotify-api" {
-  export interface TrackObjectFull {
-    album: {
-      name: string;
-      artists: Array<{ name: string }>;
-    };
-    artists: Array<{ name: string }>;
-    name: string;
-    // ... tambahkan properti lain sesuai kebutuhan
   }
 }
 
@@ -117,7 +103,9 @@ export default function MessagePage() {
           `https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`
         );
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
 
@@ -126,15 +114,19 @@ export default function MessagePage() {
           setMessage(messageData);
 
           if (messageData.track?.spotify_embed_link) {
-            const trackId = extractTrackId(messageData.track.spotify_embed_link);
+            const trackId = extractTrackId(
+              messageData.track.spotify_embed_link
+            );
             if (trackId) {
               const trackData = await getTrackInfo(trackId);
-              trackData && setTrackInfo(trackData);
+              if (trackData) {
+                setTrackInfo(trackData); // Perbaikan di sini
+              }
             }
           }
         }
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error fetching message:", error);
         setMessage(null);
       } finally {
         setIsLoading(false);
