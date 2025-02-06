@@ -64,18 +64,6 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const fetchSpotifyTrack = async (spotifyId: string) => {
-    const response = await fetch(`https://api.spotify.com/v1/tracks/${spotifyId}`, {
-      headers: {
-        'Authorization': 'Bearer YOUR_SPOTIFY_ACCESS_TOKEN'
-      }
-    });
-    if (!response.ok) {
-      throw new Error("Failed to fetch track details.");
-    }
-    return response.json();
-  };
-
   useEffect(() => {
     const fetchMessages = async () => {
       setLoading(true);
@@ -91,18 +79,22 @@ export default function HomePage() {
         if (responseData.status && Array.isArray(responseData.data)) {
           const messagesWithTracks = await Promise.all(responseData.data.map(async (menfess) => {
             if (menfess.spotify_id) {
-              const trackDetails = await fetchSpotifyTrack(menfess.spotify_id);
-              return {
-                ...menfess,
-                track: {
-                  title: trackDetails.name,
-                  artist: trackDetails.artists.map((artist: any) => artist.name).join(', '),
-                  cover_img: trackDetails.album.images[0].url,
-                  preview_link: trackDetails.preview_url,
-                  spotify_embed_link: `https://open.spotify.com/embed/track/${trackDetails.id}`,
-                  external_link: trackDetails.external_urls.spotify
+              const trackResponse = await fetch(`https://api.spotify.com/v1/tracks/${menfess.spotify_id}`, {
+                headers: {
+                  'Authorization': 'Bearer YOUR_SPOTIFY_ACCESS_TOKEN'
                 }
-              };
+              });
+              if (trackResponse.ok) {
+                const trackData = await trackResponse.json();
+                menfess.track = {
+                  title: trackData.name,
+                  artist: trackData.artists.map((artist: any) => artist.name).join(', '),
+                  cover_img: trackData.album.images[0].url,
+                  preview_link: trackData.preview_url,
+                  spotify_embed_link: `https://open.spotify.com/embed/track/${menfess.spotify_id}`,
+                  external_link: trackData.external_urls.spotify
+                };
+              }
             }
             return menfess;
           }));
