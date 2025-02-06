@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import { ArrowUpRight } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion } from "framer-motion";
+import { getTrackInfo } from "@/lib/spotify"; // Import fungsi untuk mendapatkan info track
 
 interface Menfess {
   id: number;
@@ -80,19 +81,33 @@ export default function HomePage() {
           const sortedMessages = responseData.data
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, 5)
-            .map(menfess => ({
-              ...menfess,
-              track: menfess.track ? {
-                title: menfess.track.title,
-                artist: menfess.track.artist,
-                cover_img: menfess.track.cover_img,
-                preview_link: menfess.track.preview_link || null, 
-                spotify_embed_link: menfess.track.spotify_embed_link,
-                external_link: menfess.track.external_link,
-              } : undefined
-            }));
-          
-          setRecentlyAddedMessages(sortedMessages);
+            .map(async (menfess) => {
+              // Coba ambil info track dari Spotify
+              let trackInfo = menfess.track;
+
+              if (menfess.spotify_id) {
+                const fetchedTrackInfo = await getTrackInfo(menfess.spotify_id);
+                if (fetchedTrackInfo) {
+                  trackInfo = {
+                    title: fetchedTrackInfo.name,
+                    artist: fetchedTrackInfo.artists.map(artist => artist.name).join(", "),
+                    cover_img: fetchedTrackInfo.album.images[0]?.url,
+                    preview_link: fetchedTrackInfo.preview_url,
+                    spotify_embed_link: `https://open.spotify.com/embed/track/${menfess.spotify_id}`,
+                    external_link: fetchedTrackInfo.external_urls.spotify,
+                  };
+                }
+              }
+
+              return {
+                ...menfess,
+                track: trackInfo,
+              };
+            });
+
+          // Tunggu semua promise selesai
+          const resolvedMessages = await Promise.all(sortedMessages);
+          setRecentlyAddedMessages(resolvedMessages);
         } else {
           throw new Error("Invalid data format.");
         }
@@ -146,10 +161,10 @@ export default function HomePage() {
             >
               <Link href="/search-message">Explore Menfess</Link>
             </Button>
-<Button asChild 
-          className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
-          >
-            <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
+            <Button asChild 
+              className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
             </Button>
           </div>
           <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
@@ -189,6 +204,10 @@ export default function HomePage() {
                           coverUrl={msg.track?.cover_img}
                         />
                       </Link>
+                      {/* Tambahkan embed Spotify jika ada */}
+                      {msg.spotify_id && (
+                        <SpotifyEmbed trackId={msg.spotify_id} />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -213,3 +232,18 @@ export default function HomePage() {
     </div>
   );
 }
+
+const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
+  if (!trackId) return null;
+
+  return (
+    <iframe
+      src={`https://open.spotify.com/embed/track/${trackId}?utm_source=generator`}
+      width="100%"
+      height="152"
+      className="rounded-lg mt-6"
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      loading="lazy"
+    />
+  );
+};
