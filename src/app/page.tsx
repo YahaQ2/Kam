@@ -64,6 +64,18 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const fetchSpotifyTrack = async (spotifyId: string) => {
+    const response = await fetch(`https://api.spotify.com/v1/tracks/${spotifyId}`, {
+      headers: {
+        'Authorization': 'Bearer YOUR_SPOTIFY_ACCESS_TOKEN'
+      }
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch track details.");
+    }
+    return response.json();
+  };
+
   useEffect(() => {
     const fetchMessages = async () => {
       setLoading(true);
@@ -77,20 +89,27 @@ export default function HomePage() {
         const responseData: MenfessResponse = await response.json();
         
         if (responseData.status && Array.isArray(responseData.data)) {
-          const sortedMessages = responseData.data
+          const messagesWithTracks = await Promise.all(responseData.data.map(async (menfess) => {
+            if (menfess.spotify_id) {
+              const trackDetails = await fetchSpotifyTrack(menfess.spotify_id);
+              return {
+                ...menfess,
+                track: {
+                  title: trackDetails.name,
+                  artist: trackDetails.artists.map((artist: any) => artist.name).join(', '),
+                  cover_img: trackDetails.album.images[0].url,
+                  preview_link: trackDetails.preview_url,
+                  spotify_embed_link: `https://open.spotify.com/embed/track/${trackDetails.id}`,
+                  external_link: trackDetails.external_urls.spotify
+                }
+              };
+            }
+            return menfess;
+          }));
+
+          const sortedMessages = messagesWithTracks
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 5)
-            .map(menfess => ({
-              ...menfess,
-              track: menfess.track ? {
-                title: menfess.track.title,
-                artist: menfess.track.artist,
-                cover_img: menfess.track.cover_img,
-                preview_link: menfess.track.preview_link || null, 
-                spotify_embed_link: menfess.track.spotify_embed_link,
-                external_link: menfess.track.external_link,
-              } : undefined
-            }));
+            .slice(0, 5);
           
           setRecentlyAddedMessages(sortedMessages);
         } else {
@@ -146,10 +165,10 @@ export default function HomePage() {
             >
               <Link href="/search-message">Explore Menfess</Link>
             </Button>
-<Button asChild 
-          className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
-          >
-            <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
+            <Button asChild 
+              className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
             </Button>
           </div>
           <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
