@@ -38,7 +38,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
         {isLoveMessage && (
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-20" 
-            style={{ backgroundImage: "url('/love-background.png')" }} 
+            style={{ backgroundImage: "url('https://pngtree.com/freepng/cute-aesthetic-pink-love-vector-icon-png_6605657.html')" }} 
           />
         )}
 
@@ -67,7 +67,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
               <img 
                 src={coverUrl} 
                 alt={`${songTitle} cover`} 
-                className="w-20 h-20 object-cover rounded-md" 
+                className="w-15 h-20 object-cover rounded-md" 
               />
               <div className="flex-1 overflow-hidden">
                 <p className="font-semibold truncate">{songTitle}</p>
