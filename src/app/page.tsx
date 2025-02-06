@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import { ArrowUpRight } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion } from "framer-motion";
+import { getTrackInfo } from "@/libs/Spotify";  // **Impor diperbaiki**
 
 interface TrackData {
   title: string;
@@ -51,8 +52,8 @@ export default function HomePage() {
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -61,9 +62,30 @@ export default function HomePage() {
         const response = await fetch(`/api/menfess`);
         if (!response.ok) throw new Error("Gagal memuat pesan");
         
-        const { data }: MenfessResponse = await response.json();
-        
-        const sortedMessages = data
+        let { data }: MenfessResponse = await response.json();
+
+        // Ambil detail lagu dari Spotify jika ada `spotify_id`
+        const updatedData = await Promise.all(
+          data.map(async (msg) => {
+            if (msg.spotify_id) {
+              const trackInfo = await getTrackInfo(msg.spotify_id);
+              if (trackInfo) {
+                msg.track = {
+                  title: trackInfo.name,
+                  artist: trackInfo.artists.map((a) => a.name).join(", "),
+                  cover_img: trackInfo.album.images[0]?.url || "",
+                  preview_link: trackInfo.preview_url || null,
+                  spotify_embed_link: `https://open.spotify.com/embed/track/${msg.spotify_id}`,
+                  external_link: trackInfo.external_urls.spotify
+                };
+              }
+            }
+            return msg;
+          })
+        );
+
+        // Urutkan berdasarkan tanggal
+        const sortedMessages = updatedData
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .slice(0, 5);
 
@@ -93,7 +115,7 @@ export default function HomePage() {
       
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8 md:py-16 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat unand</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat Unand</h2>
           
           <Link
             href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
@@ -101,7 +123,7 @@ export default function HomePage() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <span>saran/masukan/fitur baru</span>
+            <span>Saran/Masukan/Fitur Baru</span>
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
           </Link>
 
@@ -142,10 +164,7 @@ export default function HomePage() {
                   onScroll={handleScroll}
                 >
                   {recentlyAddedMessages.map((msg) => (
-                    <div 
-                      key={msg.id} 
-                      className={isMobile ? 'flex-shrink-0 w-full snap-center' : ''}
-                    >
+                    <div key={msg.id} className={isMobile ? 'flex-shrink-0 w-full snap-center' : ''}>
                       <Link href={`/message/${msg.id}`} className="block h-full">
                         <CarouselCard 
                           to={msg.recipient} 
@@ -159,18 +178,6 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
-
-                {isMobile && (
-                  <div className="flex justify-center space-x-2 mt-4">
-                    {recentlyAddedMessages.map((_, index) => (
-                      <motion.div
-                        key={index}
-                        className={`h-2 w-2 rounded-full ${currentCard === index ? 'bg-gray-800' : 'bg-gray-300'}`}
-                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                      />
-                    ))}
-                  </div>
-                )}
               </div>
             )}
           </div>
