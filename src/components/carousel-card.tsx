@@ -38,7 +38,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
         {isLoveMessage && (
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-20" 
-            style={{ backgroundImage: "url('https://pngtree.com/freepng/cute-aesthetic-pink-love-vector-icon-png_6605657.html')" }} 
+            style={{ backgroundImage: "url('https://res.cloudinary.com/depbfbxtm/image/upload/v1738829131/dkncarmepvddfdt93cxj.png')" }} 
           />
         )}
 
