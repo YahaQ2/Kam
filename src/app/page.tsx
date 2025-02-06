@@ -125,7 +125,7 @@ export default function HomePage() {
               asChild
               className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
             >
-              <Link href="/search-message">ziwa(tempat cuhat anon)</Link>
+              <Link href="/search-message">ziwa(cari teman dan cuhat anon)</Link>
             </Button>
           </div>
 
