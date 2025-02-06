@@ -106,7 +106,7 @@ export default function HomePage() {
           >
             <span>saran/masukan/fitur baru</span>
             <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-          </Link>
+          </Link>href="https://www.instagram.com/@unandfess.xyz"
 
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-12 md:mb-16">
             <Button
@@ -120,6 +120,12 @@ export default function HomePage() {
               className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
             >
               <Link href="/search-message">Explore Menfess</Link>
+            </Button>
+            <Button
+              asChild
+              className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <Link href="/search-message">ziwa(tempat cuhat anon)</Link>
             </Button>
           </div>
 
