@@ -21,13 +21,28 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
   coverUrl, 
   spotifyEmbed 
 }) => {
+  // Mengecek apakah message mengandung kata yang ditentukan
+  const isLoveMessage = /love|cinta|sayang/i.test(message);
+
   return (
     <motion.div
       className="mx-2 my-4"
       whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
     >
-      <Card className="w-72 h-96 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col">
-        <CardContent className="p-6 flex flex-col flex-grow">
+      <Card 
+        className={`w-72 h-96 shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col relative 
+          ${isLoveMessage ? "bg-pink-200" : "bg-white"}
+        `}
+      >
+        {/* Background Love jika mengandung kata tertentu */}
+        {isLoveMessage && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-20" 
+            style={{ backgroundImage: "url('/love-background.png')" }} 
+          />
+        )}
+
+        <CardContent className="p-6 flex flex-col flex-grow relative">
           {/* Header */}
           <div className="space-y-1 mb-4 text-start">
             <p className="text-sm text-gray-500">To: {to}</p>
@@ -37,7 +52,9 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
           {/* Message */}
           <div className="flex-1 flex items-center justify-center">
             <p
-              className="text-xl text-gray-700 font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis line-clamp-3 font-['Reenie_Beanie']"
+              className={`text-xl font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis line-clamp-3 
+                font-['Reenie_Beanie'] ${isLoveMessage ? "text-pink-700" : "text-gray-700"}
+              `}
               title={message}
             >
               {message}
