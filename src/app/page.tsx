@@ -1,4 +1,4 @@
-// pages/index.js
+// pages/index.tsx
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -184,7 +184,7 @@ export default function HomePage() {
                 <div
                   ref={containerRef}
                   className={`${
-                    isMobile ? 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide' : 'flex justify-center gap-4'
+                    is Mobile ? 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide' : 'flex justify-center gap-4'
                   }`}
                   onScroll={handleScroll}
                 >
