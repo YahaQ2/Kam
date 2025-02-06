@@ -184,7 +184,7 @@ export default function HomePage() {
                 <div
                   ref={containerRef}
                   className={`${
-                    is Mobile ? 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide' : 'flex justify-center gap-4'
+                    isMobile ? 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide' : 'flex justify-center gap-4'
                   }`}
                   onScroll={handleScroll}
                 >
