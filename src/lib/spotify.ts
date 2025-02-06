@@ -7,7 +7,12 @@ interface AccessTokenResponse {
 let accessToken: string | null = null;
 let tokenExpirationTime: number = 0;
 
+/**
+ * Mendapatkan access token dari Spotify API menggunakan client credentials flow.
+ * @returns {Promise<string>} Access token untuk mengakses Spotify API.
+ */
 async function getAccessToken(): Promise<string> {
+  // Jika access token masih valid, gunakan yang sudah ada
   if (accessToken && Date.now() < tokenExpirationTime) {
     return accessToken;
   }
@@ -16,9 +21,10 @@ async function getAccessToken(): Promise<string> {
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    throw new Error("Missing Spotify client credentials");
+    throw new Error("Missing Spotify client credentials. Please ensure SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are set in your environment variables.");
   }
 
+  // Encode client credentials ke base64
   const authHeader = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
   try {
@@ -37,7 +43,7 @@ async function getAccessToken(): Promise<string> {
 
     const data: AccessTokenResponse = await response.json();
     accessToken = data.access_token;
-    tokenExpirationTime = Date.now() + data.expires_in * 1000 - 60000;
+    tokenExpirationTime = Date.now() + data.expires_in * 1000 - 60000; // Expire 1 menit lebih awal
 
     return accessToken;
   } catch (error) {
@@ -46,23 +52,24 @@ async function getAccessToken(): Promise<string> {
   }
 }
 
-export async function getTrackInfo(
-  trackId: string
-): Promise<SpotifyApi.TrackObjectFull | null> {
+/**
+ * Mendapatkan informasi detail tentang sebuah track dari Spotify API.
+ * @param {string} trackId - ID track Spotify.
+ * @returns {Promise<SpotifyApi.TrackObjectFull | null>} Objek track atau null jika gagal.
+ */
+export async function getTrackInfo(trackId: string): Promise<SpotifyApi.TrackObjectFull | null> {
   try {
     const accessToken = await getAccessToken();
 
-    const response = await fetch(
-      `https://api.spotify.com/v1/tracks/${trackId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    const response = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
     if (!response.ok) {
       if (response.status === 401) {
+        // Jika token expired, coba lagi sekali
         accessToken = null;
         return getTrackInfo(trackId);
       }
