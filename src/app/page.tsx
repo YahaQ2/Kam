@@ -74,9 +74,9 @@ export default function HomePage() {
         if (!response.ok) {
           throw new Error("Failed to fetch messages.");
         }
-        
+
         const responseData: MenfessResponse = await response.json();
-        
+
         if (responseData.status && Array.isArray(responseData.data)) {
           const sortedMessages = responseData.data
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -121,7 +121,7 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-  
+
     fetchMessages();
   }, []);
 
@@ -161,7 +161,7 @@ export default function HomePage() {
             >
               <Link href="/search-message">Explore Menfess</Link>
             </Button>
-            <Button asChild 
+            <Button asChild
               className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
             >
               <Link href="https://ziwa-351410.web.app/#/">ziwa ( tempat curhat anonymouse ) non unand universal</Link>
@@ -180,7 +180,7 @@ export default function HomePage() {
               <p>No recent messages found.</p>
             ) : (
               <div className="relative">
-                <div 
+                <div
                   ref={containerRef}
                   className={`${
                     isMobile ? 'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide' : 'flex justify-center gap-4'
@@ -188,26 +188,20 @@ export default function HomePage() {
                   onScroll={handleScroll}
                 >
                   {recentlyAddedMessages.map((msg) => (
-                    <div 
-                      key={msg.id} 
+                    <div
+                      key={msg.id}
                       className={`${
                         isMobile ? 'flex flex-shrink-0 w-full snap-center justify-center' : ''
                       }`}
                     >
                       <Link href={`/message/${msg.id}`}>
-                        <CarouselCard 
-                          to={msg.recipient} 
-                          from={msg.sender} 
+                        <CarouselCard
+                          to={msg.recipient}
+                          from={msg.sender}
                           message={msg.message}
-                          songTitle={msg.track?.title}
-                          artist={msg.track?.artist}
-                          coverUrl={msg.track?.cover_img}
+                          track={msg.track} // Pass the entire track object
                         />
                       </Link>
-                      {/* Tambahkan embed Spotify jika ada */}
-                      {msg.spotify_id && (
-                        <SpotifyEmbed trackId={msg.spotify_id} />
-                      )}
                     </div>
                   ))}
                 </div>
@@ -232,18 +226,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
-  if (!trackId) return null;
-
-  return (
-    <iframe
-      src={`https://open.spotify.com/embed/track/${trackId}?utm_source=generator`}
-      width="100%"
-      height="152"
-      className="rounded-lg mt-6"
-      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      loading="lazy"
-    />
-  );
-};
