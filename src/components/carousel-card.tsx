@@ -1,57 +1,63 @@
-// components/carousel-card.tsx
-import React from 'react';
+/* eslint-disable @next/next/no-img-element */
+import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface CarouselCardProps {
   to: string;
   from: string;
   message: string;
-  track?: {
-    title: string;
-    artist: string;
-    cover_img: string;
-    preview_link: string | null;
-    spotify_embed_link: string;
-    external_link: string;
-  };
+  songTitle?: string;
+  artist?: string;
+  coverUrl?: string;
 }
 
-const CarouselCard: React.FC<CarouselCardProps> = ({ to, from, message, track }) => {
+export const CarouselCard: React.FC<CarouselCardProps> = ({ 
+  to, 
+  from, 
+  message, 
+  songTitle, 
+  artist, 
+  coverUrl 
+}) => {
   return (
-    <div className="p-4 bg-white shadow-md rounded-lg">
-      <h3 className="text-xl font-bold mb-2">To: {to}</h3>
-      <h4 className="text-lg font-semibold mb-2">From: {from}</h4>
-      <p className="text-gray-700 mb-4">{message}</p>
-      {track && (
-        <div className="mt-4">
-          <h5 className="text-lg font-semibold mb-2">Song Details</h5>
-          <div className="flex items-center">
-            {track.cover_img && (
-              <img src={track.cover_img} alt={track.title} className="w-16 h-16 mr-4 rounded" />
-            )}
-            <div>
-              <p className="text-gray-800">{track.title}</p>
-              <p className="text-gray-600">{track.artist}</p>
-              {track.preview_link && (
-                <a href={track.preview_link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                  Preview
-                </a>
-              )}
-              {track.spotify_embed_link && (
-                <a href={track.spotify_embed_link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                  Spotify Embed
-                </a>
-              )}
-              {track.external_link && (
-                <a href={track.external_link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                  External Link
-                </a>
-              )}
-            </div>
+    <motion.div
+      className="mx-2 my-4"
+      whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+    >
+      <Card className="w-64 h-96 bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
+        <CardContent className="p-8 flex flex-col h-full">
+          {/* Header */}
+          <div className="space-y-1 mb-6 text-start">
+            <p className="text-sm text-gray-500">To: {to}</p>
+            <p className="text-sm text-gray-500">From: {from}</p>
           </div>
-        </div>
-      )}
-    </div>
+
+          {/* Message */}
+          <div className="flex-1 flex items-center justify-center">
+            <p
+              className="text-3xl text-gray-700 font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis line-clamp-3 font-['Reenie_Beanie']"
+              title={message}
+            >
+              {message}
+            </p>
+          </div>
+
+          {/* Song Info */}
+          {songTitle && artist && coverUrl && (
+            <div className="mt-4 flex items-center space-x-3 text-sm text-gray-600">
+              <img 
+                src={coverUrl} 
+                alt={`${songTitle} cover`} 
+                className="w-16 h-16 object-cover rounded-md" 
+              />
+              <div className="flex-1 overflow-hidden">
+                <p className="font-semibold truncate">{songTitle}</p>
+                <p className="text-xs truncate">{artist}</p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
-
-export default CarouselCard;
