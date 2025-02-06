@@ -26,8 +26,8 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
       className="mx-2 my-4"
       whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
     >
-      <Card className="w-64 h-auto bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
-        <CardContent className="p-6 flex flex-col">
+      <Card className="w-72 h-96 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col">
+        <CardContent className="p-6 flex flex-col flex-grow">
           {/* Header */}
           <div className="space-y-1 mb-4 text-start">
             <p className="text-sm text-gray-500">To: {to}</p>
@@ -50,7 +50,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
               <img 
                 src={coverUrl} 
                 alt={`${songTitle} cover`} 
-                className="w-16 h-16 object-cover rounded-md" 
+                className="w-20 h-20 object-cover rounded-md" 
               />
               <div className="flex-1 overflow-hidden">
                 <p className="font-semibold truncate">{songTitle}</p>
