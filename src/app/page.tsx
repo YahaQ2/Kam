@@ -158,7 +158,7 @@ export default function HomePage() {
                   className={`flex ${
                     isMobile 
                       ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide' 
-                      : 'flex-wrap justify-center gap-6'
+                      : 'overflow-hidden'
                   }`}
                   onScroll={handleScroll}
                 >
@@ -174,7 +174,7 @@ export default function HomePage() {
                         className={`${
                           isMobile 
                             ? 'flex-shrink-0 w-full snap-center p-4' 
-                            : 'w-full md:w-[400px]'
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
                         }`}
                       >
                         <Link href={`/message/${msg.id}`}>
