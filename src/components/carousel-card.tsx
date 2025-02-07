@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface CarouselCardProps {
   to: string;
@@ -22,24 +22,16 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
   coverUrl, 
   spotifyEmbed 
 }) => {
-  // State to track if the card is opened
-  const [isOpened, setIsOpened] = useState(false);
-
   // Deteksi kata tidak pantas
   const inappropriateWordsRegex = /fuck|kontol|pantek|pntk|fck|kntl|asu|jablay|lonte|tai|memek/i;
   const hasInappropriateWords = inappropriateWordsRegex.test(message);
   
+  // Deteksi kata spesifik unand
+  const unandWordsRegex = /unand|yunand|yunend|unend|unands/i;
+  const hasUnandWords = unandWordsRegex.test(message);
+  
   // Deteksi pesan cinta (hanya jika tidak ada kata tidak pantas)
   const isLoveMessage = !hasInappropriateWords && /love|cinta|sayang/i.test(message);
-
-  useEffect(() => {
-    // Show alert if the card is opened and has inappropriate words
-    
-
-  // Set the card as opened when it is rendered
-  useEffect(() => {
-    setIsOpened(true);
-  }, []);
 
   return (
     <motion.div
@@ -55,11 +47,19 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
               : "bg-white"}
         `}
       >
-        {/* Background Love hanya jika tidak ada kata tidak pantas */}
+        {/* Background Love */}
         {isLoveMessage && !hasInappropriateWords && (
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-20" 
             style={{ backgroundImage: "url('https://res.cloudinary.com/depbfbxtm/image/upload/v1738829131/dkncarmepvddfdt93cxj.png')" }} 
+          />
+        )}
+        
+        {/* Background Unand */}
+        {hasUnandWords && !hasInappropriateWords && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-20" 
+            style={{ backgroundImage: "url('https://res.cloudinary.com/depbfbxtm/image/upload/v1738897074/IMG_20250207_095652_727_gsfzyg.jpg')" }} 
           />
         )}
 
@@ -79,6 +79,8 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
                     ? "text-red-700" 
                     : isLoveMessage 
                       ? "text-pink-700" 
+                      : hasUnandWords
+                      ? "text-green-700"
                       : "text-gray-700"
                 }
               `}
