@@ -34,10 +34,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 
   useEffect(() => {
     // Show alert if the card is opened and has inappropriate words
-    if (isOpened && hasInappropriateWords) {
-      alert("Pesan mengandung kata tidak pantas!");
-    }
-  }, [isOpened, hasInappropriateWords]);
+    
 
   // Set the card as opened when it is rendered
   useEffect(() => {
