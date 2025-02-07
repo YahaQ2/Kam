@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface CarouselCardProps {
   to: string;
@@ -22,6 +22,9 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
   coverUrl, 
   spotifyEmbed 
 }) => {
+  // State to track if the card is opened
+  const [isOpened, setIsOpened] = useState(false);
+
   // Deteksi kata tidak pantas
   const inappropriateWordsRegex = /fuck|kontol|pantek|pntk|fck|kntl|asu|jablay|lonte|tai|memek/i;
   const hasInappropriateWords = inappropriateWordsRegex.test(message);
@@ -30,10 +33,16 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
   const isLoveMessage = !hasInappropriateWords && /love|cinta|sayang/i.test(message);
 
   useEffect(() => {
-    if (hasInappropriateWords) {
+    // Show alert if the card is opened and has inappropriate words
+    if (isOpened && hasInappropriateWords) {
       alert("Pesan mengandung kata tidak pantas!");
     }
-  }, [hasInappropriateWords]);
+  }, [isOpened, hasInappropriateWords]);
+
+  // Set the card as opened when it is rendered
+  useEffect(() => {
+    setIsOpened(true);
+  }, []);
 
   return (
     <motion.div
