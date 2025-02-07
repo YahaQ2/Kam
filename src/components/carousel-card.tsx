@@ -31,7 +31,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
   const hasUnandWords = unandWordsRegex.test(message);
   
   // Deteksi pesan cinta (hanya jika tidak ada kata tidak pantas)
-  const isLoveMessage = !hasInappropriateWords && /love|cinta|sayang/i.test(message);
+  const isLoveMessage = !hasInappropriateWords && /love|cinta|sayang|crush/i.test(message);
 
   return (
     <motion.div
