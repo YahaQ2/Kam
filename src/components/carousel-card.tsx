@@ -23,7 +23,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
   spotifyEmbed 
 }) => {
   // Deteksi kata tidak pantas
-  const inappropriateWordsRegex = /fuck|kontol|pantek|pntk|fck|kntl|asu|jablay|lonte|tai|memek/i;
+  const inappropriateWordsRegex = /fuck|kontol|pantek|pntk|fck|kntl|asu|jablay|lonte|bangsat|memek/i;
   const hasInappropriateWords = inappropriateWordsRegex.test(message);
   
   // Deteksi kata spesifik unand
