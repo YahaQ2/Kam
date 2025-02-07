@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
+import { useEffect } from "react";
 
 interface CarouselCardProps {
   to: string;
@@ -21,8 +22,18 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
   coverUrl, 
   spotifyEmbed 
 }) => {
-  // Mengecek apakah message mengandung kata yang ditentukan
-  const isLoveMessage = /love|cinta|sayang/i.test(message);
+  // Deteksi kata tidak pantas
+  const inappropriateWordsRegex = /fuck|kontol|pantek|pntk|fck|kntl|asu|jablay|lonte|tai|memek/i;
+  const hasInappropriateWords = inappropriateWordsRegex.test(message);
+  
+  // Deteksi pesan cinta (hanya jika tidak ada kata tidak pantas)
+  const isLoveMessage = !hasInappropriateWords && /love|cinta|sayang/i.test(message);
+
+  useEffect(() => {
+    if (hasInappropriateWords) {
+      alert("Pesan mengandung kata tidak pantas!");
+    }
+  }, [hasInappropriateWords]);
 
   return (
     <motion.div
@@ -31,11 +42,15 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
     >
       <Card 
         className={`w-72 h-96 shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col relative 
-          ${isLoveMessage ? "bg-pink-200" : "bg-white"}
+          ${hasInappropriateWords 
+            ? "bg-red-200" 
+            : isLoveMessage 
+              ? "bg-pink-200" 
+              : "bg-white"}
         `}
       >
-        {/* Background Love jika mengandung kata tertentu */}
-        {isLoveMessage && (
+        {/* Background Love hanya jika tidak ada kata tidak pantas */}
+        {isLoveMessage && !hasInappropriateWords && (
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-20" 
             style={{ backgroundImage: "url('https://res.cloudinary.com/depbfbxtm/image/upload/v1738829131/dkncarmepvddfdt93cxj.png')" }} 
@@ -53,7 +68,13 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
           <div className="flex-1 flex items-center justify-center">
             <p
               className={`text-xl font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis line-clamp-3 
-                font-['Reenie_Beanie'] ${isLoveMessage ? "text-pink-700" : "text-gray-700"}
+                font-['Reenie_Beanie'] ${
+                  hasInappropriateWords 
+                    ? "text-red-700" 
+                    : isLoveMessage 
+                      ? "text-pink-700" 
+                      : "text-gray-700"
+                }
               `}
               title={message}
             >
