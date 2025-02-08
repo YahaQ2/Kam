@@ -6,7 +6,6 @@ import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles, Heart, MessageCircle } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
@@ -33,21 +32,16 @@ interface MenfessResponse {
 }
 
 const SWIPE_THRESHOLD = 100;
-const DRAG_BUFFER = 50;
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [dragging, setDragging] = useState(false);
   const dragX = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const onDragStart = () => setDragging(true);
-
   const onDragEnd = () => {
-    setDragging(false);
     const x = dragX.get();
     
     if (x <= -SWIPE_THRESHOLD) {
@@ -213,7 +207,6 @@ export default function HomePage() {
                 <motion.div
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
-                  onDragStart={onDragStart}
                   onDragEnd={onDragEnd}
                   style={{ x: dragX }}
                   className="flex cursor-grab active:cursor-grabbing"
