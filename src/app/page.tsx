@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -58,6 +57,14 @@ export default function HomePage() {
     }
   };
 
+  const shuffleArray = (array: Menfess[]) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -71,7 +78,7 @@ export default function HomePage() {
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, 6);
           
-          setRecentlyAddedMessages(sortedMessages);
+          setRecentlyAddedMessages(shuffleArray(sortedMessages));
         } else {
           throw new Error("Format data tidak valid");
         }
@@ -84,6 +91,14 @@ export default function HomePage() {
   
     fetchMessages();
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % recentlyAddedMessages.length);
+    }, 5000); // Change slide every 5 seconds
+
+    return () => clearInterval(interval); // Clear interval on unmount
+  }, [recentlyAddedMessages.length]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-indigo-50 text-gray-800">
