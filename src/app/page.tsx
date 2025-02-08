@@ -7,9 +7,9 @@ import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
-import { motion, AnimatePresence, useMotionValue } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Menfess {
   id: number;
@@ -25,29 +25,31 @@ interface Menfess {
   created_at: string;
 }
 
-const SWIPE_THRESHOLD = 100;
-const DRAG_BUFFER = 50;
+interface MenfessResponse {
+  status: boolean;
+  success: boolean;
+  message: string | null;
+  data: Menfess[];
+}
+
+const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
+  ssr: false,
+});
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const dragX = useMotionValue(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [currentCard, setCurrentCard] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const onDragStart = () => setDragging(true);
-  const onDragEnd = () => {
-    setDragging(false);
-    const x = dragX.get();
-    
-    if (x <= -SWIPE_THRESHOLD) {
-      setCurrentIndex(prev => Math.min(recentlyAddedMessages.length - 1, prev + 1));
-    } else if (x >= SWIPE_THRESHOLD) {
-      setCurrentIndex(prev => Math.max(0, prev - 1));
-    }
-  };
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -55,12 +57,12 @@ export default function HomePage() {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
         if (!response.ok) throw new Error("Gagal memuat pesan");
         
-        const responseData = await response.json();
+        const responseData: MenfessResponse = await response.json();
         
         if (responseData.status && Array.isArray(responseData.data)) {
           const sortedMessages = responseData.data
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 6);
+            .slice(0, 5);
           
           setRecentlyAddedMessages(sortedMessages);
         } else {
@@ -76,63 +78,97 @@ export default function HomePage() {
     fetchMessages();
   }, []);
 
-  return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-indigo-50 text-gray-800">
-      {/* ... Bagian sebelumnya tetap sama ... */}
+  const handleScroll = () => {
+    if (containerRef.current) {
+      const scrollPosition = containerRef.current.scrollLeft;
+      const cardWidth = containerRef.current.offsetWidth;
+      setCurrentCard(Math.round(scrollPosition / cardWidth));
+    }
+  };
 
-      {/* Recent Menfess Section */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-              Menfess Terbaru
-            </h2>
-            <p className="text-gray-600 max-w-xl mx-auto">
-              Pesan-pesan terbaru yang penuh kejutan dan makna
-            </p>
+  const cardVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -50 }
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen bg-white text-gray-800">
+      <InitialAnimation />
+      <Navbar />
+      <main className="flex-grow">
+        <div className="container mx-auto px-4 py-8 md:py-16 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat Unand</h2>
+          
+          <div className="flex flex-col items-center gap-4 mb-8">
+            <Link
+              href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>Kirim Saran/Masukan</span>
+              <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+            </Link>
           </div>
 
-          {loading ? (
-            <div className="h-96 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent" />
-            </div>
-          ) : error ? (
-            <div className="text-center py-12 bg-red-50 rounded-xl">
-              <p className="text-red-600 flex items-center justify-center gap-2">
-                <span className="text-xl">⚠️</span>
-                {error}
-              </p>
-            </div>
-          ) : (
-            <div className="relative overflow-hidden group">
-              <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
-              <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
-
-              <motion.div
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                onDragStart={onDragStart}
-                onDragEnd={onDragEnd}
-                style={{ x: dragX }}
-                className="flex cursor-grab active:cursor-grabbing"
-                ref={containerRef}
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12 md:mb-16">
+            <div className="flex flex-col sm:flex-row sm:gap-4 gap-4">
+              <Button
+                asChild
+                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
               >
-                <AnimatePresence mode="wait">
-                  {recentlyAddedMessages.map((msg, index) => (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ 
-                        opacity: index === currentIndex ? 1 : 0.5,
-                        scale: index === currentIndex ? 1 : 0.9,
-                        x: `calc(${index * 100}% - ${currentIndex * 100}%)`
-                      }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                      className="w-full flex-shrink-0 px-4"
-                    >
-                      <Link href={`/message/${msg.id}`}>
-                        <div className="h-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+                <Link href="/message">Kirim Menfess</Link>
+              </Button>
+              <Button
+                asChild
+                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <Link href="/search-message">Explore Menfess</Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+            <DynamicCarousel />
+          </div>
+
+          <div className="mt-16">
+            <h3 className="text-2xl md:text-3xl font-bold mb-8">Menfess Terbaru</h3>
+            
+            {loading ? (
+              <div className="h-40 flex items-center justify-center">Memuat...</div>
+            ) : error ? (
+              <p className="text-red-500">{error}</p>
+            ) : recentlyAddedMessages.length === 0 ? (
+              <p>Tidak ada pesan terbaru</p>
+            ) : (
+              <div className="relative">
+                <div 
+                  ref={containerRef}
+                  className={`flex ${
+                    isMobile 
+                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide' 
+                      : 'overflow-hidden'
+                  }`}
+                  onScroll={handleScroll}
+                >
+                  <AnimatePresence initial={false}>
+                    {recentlyAddedMessages.map((msg, index) => (
+                      <motion.div
+                        key={msg.id}
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        transition={{ duration: 0.3 }}
+                        className={`${
+                          isMobile 
+                            ? 'flex-shrink-0 w-full snap-center p-4' 
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                        }`}
+                      >
+                        <Link href={`/message/${msg.id}`}>
                           <CarouselCard 
                             to={msg.recipient} 
                             from={msg.sender} 
@@ -142,72 +178,43 @@ export default function HomePage() {
                             coverUrl={msg.track?.cover_img}
                             spotifyEmbed={
                               msg.spotify_id && (
-                                <div className="px-4 pb-4">
-                                  <iframe
-                                    className="w-full rounded-lg shadow-md"
-                                    src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                    width="100%"
-                                    height="80"
-                                    frameBorder="0"
-                                    allow="encrypted-media"
-                                  />
-                                </div>
+                                <iframe
+                                  className="w-full mt-4 rounded-lg"
+                                  src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                  width="100%"
+                                  height="80"
+                                  frameBorder="0"
+                                  allow="encrypted-media"
+                                />
                               )
                             }
                           />
-                          <div className="p-4 bg-gray-50 border-t">
-                            <p className="text-sm text-gray-500">
-                              {new Date(msg.created_at).toLocaleDateString('id-ID', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-
-              {/* Navigation Controls */}
-              <div className="flex items-center justify-center gap-4 mt-8">
-                <button
-                  onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
-                  className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
-                  disabled={currentIndex === 0}
-                >
-                  <ChevronLeft className="h-6 w-6 text-indigo-600" />
-                </button>
-                
-                <div className="flex gap-2">
-                  {recentlyAddedMessages.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentIndex(idx)}
-                      className={`h-3 w-3 rounded-full transition-colors ${
-                        idx === currentIndex ? 'bg-indigo-600' : 'bg-gray-300'
-                      }`}
-                    />
-                  ))}
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
 
-                <button
-                  onClick={() => setCurrentIndex(prev => Math.min(recentlyAddedMessages.length - 1, prev + 1))}
-                  className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
-                  disabled={currentIndex === recentlyAddedMessages.length - 1}
-                >
-                  <ChevronRight className="h-6 w-6 text-indigo-600" />
-                </button>
+                {isMobile && (
+                  <div className="flex justify-center space-x-2 mt-4">
+                    {recentlyAddedMessages.map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${
+                          currentCard === index ? 'bg-gray-800' : 'bg-gray-300'
+                        }`}
+                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </section>
-
-      {/* ... Bagian setelahnya tetap sama ... */}
+      </main>
+      <Footer />
     </div>
   );
 }
