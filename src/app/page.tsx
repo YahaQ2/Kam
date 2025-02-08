@@ -257,7 +257,7 @@ export default function HomePage() {
                         }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         transition={{ type: "spring", stiffness: 150, damping: 25 }}
-                        className="absolute w-full max-w-[95%] md:max-w-[80%] lg:max-w-[700px] left-1/2 -translate-x-1/2 px-4"
+                        className="absolute w-full max-w-[95%] md:max-w-[80%] lg:max-w-[400px] left-1/2 -translate-x-1/2 px-4"
                       >
                         <div className="h-full w-full flex items-center justify-center">
                           <div className="w-full h-full max-w-[500px] mx-auto bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
