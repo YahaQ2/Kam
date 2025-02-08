@@ -249,13 +249,13 @@ export default function HomePage() {
                     {recentlyAddedMessages.map((msg, index) => (
                       <motion.div
                         key={msg.id}
-                        initial={{ opacity: 0, scale: 0.9, x: `${(index - currentIndex) * 100}%` }}
+                        initial={{ opacity: 0, scale: 1, x: `${(index - currentIndex) * 100}%` }}
                         animate={{
                           opacity: index === currentIndex ? 1 : 0.2,
                           scale: index === currentIndex ? 1 : 0.85,
                           x: `${(index - currentIndex) * 100}%`,
                         }}
-                        exit={{ opacity: 0, scale: 0.8 }}
+                        exit={{ opacity: 0, scale: 1 }}
                         transition={{ type: "spring", stiffness: 150, damping: 25 }}
                         className="absolute w-full max-w-[100%] md:max-w-[100%] lg:max-w-[700px] left-1/2 -translate-x-1/2 px-4"
                       >
