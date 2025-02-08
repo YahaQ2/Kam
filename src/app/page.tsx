@@ -53,7 +53,7 @@ export default function HomePage() {
 
   const shuffleArray = (array: Menfess[]) => {
     for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(Math. random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
@@ -69,8 +69,7 @@ export default function HomePage() {
         
         if (responseData.status && Array.isArray(responseData.data)) {
           const sortedMessages = responseData.data
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 6);
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
           
           setRecentlyAddedMessages(shuffleArray(sortedMessages));
         } else {
@@ -218,7 +217,7 @@ export default function HomePage() {
                         key={msg.id}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ 
-                          opacity: index === currentIndex ? 1 : 0.5,
+                          opacity: index === currentIndex ? 1 : 0,
                           scale: index === currentIndex ? 1 : 0.9,
                           x: `calc(${index * 100}% - ${currentIndex * 100}%)`
                         }}
@@ -253,7 +252,7 @@ export default function HomePage() {
                             <div className="p-4 bg-gray-50 border-t">
                               <p className="text-sm text-gray-500">
                                 {new Date(msg.created_at).toLocaleDateString('id-ID', {
-                                  weekday: 'long',
+ weekday: 'long',
                                   year: 'numeric',
                                   month: 'long',
                                   day: 'numeric'
@@ -305,4 +304,4 @@ export default function HomePage() {
       <Footer />
     </div>
   );
-}
+} 
