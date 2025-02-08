@@ -237,7 +237,7 @@ export default function HomePage() {
                         key={msg.id}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ 
-                          opacity: index === currentIndex ? 1 : 0.5,
+                          opacity: index === currentIndex ? 1 : 1,
                           scale: index === currentIndex ? 1 : 0.9,
                           x: `${(index - currentIndex) * 100}%`
                         }}
