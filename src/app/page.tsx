@@ -260,7 +260,7 @@ export default function HomePage() {
                         className="absolute w-full max-w-[100%] md:max-w-[100%] lg:max-w-[700px] left-1/2 -translate-x-1/2 px-4"
                       >
                         <div className="h-full w-full flex items-center justify-center">
-                          <div className="w-full h-full max-w-[800px] mx-auto bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+                          <div className="w-full h-full max-w-[100%] mx-auto bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
                             <CarouselCard 
                               to={msg.recipient || '-'} 
                               from={msg.sender || '-'} 
