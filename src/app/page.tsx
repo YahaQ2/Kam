@@ -12,6 +12,7 @@ import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useDebouncedCallback } from "use-debounce";
 
 interface Menfess {
   id: number;
@@ -38,6 +39,11 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
   ssr: false,
   loading: () => <div className="w-full h-64 bg-gray-100 animate-pulse rounded-xl" />
 });
+
+// Type guard untuk validasi response API
+function isMenfessResponse(data: any): data is MenfessResponse {
+  return data && typeof data === 'object' && 'data' in data && Array.isArray(data.data);
+}
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -67,21 +73,26 @@ export default function HomePage() {
     const fetchMessages = async () => {
       try {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
-        if (!response.ok) throw new Error("Gagal memuat pesan");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
-        const responseData: MenfessResponse = await response.json();
+        const responseData = await response.json();
         
-        if (responseData.status && Array.isArray(responseData.data)) {
+        if (isMenfessResponse(responseData)) {
           const sortedMessages = responseData.data
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, 5);
           
           setRecentlyAddedMessages(sortedMessages);
         } else {
-          throw new Error("Format data tidak valid");
+          throw new Error("Invalid API response structure");
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+        let errorMessage = "Terjadi kesalahan";
+        if (err instanceof Error) errorMessage = err.message;
+        else if (typeof err === "string") errorMessage = err;
+        
+        setError(errorMessage);
+        console.error("API Error:", err);
       } finally {
         setLoading(false);
       }
@@ -90,13 +101,13 @@ export default function HomePage() {
     fetchMessages();
   }, []);
 
-  const handleScroll = () => {
+  const handleScroll = useDebouncedCallback(() => {
     if (containerRef.current) {
-      const scrollPosition = containerRef.current.scrollLeft;
       const cardWidth = containerRef.current.offsetWidth;
-      setCurrentCard(Math.round(scrollPosition / cardWidth));
+      const newCard = Math.round(containerRef.current.scrollLeft / cardWidth);
+      setCurrentCard(Math.min(newCard, recentlyAddedMessages.length - 1));
     }
-  };
+  }, 100);
 
   const cardVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -185,7 +196,7 @@ export default function HomePage() {
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: true, margin: "0px 0px -50px 0px" }}
                 className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
               >
                 <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
@@ -198,7 +209,7 @@ export default function HomePage() {
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "0px 0px -100px 0px" }}
+                viewport={{ once: true, margin: "0px 0px -50px 0px" }}
                 className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
               >
                 <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
@@ -211,7 +222,7 @@ export default function HomePage() {
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "0px 0px -100px 0px" }}
+                viewport={{ once: true, margin: "0px 0px -50px 0px" }}
                 className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
               >
                 <div className="w-16 h-16 bg-pink-100 rounded-xl flex items-center justify-center mb-6">
@@ -277,8 +288,8 @@ export default function HomePage() {
                   )}
                   onScroll={handleScroll}
                 >
-                  <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.map((msg, index) => (
+                  <AnimatePresence mode="wait">
+                    {recentlyAddedMessages.map((msg) => (
                       <motion.div
                         key={msg.id}
                         variants={cardVariants}
@@ -299,20 +310,28 @@ export default function HomePage() {
                             to={msg.recipient} 
                             from={msg.sender} 
                             message={msg.message}
-                            songTitle={msg.track?.title}
-                            artist={msg.track?.artist}
-                            coverUrl={msg.track?.cover_img}
+                            songTitle={msg.track?.title || 'Lagu Tanpa Judul'}
+                            artist={msg.track?.artist || 'Artis Tidak Diketahui'}
+                            coverUrl={msg.track?.cover_img || '/default-cover.png'}
                             className="h-full transition-transform group-hover:-translate-y-2"
                             spotifyEmbed={
                               msg.spotify_id && (
-                                <iframe
-                                  className="w-full mt-4 rounded-lg"
-                                  src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                  width="100%"
-                                  height="80"
-                                  frameBorder="0"
-                                  allow="encrypted-media"
-                                />
+                                <div className="relative">
+                                  <iframe
+                                    className="w-full mt-4 rounded-lg"
+                                    src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                    width="100%"
+                                    height="80"
+                                    frameBorder="0"
+                                    allow="encrypted-media"
+                                    onError={(e) => {
+                                      (e.target as HTMLIFrameElement).style.display = 'none';
+                                    }}
+                                  />
+                                  <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center text-sm">
+                                    Tidak dapat memuat lagu
+                                  </div>
+                                </div>
                               )
                             }
                           />
