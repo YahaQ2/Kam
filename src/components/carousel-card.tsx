@@ -69,9 +69,12 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
             <p className="text-sm text-gray-500">To: {to}</p>
             <p className="text-sm text-gray-500">From: {from}</p>
           </div>
-
+                        
+<div className="flex flex-col items-center text-center p-6">
+  {/* ... konten lainnya */}
+</div>
           {/* Message */}
-                         // Di dalam komponen CarouselCard
+                         
 <div className="flex flex-col items-center text-center p-6">
   {/* ... konten lainnya */}
 </div>
