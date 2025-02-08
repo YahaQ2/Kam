@@ -44,39 +44,50 @@ export default function HomePage() {
   const intervalRef = useRef<NodeJS.Timeout>();
 
   const shuffleArray = (array: Menfess[]) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
+    return [...array].sort(() => Math.random() - 0.5);
+  };
+
+  const validateMenfess = (data: any): data is Menfess => {
+    return (
+      typeof data?.id === 'number' &&
+      typeof data?.sender === 'string' &&
+      typeof data?.recipient === 'string' &&
+      typeof data?.message === 'string'
+    );
   };
 
   const onDragEnd = () => {
     const x = dragX.get();
-    
-    if (x <= -SWIPE_THRESHOLD) {
-      handleNext();
-    } else if (x >= SWIPE_THRESHOLD) {
-      handlePrevious();
-    }
+    if (x <= -SWIPE_THRESHOLD) handleNext();
+    else if (x >= SWIPE_THRESHOLD) handlePrevious();
   };
 
   const handleNext = () => {
-    setCurrentIndex(prev => (prev + 1) % VISIBLE_MESSAGES);
+    setCurrentIndex(prev => (prev + 1) % recentlyAddedMessages.length);
     resetAutoSlide();
   };
 
   const handlePrevious = () => {
-    setCurrentIndex(prev => (prev - 1 + VISIBLE_MESSAGES) % VISIBLE_MESSAGES);
+    setCurrentIndex(prev => (prev - 1 + recentlyAddedMessages.length) % recentlyAddedMessages.length);
     resetAutoSlide();
   };
 
   const resetAutoSlide = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % VISIBLE_MESSAGES);
-    }, 5000);
+    clearInterval(intervalRef.current!);
+    intervalRef.current = setInterval(handleNext, 5000);
+  };
+
+  const getFormattedDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch {
+      return 'Tanggal tidak valid';
+    }
   };
 
   useEffect(() => {
@@ -85,33 +96,32 @@ export default function HomePage() {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
         if (!response.ok) throw new Error("Gagal memuat pesan");
         
-        const responseData: MenfessResponse = await response.json();
+        const data: MenfessResponse = await response.json();
         
-        if (responseData.status && Array.isArray(responseData.data)) {
-          const randomMessages = shuffleArray(responseData.data).slice(0, VISIBLE_MESSAGES);
-          setRecentlyAddedMessages(randomMessages);
+        if (data?.status && Array.isArray(data.data)) {
+          const validMessages = data.data.filter(validateMenfess);
+          const shuffled = shuffleArray(validMessages).slice(0, VISIBLE_MESSAGES);
+          setRecentlyAddedMessages(shuffled);
         } else {
           throw new Error("Format data tidak valid");
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+        console.error('Fetch error:', err);
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchMessages();
   }, []);
 
   useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % VISIBLE_MESSAGES);
-    }, 5000);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
+    if (recentlyAddedMessages.length > 0) {
+      resetAutoSlide();
+    }
+    return () => clearInterval(intervalRef.current!);
+  }, [recentlyAddedMessages]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-indigo-50 text-gray-800">
@@ -180,6 +190,7 @@ export default function HomePage() {
                 </Link>
               </Button>
 
+              {/* Tombol Ziwa */}
               <Button
                 asChild
                 className="group relative overflow-hidden bg-white border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -218,23 +229,21 @@ export default function HomePage() {
                   {error}
                 </p>
               </div>
+            ) : recentlyAddedMessages.length === 0 ? (
+              <div className="text-center py-12 bg-blue-50 rounded-xl">
+                <p className="text-blue-600">Belum ada menfess terbaru</p>
+              </div>
             ) : (
               <div className="relative overflow-hidden group">
                 <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
                 <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
-
-                {!loading && !error && recentlyAddedMessages.length === 0 && (
-                  <div className="text-center py-12 bg-blue-50 rounded-xl">
-                    <p className="text-blue-600">Belum ada menfess terbaru</p>
-                  </div>
-                )}
 
                 <motion.div
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
                   onDragEnd={onDragEnd}
                   style={{ x: dragX }}
-                  className="flex cursor-grab active:cursor-grabbing relative h-[600px]"
+                  className="flex cursor-grab active:cursor-grabbing relative h-[600px] w-full"
                   ref={containerRef}
                 >
                   <AnimatePresence mode="sync">
@@ -248,15 +257,15 @@ export default function HomePage() {
                           x: `${(index - currentIndex) * 100}%`,
                         }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                        className="absolute w-full max-w-2xl left-1/2 -translate-x-1/2 px-4"
+                        transition={{ type: "spring", stiffness: 150, damping: 25 }}
+                        className="absolute w-full max-w-[95%] md:max-w-[80%] lg:max-w-[700px] left-1/2 -translate-x-1/2 px-4"
                       >
-                        <Link href={`/message/${msg.id}`}>
-                          <div className="h-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+                        <div className="h-full w-full flex items-center justify-center">
+                          <div className="w-full h-full max-w-[500px] mx-auto bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
                             <CarouselCard 
-                              to={msg.recipient} 
-                              from={msg.sender} 
-                              message={msg.message}
+                              to={msg.recipient || '-'} 
+                              from={msg.sender || '-'} 
+                              message={msg.message || 'Pesan tidak tersedia'}
                               songTitle={msg.track?.title}
                               artist={msg.track?.artist}
                               coverUrl={msg.track?.cover_img}
@@ -277,26 +286,21 @@ export default function HomePage() {
                             />
                             <div className="p-4 bg-gray-50 border-t">
                               <p className="text-sm text-gray-500">
-                                {new Date(msg.created_at).toLocaleDateString('id-ID', {
-                                  weekday: 'long',
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric'
-                                })}
+                                {getFormattedDate(msg.created_at)}
                               </p>
                             </div>
                           </div>
-                        </Link>
+                        </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
                 </motion.div>
 
+                {/* Tombol Navigasi */}
                 <div className="flex items-center justify-center gap-4 mt-8">
                   <button
                     onClick={handlePrevious}
                     className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
-                    disabled={currentIndex === 0}
                   >
                     <ChevronLeft className="h-6 w-6 text-indigo-600" />
                   </button>
@@ -316,7 +320,6 @@ export default function HomePage() {
                   <button
                     onClick={handleNext}
                     className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
-                    disabled={currentIndex === recentlyAddedMessages.length - 1}
                   >
                     <ChevronRight className="h-6 w-6 text-indigo-600" />
                   </button>
