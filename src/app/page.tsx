@@ -259,37 +259,43 @@ export default function HomePage() {
                         transition={{ type: "spring", stiffness: 150, damping: 25 }}
                         className="absolute w-full max-w-[100%] md:max-w-[100%] lg:max-w-[700px] left-1/2 -translate-x-1/2 px-10"
                       >
-                        <div className="h-full w-full flex items-center justify-center">
-                          <div className="w-full h-full max-w-[600px] mx-auto bg-white rounded-2xl shadow-lg hover:shadow-xl">
-                            <CarouselCard 
-                              to={msg.recipient || '-'} 
-                              from={msg.sender || '-'} 
-                              message={msg.message || 'Pesan tidak tersedia'}
-                              songTitle={msg.track?.title}
-                              artist={msg.track?.artist}
-                              coverUrl={msg.track?.cover_img}
-                              spotifyEmbed={
-                                msg.spotify_id && (
-                                  <div className="px-4 pb-4">
-                                    <iframe
-                                      className="w-full rounded-lg shadow-md"
-                                      src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                      width="100%"
-                                      height="80"
-                                      frameBorder="0"
-                                      allow="encrypted-media"
-                                    />
-                                  </div>
-                                )
-                              }
-                            />
-                            <div className="p-4 bg-gray-50 border-t">
-                              <p className="text-sm text-gray-500 text-center">
-                                {getFormattedDate(msg.created_at)}
-                              </p>
+                        <Link 
+                          href={`/message/${msg.id}`} 
+                          className="block h-full w-full"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          <div className="h-full w-full flex items-center justify-center">
+                            <div className="w-full h-full max-w-[600px] mx-auto bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                              <CarouselCard 
+                                to={msg.recipient || '-'} 
+                                from={msg.sender || '-'} 
+                                message={msg.message || 'Pesan tidak tersedia'}
+                                songTitle={msg.track?.title}
+                                artist={msg.track?.artist}
+                                coverUrl={msg.track?.cover_img}
+                                spotifyEmbed={
+                                  msg.spotify_id && (
+                                    <div className="px-4 pb-4">
+                                      <iframe
+                                        className="w-full rounded-lg shadow-md"
+                                        src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                        width="100%"
+                                        height="80"
+                                        frameBorder="0"
+                                        allow="encrypted-media"
+                                      />
+                                    </div>
+                                  )
+                                }
+                              />
+                              <div className="p-4 bg-gray-50 border-t">
+                                <p className="text-sm text-gray-500 text-center">
+                                  {getFormattedDate(msg.created_at)}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       </motion.div>
                     ))}
                   </AnimatePresence>
