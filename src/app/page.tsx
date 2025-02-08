@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -32,8 +33,8 @@ interface MenfessResponse {
   data: Menfess[];
 }
 
-const SWIPE_THRESHOLD = 100; // Jarak minimal untuk swipe
-const DRAG_BUFFER = 50; // Jarak buffer untuk drag
+const SWIPE_THRESHOLD = 100;
+const DRAG_BUFFER = 50;
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -44,10 +45,8 @@ export default function HomePage() {
   const dragX = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Handle drag start
   const onDragStart = () => setDragging(true);
 
-  // Handle drag end
   const onDragEnd = () => {
     setDragging(false);
     const x = dragX.get();
@@ -59,7 +58,6 @@ export default function HomePage() {
     }
   };
 
-  // Fetch data dari API
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -71,7 +69,7 @@ export default function HomePage() {
         if (responseData.status && Array.isArray(responseData.data)) {
           const sortedMessages = responseData.data
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 6); // Ambil 6 pesan terbaru
+            .slice(0, 6);
           
           setRecentlyAddedMessages(sortedMessages);
         } else {
@@ -93,7 +91,6 @@ export default function HomePage() {
       <Navbar />
       
       <main className="flex-grow">
-        {/* Hero Section */}
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
           <div className="container mx-auto px-4 text-center">
             <motion.div
@@ -110,17 +107,17 @@ export default function HomePage() {
               <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
-            <div className="flex flex-col items-center gap-4 mb-8">
-            <Link
-              href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
-              className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>Kirim Saran/Masukan</span>
-              <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-            </Link>
-          </div>
+              <div className="flex flex-col items-center gap-4 mb-8">
+                <Link
+                  href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
+                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span>Kirim Saran/Masukan</span>
+                  <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+                </Link>
+              </div>
             </motion.div>
 
             <motion.div
@@ -154,7 +151,11 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
               </Button>
-                            >
+
+              <Button
+                asChild
+                className="group relative overflow-hidden bg-white border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
                 <Link href="https://ziwa-351410.web.app">
                   <span className="relative z-10 flex items-center gap-2">
                     <Heart className="h-5 w-5" />
@@ -167,7 +168,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Recent Menfess Section */}
         <section className="py-16 md:py-24 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -192,11 +192,9 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="relative overflow-hidden group">
-                {/* Gradient Overlay */}
                 <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
                 <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
 
-                {/* Carousel Container */}
                 <motion.div
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
@@ -261,7 +259,6 @@ export default function HomePage() {
                   </AnimatePresence>
                 </motion.div>
 
-                {/* Navigation Controls */}
                 <div className="flex items-center justify-center gap-4 mt-8">
                   <button
                     onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
