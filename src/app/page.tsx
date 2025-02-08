@@ -146,7 +146,7 @@ export default function HomePage() {
                 <Link href="/search-message">
                   <span className="relative z-10 flex items-center gap-2">
                     <Heart className="h-5 w-5" />
-                    Jelajahi Menfess
+                    Explore Menfess
                   </span>
                   <div className="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
