@@ -250,10 +250,10 @@ export default function HomePage() {
                       {recentlyAddedMessages.map((msg, index) => (
                         <motion.div
                           key={msg.id}
-                          initial={{ opacity: 0, scale: 0.95 }}
+                          initial={{ opacity: 1, scale: 1 }}
                           animate={{
-                            opacity: index === currentIndex ? 1 : 0.2,
-                            scale: index === currentIndex ? 1 : 0.85,
+                            opacity: index === currentIndex ? 1 :1,
+                            scale: index === currentIndex ? 1 : 1,
                             x: `${(index - currentIndex) * 100}%`,
                           }}
                           exit={{ opacity: 0, scale: 0.95 }}
