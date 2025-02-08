@@ -7,9 +7,11 @@ import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Music, Heart, MessageCircle } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface Menfess {
   id: number;
@@ -34,6 +36,7 @@ interface MenfessResponse {
 
 const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
   ssr: false,
+  loading: () => <div className="w-full h-64 bg-gray-100 animate-pulse rounded-xl" />
 });
 
 export default function HomePage() {
@@ -43,9 +46,18 @@ export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<HTMLDivElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -87,79 +99,182 @@ export default function HomePage() {
   };
 
   const cardVariants = {
-    hidden: { opacity: 0, x: 50 },
-    visible: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -50 }
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -50 }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-800">
+    <div className="flex flex-col min-h-screen bg-white text-gray-900">
       <InitialAnimation />
       <Navbar />
+      
       <main className="flex-grow">
-        <div className="container mx-auto px-4 py-8 md:py-16 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat Unand</h2>
-          
-          <div className="flex flex-col items-center gap-4 mb-8">
-            <Link
-              href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
-              className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
-              target="_blank"
-              rel="noopener noreferrer"
+        {/* Hero Section */}
+        <section 
+          ref={targetRef}
+          className="relative h-[90vh] flex items-center justify-center overflow-hidden"
+        >
+          <motion.div 
+            style={{ opacity, scale }}
+            className="container mx-auto px-4 text-center relative z-10"
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
             >
-              <span>Kirim Saran/Masukan</span>
-              <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-            </Link>
-          </div>
+              Sampaikan Perasaanmu
+            </motion.h1>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto"
+            >
+              Berbagi pesan dan musik secara anonim dengan komunitas Universitas Andalas
+            </motion.p>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12 md:mb-16">
-            <div className="flex flex-col sm:flex-row sm:gap-4 gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="flex flex-col sm:flex-row justify-center gap-6 mb-16"
+            >
               <Button
                 asChild
-                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
+                className="h-14 px-8 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg shadow-lg hover:shadow-xl transition-all"
               >
-                <Link href="/message">Kirim Menfess</Link>
+                <Link href="/message">
+                  <MessageCircle className="mr-3 h-6 w-6" />
+                  Kirim Menfess
+                </Link>
               </Button>
+              
               <Button
                 asChild
-                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+                variant="outline"
+                className="h-14 px-8 rounded-2xl border-2 border-gray-900 hover:bg-gray-50 text-lg hover:shadow-md transition-all"
               >
-                <Link href="/search-message">Explore Menfess</Link>
+                <Link href="/search-message">
+                  <Music className="mr-3 h-6 w-6" />
+                  Jelajahi Menfess
+                </Link>
               </Button>
+            </motion.div>
+          </motion.div>
+
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-white/30" />
+        </section>
+
+        {/* Featured Section */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                Mengapa Memilih Platform Kami?
+              </h2>
+              <p className="text-gray-600 text-lg md:text-xl">
+                Platform eksklusif untuk mahasiswa Unand dalam berbagi pesan dan musik secara kreatif
+              </p>
             </div>
-            
-            <Button
-              asChild
-              className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors"
-            >
-              <Link href="https://ziwa-351410.web.app">
-                Ziwa - Cari Teman & Curhat
-              </Link>
-            </Button>
-          </div>
 
-          <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
-            <DynamicCarousel />
-          </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                  <MessageCircle className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4">Anonimitas Terjaga</h3>
+                <p className="text-gray-600">Kirim pesan tanpa khawatir identitas terbuka</p>
+              </motion.div>
 
-          <div className="mt-16">
-            <h3 className="text-2xl md:text-3xl font-bold mb-8">Menfess Terbaru</h3>
-            
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "0px 0px -100px 0px" }}
+                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                  <Music className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4">Integrasi Spotify</h3>
+                <p className="text-gray-600">Bagikan lagu favoritmu langsung dari Spotify</p>
+              </motion.div>
+
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "0px 0px -100px 0px" }}
+                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <div className="w-16 h-16 bg-pink-100 rounded-xl flex items-center justify-center mb-6">
+                  <Heart className="w-8 h-8 text-pink-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4">Komunitas Ramah</h3>
+                <p className="text-gray-600">Terkoneksi dengan ribuan mahasiswa Unand</p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* Carousel Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <h3 className="text-3xl font-bold text-center mb-12">
+              Menfess Terpopuler
+            </h3>
+            <div className="relative w-full max-w-7xl mx-auto">
+              <DynamicCarousel />
+            </div>
+          </div>
+        </section>
+
+        {/* Recent Menfess Section */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                Menfess Terbaru
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Lihat pesan-pesan terbaru dari komunitas kami
+              </p>
+            </div>
+
             {loading ? (
-              <div className="h-40 flex items-center justify-center">Memuat...</div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-64 rounded-2xl" />
+                ))}
+              </div>
             ) : error ? (
-              <p className="text-red-500">{error}</p>
+              <div className="text-center py-12">
+                <div className="text-red-600 mb-4">⚠️ {error}</div>
+                <Button onClick={() => window.location.reload()}>
+                  Coba Lagi
+                </Button>
+              </div>
             ) : recentlyAddedMessages.length === 0 ? (
-              <p>Tidak ada pesan terbaru</p>
+              <div className="text-center py-12 text-gray-500">
+                Belum ada menfess terbaru
+              </div>
             ) : (
               <div className="relative">
                 <div 
                   ref={containerRef}
-                  className={`flex ${
+                  className={cn(
+                    "grid gap-6 pb-4",
                     isMobile 
-                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide' 
-                      : 'overflow-hidden'
-                  }`}
+                      ? "overflow-x-auto snap-x snap-mandatory scrollbar-hide grid-flow-col auto-cols-[85%]"
+                      : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                  )}
                   onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
@@ -171,13 +286,15 @@ export default function HomePage() {
                         animate="visible"
                         exit="exit"
                         transition={{ duration: 0.3 }}
-                        className={`${
-                          isMobile 
-                            ? 'flex-shrink-0 w-full snap-center p-4' 
-                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-                        }`}
+                        className={cn(
+                          "relative group",
+                          isMobile && "snap-center"
+                        )}
                       >
-                        <Link href={`/message/${msg.id}`}>
+                        <Link 
+                          href={`/message/${msg.id}`}
+                          className="block h-full"
+                        >
                           <CarouselCard 
                             to={msg.recipient} 
                             from={msg.sender} 
@@ -185,6 +302,7 @@ export default function HomePage() {
                             songTitle={msg.track?.title}
                             artist={msg.track?.artist}
                             coverUrl={msg.track?.cover_img}
+                            className="h-full transition-transform group-hover:-translate-y-2"
                             spotifyEmbed={
                               msg.spotify_id && (
                                 <iframe
@@ -205,14 +323,14 @@ export default function HomePage() {
                 </div>
 
                 {isMobile && (
-                  <div className="flex justify-center space-x-2 mt-4">
+                  <div className="flex justify-center space-x-2 mt-6">
                     {recentlyAddedMessages.map((_, index) => (
                       <motion.div
                         key={index}
                         className={`h-2 w-2 rounded-full ${
-                          currentCard === index ? 'bg-gray-800' : 'bg-gray-300'
+                          currentCard === index ? 'bg-gray-900' : 'bg-gray-300'
                         }`}
-                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        animate={{ scale: currentCard === index ? 1.4 : 1 }}
                         transition={{ duration: 0.2 }}
                       />
                     ))}
@@ -221,8 +339,9 @@ export default function HomePage() {
               </div>
             )}
           </div>
-        </div>
+        </section>
       </main>
+
       <Footer />
     </div>
   );
