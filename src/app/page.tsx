@@ -237,38 +237,44 @@ export default function HomePage() {
                 <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
                 <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
 
-                <motion.div
-                  drag="x"
-                  dragConstraints={{ left: 0, right: 0 }}
-                  onDragEnd={onDragEnd}
-                  style={{ x: dragX }}
-                  className="flex cursor-grab active:cursor-grabbing relative h-[600px] w-full"
-                  ref={containerRef}
-                >
-                  <AnimatePresence mode="sync">
-                    {recentlyAddedMessages.map((msg, index) => (
-                      <motion.div
-                        key={msg.id}
-                        initial={{ opacity: 0, scale: 1, x: `${(index - currentIndex) * 100}%` }}
-                        animate={{
-                          opacity: index === currentIndex ? 1 : 0.2,
-                          scale: index === currentIndex ? 1 : 0.85,
-                          x: `${(index - currentIndex) * 100}%`,
-                        }}
-                        exit={{ opacity: 0, scale: 1 }}
-                        transition={{ type: "spring", stiffness: 150, damping: 25 }}
-                        className="absolute w-full max-w-[100%] md:max-w-[100%] lg:max-w-[700px] left-1/2 -translate-x-1/2 px-10"
-                      >
-                        <Link 
-                          href={`/message/${msg.id}`} 
-                          className="block h-full w-full"
-                          onClick={(e) => e.preventDefault()}
+                <div className="relative h-[600px] w-full max-w-4xl mx-auto">
+                  <motion.div
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    onDragEnd={onDragEnd}
+                    style={{ x: dragX }}
+                    className="flex cursor-grab active:cursor-grabbing h-full"
+                    ref={containerRef}
+                  >
+                    <AnimatePresence mode="sync">
+                      {recentlyAddedMessages.map((msg, index) => (
+                        <motion.div
+                          key={msg.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{
+                            opacity: index === currentIndex ? 1 : 0.2,
+                            scale: index === currentIndex ? 1 : 0.85,
+                            x: `${(index - currentIndex) * 100}%`,
+                          }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          className="absolute w-full h-full px-4"
+                          style={{
+                            left: `${index * 100}%`,
+                            right: `${index * 100}%`,
+                          }}
                         >
-                          <div className="h-full w-full flex items-center justify-center">
-                            <div className="w-full h-full max-w-[600px] mx-auto bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                              <CarouselCard 
-                                to={msg.recipient || '-'} 
-                                from={msg.sender || '-'} 
+                          <Link
+                            href={`/message/${msg.id}`}
+                            className="block h-full w-full p-4"
+                            onClick={(e) => {
+                              if (Math.abs(dragX.get()) > 10) e.preventDefault();
+                            }}
+                          >
+                            <div className="h-full w-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                              <CarouselCard
+                                to={msg.recipient || '-'}
+                                from={msg.sender || '-'}
                                 message={msg.message || 'Pesan tidak tersedia'}
                                 songTitle={msg.track?.title}
                                 artist={msg.track?.artist}
@@ -288,18 +294,18 @@ export default function HomePage() {
                                   )
                                 }
                               />
-                              <div className="p-4 bg-gray-50 border-t">
+                              <div className="p-4 bg-gray-50 border-t rounded-b-2xl">
                                 <p className="text-sm text-gray-500 text-center">
                                   {getFormattedDate(msg.created_at)}
                                 </p>
                               </div>
                             </div>
-                          </div>
-                        </Link>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </motion.div>
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </motion.div>
+                </div>
 
                 <div className="flex items-center justify-center gap-4 mt-8">
                   <button
