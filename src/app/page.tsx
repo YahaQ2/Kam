@@ -190,7 +190,6 @@ export default function HomePage() {
                 </Link>
               </Button>
 
-              {/* Tombol Ziwa */}
               <Button
                 asChild
                 className="group relative overflow-hidden bg-white border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
@@ -285,7 +284,7 @@ export default function HomePage() {
                               }
                             />
                             <div className="p-4 bg-gray-50 border-t">
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-gray-500 text-center">
                                 {getFormattedDate(msg.created_at)}
                               </p>
                             </div>
@@ -296,7 +295,6 @@ export default function HomePage() {
                   </AnimatePresence>
                 </motion.div>
 
-                {/* Tombol Navigasi */}
                 <div className="flex items-center justify-center gap-4 mt-8">
                   <button
                     onClick={handlePrevious}
