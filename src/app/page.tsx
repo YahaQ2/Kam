@@ -200,10 +200,10 @@ export default function HomePage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                Menfess Pilihan Acak
+                MENFESS TERBARU
               </h2>
               <p className="text-gray-600 max-w-xl mx-auto">
-                6 Pesan acak dari seluruh database
+                trending menfess
               </p>
             </div>
 
