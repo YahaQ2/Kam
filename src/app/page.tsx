@@ -32,6 +32,7 @@ interface MenfessResponse {
 }
 
 const SWIPE_THRESHOLD = 100;
+const VISIBLE_MESSAGES = 6;
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -40,23 +41,42 @@ export default function HomePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const dragX = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout>();
+
+  const shuffleArray = (array: Menfess[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
 
   const onDragEnd = () => {
     const x = dragX.get();
     
     if (x <= -SWIPE_THRESHOLD) {
-      setCurrentIndex(prev => Math.min(recentlyAddedMessages.length - 1, prev + 1));
+      handleNext();
     } else if (x >= SWIPE_THRESHOLD) {
-      setCurrentIndex(prev => Math.max(0, prev - 1));
+      handlePrevious();
     }
   };
 
-  const shuffleArray = (array: Menfess[]) => {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math. random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
+  const handleNext = () => {
+    setCurrentIndex(prev => (prev + 1) % VISIBLE_MESSAGES);
+    resetAutoSlide();
+  };
+
+  const handlePrevious = () => {
+    setCurrentIndex(prev => (prev - 1 + VISIBLE_MESSAGES) % VISIBLE_MESSAGES);
+    resetAutoSlide();
+  };
+
+  const resetAutoSlide = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % VISIBLE_MESSAGES);
+    }, 5000);
   };
 
   useEffect(() => {
@@ -68,10 +88,8 @@ export default function HomePage() {
         const responseData: MenfessResponse = await response.json();
         
         if (responseData.status && Array.isArray(responseData.data)) {
-          const sortedMessages = responseData.data
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-          
-          setRecentlyAddedMessages(shuffleArray(sortedMessages));
+          const randomMessages = shuffleArray(responseData.data).slice(0, VISIBLE_MESSAGES);
+          setRecentlyAddedMessages(randomMessages);
         } else {
           throw new Error("Format data tidak valid");
         }
@@ -86,12 +104,14 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % recentlyAddedMessages.length);
-    }, 100000); // Change slide every 5 seconds
+    intervalRef.current = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % VISIBLE_MESSAGES);
+    }, 5000);
 
-    return () => clearInterval(interval); // Clear interval on unmount
-  }, [recentlyAddedMessages.length]);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-indigo-50 text-gray-800">
@@ -180,10 +200,10 @@ export default function HomePage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
-                Menfess Terbaru
+                Menfess Pilihan Acak
               </h2>
               <p className="text-gray-600 max-w-xl mx-auto">
-                Pesan-pesan terbaru yang penuh makna
+                6 Pesan acak dari seluruh database
               </p>
             </div>
 
@@ -217,9 +237,9 @@ export default function HomePage() {
                         key={msg.id}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ 
-                          opacity: index === currentIndex ? 1 : 0,
+                          opacity: index === currentIndex ? 1 : 0.5,
                           scale: index === currentIndex ? 1 : 0.9,
-                          x: `calc(${index * 100}% - ${currentIndex * 100}%)`
+                          x: `${(index - currentIndex) * 100}%`
                         }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -252,7 +272,7 @@ export default function HomePage() {
                             <div className="p-4 bg-gray-50 border-t">
                               <p className="text-sm text-gray-500">
                                 {new Date(msg.created_at).toLocaleDateString('id-ID', {
- weekday: 'long',
+                                  weekday: 'long',
                                   year: 'numeric',
                                   month: 'long',
                                   day: 'numeric'
@@ -268,7 +288,7 @@ export default function HomePage() {
 
                 <div className="flex items-center justify-center gap-4 mt-8">
                   <button
-                    onClick={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
+                    onClick={handlePrevious}
                     className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
                     disabled={currentIndex === 0}
                   >
@@ -288,7 +308,7 @@ export default function HomePage() {
                   </div>
 
                   <button
-                    onClick={() => setCurrentIndex(prev => Math.min(recentlyAddedMessages.length - 1, prev + 1))}
+                    onClick={handleNext}
                     className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
                     disabled={currentIndex === recentlyAddedMessages.length - 1}
                   >
@@ -304,4 +324,4 @@ export default function HomePage() {
       <Footer />
     </div>
   );
-} 
+}
