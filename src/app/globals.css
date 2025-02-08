@@ -75,3 +75,13 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Untuk menghindari overflow horizontal di mobile */
+@media (max-width: 640px) {
+  html {
+    overflow-x: hidden;
+  }
+  body {
+    position: relative;
+  }
+}
