@@ -71,6 +71,10 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
           </div>
 
           {/* Message */}
+                         // Di dalam komponen CarouselCard
+<div className="flex flex-col items-center text-center p-6">
+  {/* ... konten lainnya */}
+</div>
           <div className="flex-1 flex items-center justify-center">
             <p
               className={`text-xl font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis line-clamp-3 
@@ -101,10 +105,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
               <div className="flex-1 overflow-hidden">
                 <p className="font-semibold truncate">{songTitle}</p>
                 <p className="text-xs truncate">{artist}</p>
-                // Di dalam komponen CarouselCard
-<div className="flex flex-col items-center text-center p-6">
-  {/* ... konten lainnya */}
-</div>
+ 
               </div>
             </div>
           )}
