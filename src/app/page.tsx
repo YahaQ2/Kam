@@ -242,7 +242,7 @@ export default function HomePage() {
               Menfess Terpopuler
             </h3>
             <div className="relative w-full max-w-7xl mx-auto">
-              <DynamicCarousel />
+ <DynamicCarousel />
             </div>
           </div>
         </section>
