@@ -203,7 +203,7 @@ export default function HomePage() {
                 MENFESS TERBARU
               </h2>
               <p className="text-gray-600 max-w-xl mx-auto">
-                trending menfess
+                Trending menfess
               </p>
             </div>
 
@@ -223,27 +223,33 @@ export default function HomePage() {
                 <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
                 <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
 
+                {!loading && !error && recentlyAddedMessages.length === 0 && (
+                  <div className="text-center py-12 bg-blue-50 rounded-xl">
+                    <p className="text-blue-600">Belum ada menfess terbaru</p>
+                  </div>
+                )}
+
                 <motion.div
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
                   onDragEnd={onDragEnd}
                   style={{ x: dragX }}
-                  className="flex cursor-grab active:cursor-grabbing"
+                  className="flex cursor-grab active:cursor-grabbing relative h-[600px]"
                   ref={containerRef}
                 >
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="sync">
                     {recentlyAddedMessages.map((msg, index) => (
                       <motion.div
                         key={msg.id}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ 
-                          opacity: index === currentIndex ? 1 : 1,
-                          scale: index === currentIndex ? 1 : 0.9,
-                          x: `${(index - currentIndex) * 100}%`
+                        initial={{ opacity: 0, scale: 0.9, x: `${(index - currentIndex) * 100}%` }}
+                        animate={{
+                          opacity: index === currentIndex ? 1 : 0.2,
+                          scale: index === currentIndex ? 1 : 0.85,
+                          x: `${(index - currentIndex) * 100}%`,
                         }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="w-full flex-shrink-0 px-4"
+                        transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                        className="absolute w-full max-w-2xl left-1/2 -translate-x-1/2 px-4"
                       >
                         <Link href={`/message/${msg.id}`}>
                           <div className="h-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
