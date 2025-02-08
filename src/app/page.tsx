@@ -14,35 +14,40 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 
+// Definisi tipe dengan interface yang lebih aman
+interface Track {
+  title?: string;
+  artist?: string;
+  cover_img?: string;
+}
+
 interface Menfess {
   id: number;
   sender: string;
   recipient: string;
   message: string;
   spotify_id?: string;
-  track?: {
-    title: string;
-    artist: string;
-    cover_img: string;
-  };
+  track?: Track;
   created_at: string;
 }
 
 interface MenfessResponse {
-  status: boolean;
-  success: boolean;
-  message: string | null;
-  data: Menfess[];
+  status?: boolean;
+  success?: boolean;
+  message?: string;
+  data?: Menfess[];
 }
 
+// Dynamic import dengan error boundary
 const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
   ssr: false,
-  loading: () => <div className="w-full h-64 bg-gray-100 animate-pulse rounded-xl" />
+  loading: () => <div className="w-full h-64 bg-gray-100 animate-pulse rounded-xl" />,
+  onError: (error) => console.error("Failed to load Carousel:", error)
 });
 
-// Type guard untuk validasi response API
-function isMenfessResponse(data: any): data is MenfessResponse {
-  return data && typeof data === 'object' && 'data' in data && Array.isArray(data.data);
+// Validasi response API yang lebih ketat
+function isValidMenfess(data: any): data is MenfessResponse {
+  return data && Array.isArray(data.data);
 }
 
 export default function HomePage() {
@@ -62,53 +67,61 @@ export default function HomePage() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
 
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Handle resize dengan debounce
+  const handleResize = useDebouncedCallback(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, 200);
 
   useEffect(() => {
-    const fetchMessages = async () => {
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, [handleResize]);
+
+  // Fetch data dengan error handling lebih baik
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
-        const responseData = await response.json();
-        
-        if (isMenfessResponse(responseData)) {
-          const sortedMessages = responseData.data
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 5);
-          
-          setRecentlyAddedMessages(sortedMessages);
-        } else {
-          throw new Error("Invalid API response structure");
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      } catch (err) {
-        let errorMessage = "Terjadi kesalahan";
-        if (err instanceof Error) errorMessage = err.message;
-        else if (typeof err === "string") errorMessage = err;
         
+        const data: MenfessResponse = await response.json();
+        
+        if (!isValidMenfess(data)) {
+          throw new Error("Invalid data structure from API");
+        }
+        
+        const sortedMessages = (data.data || [])
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 5);
+        
+        setRecentlyAddedMessages(sortedMessages);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
         setError(errorMessage);
-        console.error("API Error:", err);
+        console.error("Fetch error:", err);
       } finally {
         setLoading(false);
       }
     };
-  
-    fetchMessages();
+
+    fetchData();
   }, []);
 
+  // Scroll handler dengan boundary check
   const handleScroll = useDebouncedCallback(() => {
     if (containerRef.current) {
-      const cardWidth = containerRef.current.offsetWidth;
-      const newCard = Math.round(containerRef.current.scrollLeft / cardWidth);
-      setCurrentCard(Math.min(newCard, recentlyAddedMessages.length - 1));
+      const { scrollLeft, offsetWidth } = containerRef.current;
+      const maxScroll = containerRef.current.scrollWidth - offsetWidth;
+      const normalizedScroll = Math.min(Math.max(scrollLeft, 0), maxScroll);
+      setCurrentCard(Math.round(normalizedScroll / offsetWidth));
     }
-  }, 100);
+  }, 150);
 
+  // Variants untuk animasi
   const cardVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0 },
@@ -158,9 +171,11 @@ export default function HomePage() {
                 asChild
                 className="h-14 px-8 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg shadow-lg hover:shadow-xl transition-all"
               >
-                <Link href="/message">
-                  <MessageCircle className="mr-3 h-6 w-6" />
-                  Kirim Menfess
+                <Link href="/message" passHref legacyBehavior>
+                  <a>
+                    <MessageCircle className="mr-3 h-6 w-6" />
+                    Kirim Menfess
+                  </a>
                 </Link>
               </Button>
               
@@ -169,9 +184,11 @@ export default function HomePage() {
                 variant="outline"
                 className="h-14 px-8 rounded-2xl border-2 border-gray-900 hover:bg-gray-50 text-lg hover:shadow-md transition-all"
               >
-                <Link href="/search-message">
-                  <Music className="mr-3 h-6 w-6" />
-                  Jelajahi Menfess
+                <Link href="/search-message" passHref legacyBehavior>
+                  <a>
+                    <Music className="mr-3 h-6 w-6" />
+                    Jelajahi Menfess
+                  </a>
                 </Link>
               </Button>
             </motion.div>
@@ -193,44 +210,37 @@ export default function HomePage() {
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "0px 0px -50px 0px" }}
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
-              >
-                <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                  <MessageCircle className="w-8 h-8 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-4">Anonimitas Terjaga</h3>
-                <p className="text-gray-600">Kirim pesan tanpa khawatir identitas terbuka</p>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "0px 0px -50px 0px" }}
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
-              >
-                <div className="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                  <Music className="w-8 h-8 text-purple-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-4">Integrasi Spotify</h3>
-                <p className="text-gray-600">Bagikan lagu favoritmu langsung dari Spotify</p>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "0px 0px -50px 0px" }}
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
-              >
-                <div className="w-16 h-16 bg-pink-100 rounded-xl flex items-center justify-center mb-6">
-                  <Heart className="w-8 h-8 text-pink-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-4">Komunitas Ramah</h3>
-                <p className="text-gray-600">Terkoneksi dengan ribuan mahasiswa Unand</p>
-              </motion.div>
+              {[
+                {
+                  icon: <MessageCircle className="w-8 h-8 text-blue-600" />,
+                  title: "Anonimitas Terjaga",
+                  desc: "Kirim pesan tanpa khawatir identitas terbuka"
+                },
+                {
+                  icon: <Music className="w-8 h-8 text-purple-600" />,
+                  title: "Integrasi Spotify",
+                  desc: "Bagikan lagu favoritmu langsung dari Spotify"
+                },
+                {
+                  icon: <Heart className="w-8 h-8 text-pink-600" />,
+                  title: "Komunitas Ramah",
+                  desc: "Terkoneksi dengan ribuan mahasiswa Unand"
+                }
+              ].map((feature, index) => (
+                <motion.div 
+                  key={index}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "0px 0px -50px 0px" }}
+                  className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
+                >
+                  <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-4">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.desc}</p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
@@ -242,7 +252,7 @@ export default function HomePage() {
               Menfess Terpopuler
             </h3>
             <div className="relative w-full max-w-7xl mx-auto">
- <DynamicCarousel />
+              <DynamicCarousel />
             </div>
           </div>
         </section>
@@ -305,6 +315,7 @@ export default function HomePage() {
                         <Link 
                           href={`/message/${msg.id}`}
                           className="block h-full"
+                          passHref
                         >
                           <CarouselCard 
                             to={msg.recipient} 
@@ -324,6 +335,7 @@ export default function HomePage() {
                                     height="80"
                                     frameBorder="0"
                                     allow="encrypted-media"
+                                    loading="lazy"
                                     onError={(e) => {
                                       (e.target as HTMLIFrameElement).style.display = 'none';
                                     }}
