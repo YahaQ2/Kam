@@ -74,10 +74,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
   {/* ... konten lainnya */}
 </div>
           {/* Message */}
-                         
-<div className="flex flex-col items-center text-center p-6">
-  {/* ... konten lainnya */}
-</div>
+                        
           <div className="flex-1 flex items-center justify-center">
             <p
               className={`text-xl font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis line-clamp-3 
