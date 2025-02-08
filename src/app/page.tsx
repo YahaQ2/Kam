@@ -88,7 +88,7 @@ export default function HomePage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % recentlyAddedMessages.length);
-    }, 5000); // Change slide every 5 seconds
+    }, 9000); // Change slide every 5 seconds
 
     return () => clearInterval(interval); // Clear interval on unmount
   }, [recentlyAddedMessages.length]);
