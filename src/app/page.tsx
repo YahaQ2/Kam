@@ -129,7 +129,82 @@ export default function HomePage() {
       <Navbar />
       
       <main className="flex-grow">
-        {/* ... (Bagian header tetap sama) ... */}
+        <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
+          <div className="container mx-auto px-4 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="mb-8">
+                <Sparkles className="h-16 w-16 text-amber-400 mx-auto animate-pulse" />
+              </div>
+              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6">
+                Menfess warga Unand
+              </h1>
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+                Sampaikan perasaanmu dengan cara yang berkesan 
+              </p>
+              <div className="flex flex-col items-center gap-4 mb-8">
+                <Link
+                  href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
+                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span>Kirim Saran/Masukan</span>
+                  <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+                </Link>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-col sm:flex-row justify-center gap-6 mb-16"
+            >
+              <Button
+                asChild
+                className="group relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Link href="/message">
+                  <span className="relative z-10 flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5" />
+                    Kirim Menfess
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                className="group relative overflow-hidden bg-white border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Link href="/search-message">
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Heart className="h-5 w-5" />
+                    Explore Menfess
+                  </span>
+                  <div className="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                className="group relative overflow-hidden bg-white border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Link href="https://ziwa-351410.web.app">
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Heart className="h-5 w-5" />
+                    Ziwa - Cari Teman baru & fun space
+                  </span>
+                  <div className="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Link>
+              </Button>
+            </motion.div>
+          </div>
+        </section>
 
         <section className="py-16 md:py-24 bg-white">
           <div className="container mx-auto px-4">
@@ -231,7 +306,6 @@ export default function HomePage() {
                   </motion.div>
                 </div>
 
-                {/* Navigation controls */}
                 <div className="flex items-center justify-center gap-4 mt-8">
                   <button
                     onClick={handlePrevious}
