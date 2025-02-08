@@ -168,7 +168,7 @@ export default function HomePage() {
                 Menfess Terpopuler
               </h2>
               <p className="text-gray-600 max-w-xl mx-auto">
-                Lihat pesan-pesan penuh makna yang paling banyak disukai masyarakat
+                Lihat pesan-pesan penuh makna yang paling banyak dilihat
               </p>
             </motion.div>
 
