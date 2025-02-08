@@ -119,7 +119,82 @@ export default function HomePage() {
       <Navbar />
       
       <main className="flex-grow">
-        {/* ... Bagian Header tetap sama ... */}
+        <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
+          <div className="container mx-auto px-4 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="mb-8">
+                <Sparkles className="h-16 w-16 text-amber-400 mx-auto animate-pulse" />
+              </div>
+              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6">
+                Menfess warga Unand
+              </h1>
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+                Sampaikan perasaanmu dengan cara yang berkesan 
+              </p>
+              <div className="flex flex-col items-center gap-4 mb-8">
+                <Link
+                  href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
+                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span>Kirim Saran/Masukan</span>
+                  <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+                </Link>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-col sm:flex-row justify-center gap-6 mb-16"
+            >
+              <Button
+                asChild
+                className="group relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Link href="/message">
+                  <span className="relative z-10 flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5" />
+                    Kirim Menfess
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                className="group relative overflow-hidden bg-white border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Link href="/search-message">
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Heart className="h-5 w-5" />
+                    Explore Menfess
+                  </span>
+                  <div className="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                className="group relative overflow-hidden bg-white border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Link href="https://ziwa-351410.web.app">
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Heart className="h-5 w-5" />
+                    Ziwa - Cari Teman baru & fun space
+                  </span>
+                  <div className="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Link>
+              </Button>
+            </motion.div>
+          </div>
+        </section>
 
         <section className="py-16 md:py-24 bg-white">
           <div className="container mx-auto px-4">
@@ -159,10 +234,10 @@ export default function HomePage() {
                   dragConstraints={{ left: 0, right: 0 }}
                   onDragEnd={onDragEnd}
                   style={{ x: dragX }}
-                  className="flex cursor-grab active:cursor-grabbing relative min-h-[500px] h-[600px] w-full"
+                  className="flex cursor-grab active:cursor-grabbing relative h-[600px]"
                   ref={containerRef}
                 >
-                  <AnimatePresence mode="wait">
+                  <AnimatePresence mode="sync">
                     {recentlyAddedMessages.map((msg, index) => (
                       <motion.div
                         key={msg.id}
@@ -173,50 +248,45 @@ export default function HomePage() {
                           x: `${(index - currentIndex) * 100}%`,
                         }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ type: "spring", stiffness: 150, damping: 25 }}
-                        className="absolute w-full max-w-[95%] md:max-w-[80%] lg:max-w-[700px] left-1/2 -translate-x-1/2 px-4"
+                        transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                        className="absolute w-full max-w-2xl left-1/2 -translate-x-1/2 px-4"
                       >
-                        <div className="h-full w-full flex items-center justify-center">
-                          <Link 
-                            href={`/message/${msg.id}`} 
-                            className="w-full h-full max-w-[500px] mx-auto"
-                          >
-                            <div className="h-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
-                              <CarouselCard 
-                                to={msg.recipient} 
-                                from={msg.sender} 
-                                message={msg.message}
-                                songTitle={msg.track?.title}
-                                artist={msg.track?.artist}
-                                coverUrl={msg.track?.cover_img}
-                                spotifyEmbed={
-                                  msg.spotify_id && (
-                                    <div className="px-4 pb-4">
-                                      <iframe
-                                        className="w-full rounded-lg shadow-md"
-                                        src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                        width="100%"
-                                        height="80"
-                                        frameBorder="0"
-                                        allow="encrypted-media"
-                                      />
-                                    </div>
-                                  )
-                                }
-                              />
-                              <div className="p-4 bg-gray-50 border-t">
-                                <p className="text-sm text-gray-500">
-                                  {new Date(msg.created_at).toLocaleDateString('id-ID', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                  })}
-                                </p>
-                              </div>
+                        <Link href={`/message/${msg.id}`}>
+                          <div className="h-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden">
+                            <CarouselCard 
+                              to={msg.recipient} 
+                              from={msg.sender} 
+                              message={msg.message}
+                              songTitle={msg.track?.title}
+                              artist={msg.track?.artist}
+                              coverUrl={msg.track?.cover_img}
+                              spotifyEmbed={
+                                msg.spotify_id && (
+                                  <div className="px-4 pb-4">
+                                    <iframe
+                                      className="w-full rounded-lg shadow-md"
+                                      src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                      width="100%"
+                                      height="80"
+                                      frameBorder="0"
+                                      allow="encrypted-media"
+                                    />
+                                  </div>
+                                )
+                              }
+                            />
+                            <div className="p-4 bg-gray-50 border-t">
+                              <p className="text-sm text-gray-500">
+                                {new Date(msg.created_at).toLocaleDateString('id-ID', {
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </p>
                             </div>
-                          </Link>
-                        </div>
+                          </div>
+                        </Link>
                       </motion.div>
                     ))}
                   </AnimatePresence>
