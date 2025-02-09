@@ -7,6 +7,7 @@ import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
 import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import dynamic from "next/dynamic";
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
 
@@ -207,6 +208,10 @@ export default function HomePage() {
               </Button>
             </motion.div>
           </div>
+          
+          <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+            <DynamicCarousel />
+          </div>
         </section>
 
         <section className="py-16 md:py-24 bg-gray-900">
@@ -295,29 +300,25 @@ export default function HomePage() {
                           </Link>
                         </motion.div>
                       ))}
-                    </AnimatePresence>
-                  </motion.div>
+                    </AnimatePresence>                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
 
-                <div className="flex items-center justify-center gap-4 mt-8">
-                  <button
-                    onClick={handlePrevious}
-                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    <ChevronLeft className="h-6 w-6 text-gray-300" />
-                  </button>
-                  
-                  <div className="flex gap-2">
-                    {recentlyAddedMessages.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setCurrentCard(idx)}
-                        className={`h-3 w-3 rounded-full transition-colors ${
-                          idx === currentCard ? 'bg-gray-300' : 'bg-gray-600'
+                {isMobile && (
+                  <div className="flex justify-center space-x-2 mt-4">
+                    {recentlyAddedMessages.map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${
+                          currentCard === index ? 'bg-gray-800' : 'bg-gray-300'
                         }`}
+                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        transition={{ duration: 0.2 }}
                       />
                     ))}
                   </div>
+
 
                   <button
                     onClick={handleNext}
