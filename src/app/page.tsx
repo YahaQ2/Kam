@@ -142,9 +142,6 @@ export default function HomePage() {
               <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6">
                 Menfess warga Unand
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-                Sampaikan perasaanmu dengan cara yang berkesan 
-              </p>
               <div className="flex flex-col items-center gap-4 mb-8">
                 <Link
                   href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
