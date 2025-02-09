@@ -6,9 +6,10 @@ import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import dynamic from "next/dynamic";
+import { ArrowUpRight } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
-import { motion, AnimatePresence, useMotionValue } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Menfess {
   id: number;
@@ -31,8 +32,9 @@ interface MenfessResponse {
   data: Menfess[];
 }
 
-const SWIPE_THRESHOLD = 100;
-const VISIBLE_MESSAGES = 6;
+const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
+  ssr: false,
+});
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -40,66 +42,10 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
-  const dragX = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout>();
-
-  const shuffleArray = (array: Menfess[]) => {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  };
-
-  const validateMenfess = (data: any): data is Menfess => {
-    return (
-      typeof data?.id === 'number' &&
-      typeof data?.sender === 'string' &&
-      typeof data?.recipient === 'string' &&
-      typeof data?.message === 'string'
-    );
-  };
-
-  const onDragEnd = () => {
-    const x = dragX.get();
-    if (x <= -SWIPE_THRESHOLD) handleNext();
-    else if (x >= SWIPE_THRESHOLD) handlePrevious();
-  };
-
-  const handleNext = () => {
-    setCurrentCard(prev => (prev + 1) % recentlyAddedMessages.length);
-    resetAutoSlide();
-  };
-
-  const handlePrevious = () => {
-    setCurrentCard(prev => (prev - 1 + recentlyAddedMessages.length) % recentlyAddedMessages.length);
-    resetAutoSlide();
-  };
-
-  const resetAutoSlide = () => {
-    clearInterval(intervalRef.current!);
-    intervalRef.current = setInterval(handleNext, 5000);
-  };
-
-  const getFormattedDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return 'Tanggal tidak valid';
-    }
-  };
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 640);
-      setCurrentCard(0);
-    };
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -111,83 +57,63 @@ export default function HomePage() {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
         if (!response.ok) throw new Error("Gagal memuat pesan");
         
-        const data: MenfessResponse = await response.json();
+        const responseData: MenfessResponse = await response.json();
         
-        if (data?.status && Array.isArray(data.data)) {
-          const validMessages = data.data.filter(validateMenfess);
-          const shuffled = shuffleArray(validMessages).slice(0, VISIBLE_MESSAGES);
-          setRecentlyAddedMessages(shuffled);
+        if (responseData.status && Array.isArray(responseData.data)) {
+          const sortedMessages = responseData.data
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, 5);
+          
+          setRecentlyAddedMessages(sortedMessages);
         } else {
           throw new Error("Format data tidak valid");
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-        console.error('Fetch error:', err);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchMessages();
   }, []);
 
-  useEffect(() => {
-    if (recentlyAddedMessages.length > 0) {
-      resetAutoSlide();
+  const handleScroll = () => {
+    if (containerRef.current) {
+      const scrollPosition = containerRef.current.scrollLeft;
+      const cardWidth = containerRef.current.offsetWidth;
+      setCurrentCard(Math.round(scrollPosition / cardWidth));
     }
-    return () => clearInterval(intervalRef.current!);
-  }, [recentlyAddedMessages]);
+  };
 
-  const isNightTime = () => {
-    const currentHour = new Date().getHours();
-    return currentHour >= 18;
+  const cardVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -50 }
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
       <Navbar />
-      
       <main className="flex-grow">
-        <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          <div className="container mx-auto px-4 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+        <div className="container mx-auto px-4 py-8 md:py-16 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">Menfess Masyarakat Unand</h2>
+          
+          <div className="flex flex-col items-center gap-4 mb-8">
+            <Link
+              href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
+              className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <div className="mb-8">
-                {isNightTime() ? (
-                  <span className="text-4xl">🌙</span>
-                ) : (
-                  <Sparkles className="h-16 w-16 text-yellow-400 mx-auto animate-pulse" />
-                )}
-              </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                Menfess warga Unand
-              </h1>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-                Sampaikan perasaanmu dengan cara yang berkesan 
-              </p>
-              <div className="flex flex-col items-center gap-4 mb-8">
-                <Link
-                  href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
-                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span>Kirim Saran/Masukan</span>
-                  <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-                </Link>
-              </div>
-            </motion.div>
+              <span>Kirim Saran/Masukan</span>
+              <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+            </Link>
+          </div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row justify-center gap-6 mb-16"
-            >
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12 md:mb-16">
+            <div className="flex flex-col sm:flex-row sm:gap-4 gap-4">
               <Button
                 asChild
                 className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
@@ -200,138 +126,104 @@ export default function HomePage() {
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
-              <Button
-                asChild
-                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors"
-              >
-                <Link href="https://ziwa-351410.web.app">
-                  Ziwa - Cari Teman baru & fun space
-                </Link>
-              </Button>
-            </motion.div>
-          </div>
-        </section>
-
-        <section className="py-16 md:py-24 bg-gray-900">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
-                MENFESS TERBARU
-              </h2>
-              <p className="text-gray-400 max-w-xl mx-auto">
-                Trending menfess
-              </p>
             </div>
+            
+            <Button
+              asChild
+              className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors"
+            >
+              <Link href="https://ziwa-351410.web.app">
+                Ziwa - Cari Teman & Curhat
+              </Link>
+            </Button>
+          </div>
 
+          <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+            <DynamicCarousel />
+          </div>
+
+          <div className="mt-16">
+            <h3 className="text-2xl md:text-3xl font-bold mb-8">Menfess Terbaru</h3>
+            
             {loading ? (
-              <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
+              <div className="h-40 flex items-center justify-center">Memuat...</div>
             ) : error ? (
-              <p className="text-red-500 text-center">{error}</p>
+              <p className="text-red-500">{error}</p>
             ) : recentlyAddedMessages.length === 0 ? (
-              <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
+              <p>Tidak ada pesan terbaru</p>
             ) : (
-              <div className="relative max-w-[400px] mx-auto overflow-visible">
+              <div className="relative">
                 <div 
                   ref={containerRef}
-                  className="flex overflow-hidden justify-center"
+                  className={`flex ${
+                    isMobile 
+                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide' 
+                      : 'overflow-hidden'
+                  }`}
+                  onScroll={handleScroll}
                 >
-                  <motion.div
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    onDragEnd={onDragEnd}
-                    style={{ 
-                      x: dragX,
-                      translateX: `-${currentCard * 100}%`
-                    }}
-                    className="flex cursor-grab active:cursor-grabbing h-full"
-                  >
-                    <AnimatePresence initial={false}>
-                      {recentlyAddedMessages.map((msg, index) => (
-                        <motion.div
-                          key={msg.id}
-                          initial={{ opacity: 0, x: index > currentCard ? 100 : -100 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: index > currentCard ? -100 : 100 }}
-                          transition={{ duration: 0.3 }}
-                          className="w-full min-w-full md:w-[400px] h-full flex-shrink-0 px-4"
-                        >
-                          <Link
-                            href={`/message/${msg.id}`}
-                            className="block h-full w-full p-4"
-                          >
-                            <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 relative z-10">
-                              <CarouselCard
-                                recipient={msg.recipient || '-'}
-                                sender={msg.sender || '-'}
-                                message={msg.message || 'Pesan tidak tersedia'}
-                                songTitle={msg.track?.title}
-                                artist={msg.track?.artist}
-                                coverUrl={msg.track?.cover_img}
-                                spotifyEmbed={
-                                  msg.spotify_id && (
-                                    <div className="px-4 pb-4">
-                                      <iframe
-                                        className="w-full rounded-lg shadow-md"
-                                        src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                        width="100%"
-                                        height="80"
-                                        frameBorder="0"
-                                        allow="encrypted-media"
-                                      />
-                                    </div>
-                                  )
-                                }
-                              />
-                              <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                                <p className="text-sm text-white text-center mt-2">
-                                  {getFormattedDate(msg.created_at)}
-                                </p>
-                              </div>
-                            </div>
-                          </Link>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </motion.div>
+                  <AnimatePresence initial={false}>
+                    {recentlyAddedMessages.map((msg, index) => (
+                      <motion.div
+                        key={msg.id}
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        transition={{ duration: 0.3 }}
+                        className={`${
+                          isMobile 
+                            ? 'flex-shrink-0 w-full snap-center p-4' 
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                        }`}
+                      >
+                        <Link href={`/message/${msg.id}`}>
+                          <CarouselCard 
+                            to={msg.recipient} 
+                            from={msg.sender} 
+                            message={msg.message}
+                            songTitle={msg.track?.title}
+                            artist={msg.track?.artist}
+                            coverUrl={msg.track?.cover_img}
+                            spotifyEmbed={
+                              msg.spotify_id && (
+                                <iframe
+                                  className="w-full mt-4 rounded-lg"
+                                  src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                  width="100%"
+                                  height="80"
+                                  frameBorder="0"
+                                  allow="encrypted-media"
+                                />
+                              )
+                            }
+                          />
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
 
-                <div className="flex items-center justify-center gap-4 mt-8">
-                  <button
-                    onClick={handlePrevious}
-                    disabled={currentCard === 0}
-                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronLeft className="h-6 w-6 text-gray-300" />
-                  </button>
-                  
-                  <div className="flex gap-2">
-                    {recentlyAddedMessages.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setCurrentCard(idx)}
-                        className={`h-3 w-3 rounded-full transition-colors ${
-                          idx === currentCard ? 'bg-gray-300' : 'bg-gray-600'
+                {isMobile && (
+                  <div className="flex justify-center space-x-2 mt-4">
+                    {recentlyAddedMessages.map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${
+                          currentCard === index ? 'bg-gray-800' : 'bg-gray-300'
                         }`}
+                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        transition={{ duration: 0.2 }}
                       />
                     ))}
                   </div>
-
-                  <button
-                    onClick={handleNext}
-                    disabled={currentCard === recentlyAddedMessages.length - 1}
-                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronRight className="h-6 w-6 text-gray-300" />
-                  </button>
-                </div>
+                )}
               </div>
             )}
           </div>
-        </section>
+        </div>
       </main>
-
       <Footer />
     </div>
   );
-}
+}  
