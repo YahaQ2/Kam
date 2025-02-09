@@ -247,7 +247,7 @@ export default function HomePage() {
                         <motion.div
                           key={msg.id}
                           className="w-full h-full flex-shrink-0 px-4"
-                          initial={{ opacity: 0, scale: 0.9 }}
+                          initial={{ opacity: 1, scale: 0.9 }}
                           animate={{ 
                             opacity: 1,
                             scale: 1,
