@@ -142,7 +142,7 @@ export default function HomePage() {
               <h1 className="text-4xl md:text-6xl font-bold text-gray-100 mb-6">
                 Menfess Warga Unand
               </h1>
-              <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-12">
+              <p className="text-lg md:text-xl text-black-300 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
               <div className="flex flex-col items-center gap-4 mb-8">
@@ -340,4 +340,4 @@ export default function HomePage() {
       <Footer />
     </div>
   );
-}
+} 
