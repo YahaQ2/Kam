@@ -42,11 +42,12 @@ export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const shuffleArray = (array: Menfess[]) => {
-    for (let i = array.length - 1; i > 0; i--) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-    return array;
+    return newArray;
   };
 
   const validateMenfess = (data: any): data is Menfess => {
@@ -93,7 +94,7 @@ export default function HomePage() {
         
         if (data?.status && Array.isArray(data.data)) {
           const validMessages = data.data.filter(validateMenfess);
-          const shuffled = shuffleArray(validMessages).slice(0, VISIBLE_MESSAGES);
+          const shuffled = shuffleArray(validMessages).slice(0, VISIBLE_MESSAGES * 2);
           setRecentlyAddedMessages(shuffled);
         } else {
           throw new Error("Format data tidak valid");
@@ -109,6 +110,20 @@ export default function HomePage() {
     fetchMessages();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRecentlyAddedMessages(prev => {
+        if (prev.length < 2) return prev;
+        const newArray = [...prev];
+        const randomIndex = Math.floor(Math.random() * (newArray.length - 1)) + 1;
+        [newArray[0], newArray[randomIndex]] = [newArray[randomIndex], newArray[0]];
+        return newArray;
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const handleScroll = () => {
     if (containerRef.current) {
       const scrollPosition = containerRef.current.scrollLeft;
@@ -118,9 +133,14 @@ export default function HomePage() {
   };
 
   const cardVariants = {
-    hidden: { opacity: 0, x: 50 },
-    visible: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -50 }
+    hidden: { opacity: 0, scale: 0.8, rotate: -5 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      rotate: 0,
+      transition: { type: 'spring', stiffness: 120 } 
+    },
+    exit: { opacity: 0, scale: 0.8, rotate: 5 }
   };
 
   return (
@@ -138,7 +158,13 @@ export default function HomePage() {
             >
               <div className="mb-8">
                 {isNightTime() ? (
-                  <span className="text-4xl">🌙</span>
+                  <motion.span 
+                    className="text-4xl"
+                    animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    🌙
+                  </motion.span>
                 ) : (
                   <Sparkles className="h-16 w-16 text-yellow-400 mx-auto animate-pulse" />
                 )}
@@ -204,13 +230,13 @@ export default function HomePage() {
                   ref={containerRef}
                   className={`flex ${
                     isMobile 
-                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide' 
-                      : 'overflow-hidden'
+                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
+                      : 'overflow-hidden justify-center'
                   }`}
                   onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.map((msg, index) => (
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg, index) => (
                       <motion.div
                         key={msg.id}
                         variants={cardVariants}
@@ -263,7 +289,7 @@ export default function HomePage() {
 
                 {isMobile && (
                   <div className="flex justify-center space-x-2 mt-4">
-                    {recentlyAddedMessages.map((_, index) => (
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
                       <motion.div
                         key={index}
                         className={`h-2 w-2 rounded-full ${
