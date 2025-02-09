@@ -45,7 +45,11 @@ export default function HomePage() {
   const intervalRef = useRef<NodeJS.Timeout>();
 
   const shuffleArray = (array: Menfess[]) => {
-    return [...array].sort(() => Math.random() - 0.5);
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   };
 
   const validateMenfess = (data: any): data is Menfess => {
@@ -131,10 +135,9 @@ export default function HomePage() {
     return () => clearInterval(intervalRef.current!);
   }, [recentlyAddedMessages]);
 
-  // Function to determine if it's night time (after 6 PM)
   const isNightTime = () => {
     const currentHour = new Date().getHours();
-    return currentHour >= 18; // 6 PM
+    return currentHour >= 18;
   };
 
   return (
@@ -154,7 +157,7 @@ export default function HomePage() {
                 {isNightTime() ? (
                   <span className="text-4xl">🌙</span>
                 ) : (
-                  <Sparkles className="h-16 w-16 text-blue-500 mx-auto animate-pulse" />
+                  <Sparkles className="h-16 w-16 text-yellow-400 mx-auto animate-pulse" />
                 )}
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
@@ -218,11 +221,11 @@ export default function HomePage() {
             </div>
 
             {loading ? (
-              <div className="h-40 flex items-center justify-center">Memuat...</div>
+              <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
             ) : error ? (
-              <p className="text-red-500">{error}</p>
+              <p className="text-red-500 text-center">{error}</p>
             ) : recentlyAddedMessages.length === 0 ? (
-              <p className="text-gray-300">Tidak ada pesan terbaru</p>
+              <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
             ) : (
               <div className="relative">
                 <div 
@@ -261,10 +264,10 @@ export default function HomePage() {
                           >
                             <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                               <CarouselCard
-                                to={msg.recipient || '-'}
-                                from={msg.sender || '-'}
+                                recipient={msg.recipient || '-'}
+                                sender={msg.sender || '-'}
                                 message={msg.message || 'Pesan tidak tersedia'}
-                                songTitle={msg.track?.title}
+ songTitle={msg.track?.title}
                                 artist={msg.track?.artist}
                                 coverUrl={msg.track?.cover_img}
                                 spotifyEmbed={
