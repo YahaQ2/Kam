@@ -76,16 +76,3 @@ body {
   }
 }
 
-/* Untuk menghindari overflow horizontal di mobile */@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@media (max-width: 640px) {
-  html {
-    overflow-x: hidden;
-  }
-  body {
-    position: relative;
-    width: 100vw;
-  }
-}
