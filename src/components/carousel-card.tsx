@@ -41,16 +41,16 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
       <Card 
         className={`w-72 h-96 shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col relative 
           ${hasInappropriateWords 
-            ? "bg-red-200" 
+            ? "bg-red-100" 
             : isLoveMessage 
-              ? "bg-pink-200" 
+              ? "bg-pink-100" 
               : "bg-white"}
         `}
       >
         {/* Background Love */}
         {isLoveMessage && !hasInappropriateWords && (
           <div 
-            className="absolute inset-0 bg-cover bg-center opacity-20" 
+            className="absolute inset-0 bg-cover bg-center opacity-10" 
             style={{ backgroundImage: "url('https://res.cloudinary.com/depbfbxtm/image/upload/v1738829131/dkncarmepvddfdt93cxj.png')" }} 
           />
         )}
@@ -58,7 +58,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
         {/* Background Unand */}
         {hasUnandWords && !hasInappropriateWords && (
           <div 
-            className="absolute inset-0 bg-cover bg-center opacity-20" 
+            className="absolute inset-0 bg-cover bg-center opacity-10" 
             style={{ backgroundImage: "url('https://res.cloudinary.com/depbfbxtm/image/upload/v1738897074/IMG_20250207_095652_727_gsfzyg.jpg')" }} 
           />
         )}
@@ -66,29 +66,27 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
         <CardContent className="p-6 flex flex-col flex-grow relative">
           {/* Header */}
           <div className="space-y-1 mb-4 text-start">
-            <p className="text-sm text-gray-500">To: {to}</p>
-            <p className="text-sm text-gray-500">From: {from}</p>
+            <p className="text-sm font-medium text-gray-700">To: {to}</p>
+            <p className="text-sm font-medium text-gray-700">From: {from}</p>
           </div>
-                        
-<div className="flex flex-col items-center text-center p-6">
-  {/* ... konten lainnya */}
-</div>
+
           {/* Message */}
-                        
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center overflow-y-auto">
             <p
-              className={`text-xl font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis line-clamp-3 
-                font-['Reenie_Beanie'] ${
-                  hasInappropriateWords 
-                    ? "text-red-700" 
-                    : isLoveMessage 
-                      ? "text-pink-700" 
-                      : hasUnandWords
-                      ? "text-green-700"
-                      : "text-gray-700"
-                }
-              `}
-              title={message}
+              className={`text-2xl leading-relaxed text-center px-2 ${
+                hasInappropriateWords 
+                  ? "text-red-800 font-bold" 
+                  : isLoveMessage 
+                    ? "text-pink-800" 
+                    : hasUnandWords
+                    ? "text-green-800"
+                    : "text-gray-900"
+              }`}
+              style={{
+                fontFamily: "'Helvetica Neue', sans-serif",
+                lineHeight: "1.6",
+                wordBreak: "break-word"
+              }}
             >
               {message}
             </p>
@@ -96,16 +94,15 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 
           {/* Song Info */}
           {songTitle && artist && coverUrl && (
-            <div className="mt-4 flex items-center space-x-3 text-sm text-gray-600">
+            <div className="mt-4 flex items-center space-x-3 text-sm bg-gray-100 p-3 rounded-lg">
               <img 
                 src={coverUrl} 
                 alt={`${songTitle} cover`} 
-                className="w-15 h-20 object-cover rounded-md" 
+                className="w-16 h-16 object-cover rounded-md border-2 border-gray-200" 
               />
               <div className="flex-1 overflow-hidden">
-                <p className="font-semibold truncate">{songTitle}</p>
-                <p className="text-xs truncate">{artist}</p>
- 
+                <p className="font-semibold text-gray-800 truncate">{songTitle}</p>
+                <p className="text-xs text-gray-600 truncate">{artist}</p>
               </div>
             </div>
           )}
