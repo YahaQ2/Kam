@@ -124,14 +124,13 @@ export default function HomePage() {
   }, [recentlyAddedMessages]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-100 to-gray-900 text-gray-300">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-100 to-gray-900">
       <InitialAnimation />
-      
-      {/* Perbaikan Navbar */}
-      <div className="fixed top-0 w-full z-50 backdrop-blur-md bg-gray-100/10">
-        <Navbar className="text-gray-900 hover:text-gray-700 transition-colors" />
+      {/* Perubahan pada navbar - text hitam */}
+      <div className="text-gray-900">
+        <Navbar />
       </div>
-
+      
       <main className="flex-grow">
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
           <div className="container mx-auto px-4 text-center">
@@ -143,17 +142,17 @@ export default function HomePage() {
               <div className="mb-8">
                 <Sparkles className="h-16 w-16 text-gray-400 mx-auto animate-pulse" />
               </div>
-              {/* Perbaikan Judul */}
-              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-gray-700 via-gray-500 to-gray-300 bg-clip-text text-transparent mb-6 [text-shadow:_0_2px_8px_rgb(255_255_255_/_30%)]">
-                Menfess Warga Unand
+              {/* Perubahan pada judul - text hitam */}
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 [text-shadow:_0_2px_4px_rgb(0_0_0_/_40%)]">
+                Menfess warga Unand
               </h1>
-              <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-12">
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
               <div className="flex flex-col items-center gap-4 mb-8">
                 <Link
                   href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
-                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-300 hover:text-gray-100 transition-colors border border-gray-600 rounded-full hover:border-gray-400"
+                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-900 transition-colors border border-gray-400 rounded-full hover:border-gray-600"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -211,7 +210,7 @@ export default function HomePage() {
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-300 to-gray-100 bg-clip-text text-transparent mb-4 [text-shadow:_0_2px_4px_rgb(0_0_0_/_40%)]">
+              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-100 to-gray-300 bg-clip-text text-transparent mb-4 [text-shadow:_0_2px_4px_rgb(0_0_0_/_40%)]">
                 MENFESS TERBARU
               </h2>
               <p className="text-gray-400 max-w-xl mx-auto">
@@ -275,7 +274,7 @@ export default function HomePage() {
                         >
                           <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                             <CarouselCard
-                              to={msg.recipient || '-'}
+                              to={msg.rec ipient || '-'}
                               from={msg.sender || '-'}
                               message={msg.message || 'Pesan tidak tersedia'}
                               songTitle={msg.track?.title}
