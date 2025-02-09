@@ -287,7 +287,7 @@ export default function HomePage() {
                               />
                               <div className="p-4 bg-gray-700 rounded-b-2xl relative">
                                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                                <p className="text-sm text-gray-300 text-center mt-2">
+                                <p className="text-sm text-white-300 text-center mt-2">
                                   {getFormattedDate(msg.created_at)}
                                 </p>
                               </div>
