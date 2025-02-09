@@ -328,7 +328,7 @@ export default function HomePage() {
                     onClick={handleNext}
                     className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
                   >
-                    <ChevronRight className="h-6 w-6 text-indigo-600" />
+                    <ChevronRight className="h-6 w-6 text-indigo-300" />
                   </button>
                 </div>
               </div>
