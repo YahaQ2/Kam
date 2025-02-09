@@ -327,11 +327,7 @@ export default function HomePage() {
                     <ChevronRight className="h-6 w-6 text-gray-300" />
                   </button>
                 </div>
-              </div>
-            )}
-          </div>
-        </section>
-      </main>
+              </div>     </main>
 
       <Footer />
     </div>
