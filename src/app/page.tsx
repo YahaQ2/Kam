@@ -139,7 +139,7 @@ export default function HomePage() {
               <div className="mb-8">
                 <Sparkles className="h-16 w-16 text-gray-400 mx-auto animate-pulse" />
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-100 mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold text-black-100 mb-6">
                 Menfess Warga Unand
               </h1>
               <p className="text-lg md:text-xl text-black-300 max-w-3xl mx-auto mb-12">
