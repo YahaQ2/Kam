@@ -357,7 +357,7 @@ export function CarouselCard({
 }) {
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-1 p-6">
+      <div className="flex-100 p-100">
         <div className="space-y-4">
           <div className="text-center">
             <p className="text-sm text-gray-400">Untuk: {recipient}</p>
