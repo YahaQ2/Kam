@@ -6,7 +6,7 @@ import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles, Heart, MessageCircle } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
 
@@ -267,7 +267,7 @@ export default function HomePage() {
                                 recipient={msg.recipient || '-'}
                                 sender={msg.sender || '-'}
                                 message={msg.message || 'Pesan tidak tersedia'}
-songTitle={msg.track?.title}
+                                songTitle={msg.track?.title}
                                 artist={msg.track?.artist}
                                 coverUrl={msg.track?.cover_img}
                                 spotifyEmbed={
