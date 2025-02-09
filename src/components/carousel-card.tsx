@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect } from "react";
 
 interface CarouselCardProps {
   to: string;
@@ -79,8 +78,8 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
                   : isLoveMessage 
                     ? "text-pink-800" 
                     : hasUnandWords
-                    ? "text-green-800"
-                    : "text-gray-900"
+                      ? "text-green-800"
+                      : "text-gray-900" // Pastikan warna ini kontras dengan background
               }`}
               style={{
                 fontFamily: "'Helvetica Neue', sans-serif",
@@ -88,7 +87,8 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
                 wordBreak: "break-word"
               }}
             >
-              {message}
+              {/* Tambahkan fallback eksplisit */}
+              {message || "Pesan tidak tersedia"}
             </p>
           </div>
 
