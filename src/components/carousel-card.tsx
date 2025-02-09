@@ -1,4 +1,4 @@
- /* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect } from "react";
@@ -39,7 +39,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
       whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
     >
       <Card 
-        className={`w-72 h-96 shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col relative 
+        className={`w-64 h-96 shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col relative 
           ${hasInappropriateWords 
             ? "bg-red-100" 
             : isLoveMessage 
@@ -63,30 +63,26 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
           />
         )}
 
-        <CardContent className="p-6 flex flex-col flex-grow relative">
+        <CardContent className="p-8 flex flex-col h-full">
           {/* Header */}
-          <div className="space-y-1 mb-4 text-start">
-            <p className="text-sm font-medium text-gray-700">To: {to}</p>
-            <p className="text-sm font-medium text-gray-700">From: {from}</p>
+          <div className="space-y-1 mb-6 text-start">
+            <p className="text-sm text-gray-500">To: {to}</p>
+            <p className="text-sm text-gray-500">From: {from}</p>
           </div>
 
           {/* Message */}
-          <div className="flex-1 flex items-center justify-center overflow-y-auto">
+          <div className="flex-1 flex items-center justify-center">
             <p
-              className={`text-2xl leading-relaxed text-center px-2 ${
-                hasInappropriateWords 
+              className={`text-3xl text-gray-700 font-handwriting text-center leading-relaxed overflow-hidden text-ellipsis line-clamp-3 font-['Reenie_Beanie'] 
+                ${hasInappropriateWords 
                   ? "text-red-800 font-bold" 
                   : isLoveMessage 
                     ? "text-pink-800" 
                     : hasUnandWords
                     ? "text-green-800"
                     : "text-gray-900"
-              }`}
-              style={{
-                fontFamily: "'Helvetica Neue', sans-serif",
-                lineHeight: "1.6",
-                wordBreak: "break-word"
-              }}
+                }`}
+              title={message}
             >
               {message}
             </p>
@@ -94,15 +90,15 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
 
           {/* Song Info */}
           {songTitle && artist && coverUrl && (
-            <div className="mt-4 flex items-center space-x-3 text-sm bg-gray-100 p-3 rounded-lg">
+            <div className="mt-4 flex items-center space-x-3 text-sm text-gray-600">
               <img 
                 src={coverUrl} 
                 alt={`${songTitle} cover`} 
                 className="w-16 h-16 object-cover rounded-md border-2 border-gray-200" 
               />
               <div className="flex-1 overflow-hidden">
-                <p className="font-semibold text-gray-800 truncate">{songTitle}</p>
-                <p className="text-xs text-gray-600 truncate">{artist}</p>
+                <p className="font-semibold truncate">{songTitle}</p>
+                <p className="text-xs truncate">{artist}</p>
               </div>
             </div>
           )}
