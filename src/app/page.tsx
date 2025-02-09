@@ -318,7 +318,7 @@ export default function HomePage() {
                         key={idx}
                         onClick={() => setCurrentIndex(idx)}
                         className={`h-3 w-3 rounded-full transition-colors ${
-                          idx === currentIndex ? 'bg-indigo-600' : 'bg-gray-300'
+                          idx === currentIndex ? 'bg-indigo-300' : 'bg-gray-300'
                         }`}
                       />
                     ))}
