@@ -271,7 +271,7 @@ export default function HomePage() {
                             if (Math.abs(dragX.get()) > 10) e.preventDefault();
                           }}
                         >
-                          <div className="h-full w-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-b-4 border-indigo-100">
+                          <div className="h-full w-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                             <CarouselCard
                               to={msg.recipient || '-'}
                               from={msg.sender || '-'}
@@ -294,8 +294,9 @@ export default function HomePage() {
                                 )
                               }
                             />
-                            <div className="p-4 bg-gray-50 rounded-b-2xl">
-                              <p className="text-sm text-gray-500 text-center">
+                            <div className="p-4 bg-gray-50 rounded-b-2xl relative">
+                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-0.5 bg-indigo-200 rounded-full" />
+                              <p className="text-sm text-gray-500 text-center mt-2">
                                 {getFormattedDate(msg.created_at)}
                               </p>
                             </div>
