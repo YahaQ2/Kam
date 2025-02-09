@@ -7,6 +7,7 @@ import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
 import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
 
 interface Menfess {
@@ -32,53 +33,6 @@ interface MenfessResponse {
 
 const SWIPE_THRESHOLD = 100;
 const VISIBLE_MESSAGES = 6;
-
-const CarouselCard = ({
-  recipient,
-  sender,
-  message,
-  songTitle,
-  artist,
-  coverUrl,
-  spotifyEmbed,
-}: {
-  recipient: string;
-  sender: string;
-  message: string;
-  songTitle?: string;
-  artist?: string;
-  coverUrl?: string;
-  spotifyEmbed?: React.ReactNode;
-}) => (
-  <div className="bg-white p-6 rounded-xl shadow-lg h-full flex flex-col">
-    <div className="mb-4">
-      <h3 className="text-gray-500 text-sm mb-1">Untuk: {recipient}</h3>
-      <h3 className="text-gray-500 text-sm">Dari: {sender}</h3>
-    </div>
-
-    <div className="bg-gray-50 p-4 rounded-lg mb-4 flex-grow">
-      <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
-        {message}
-      </p>
-    </div>
-
-    {coverUrl && (
-      <div className="flex items-center gap-4 mb-4">
-        <img
-          src={coverUrl}
-          alt="Album cover"
-          className="w-12 h-12 rounded-md object-cover"
-        />
-        <div>
-          <p className="text-gray-900 font-medium text-sm">{songTitle}</p>
-          <p className="text-gray-500 text-xs">{artist}</p>
-        </div>
-      </div>
-    )}
-
-    {spotifyEmbed}
-  </div>
-);
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -255,14 +209,14 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-16 md:py-24 bg-gray-50">
+        <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
                 MENFESS TERBARU
               </h2>
-              <p className="text-gray-600 max-w-xl mx-auto">
-                Pesan-pesan yang baru saja dikirim
+              <p className="text-gray-400 max-w-xl mx-auto">
+                Trending menfess
               </p>
             </div>
 
@@ -293,7 +247,7 @@ export default function HomePage() {
                         <motion.div
                           key={msg.id}
                           className="w-full h-full flex-shrink-0 px-4"
-                          initial={{ opacity: 0, scale: 0.9 }}
+                          initial={{ opacity: 1, scale: 1 }}
                           animate={{ 
                             opacity: 1,
                             scale: 1,
@@ -308,7 +262,7 @@ export default function HomePage() {
                             href={`/message/${msg.id}`}
                             className="block h-full w-full p-4"
                           >
-                            <div className="h-full w-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                               <CarouselCard
                                 recipient={msg.recipient || '-'}
                                 sender={msg.sender || '-'}
@@ -331,6 +285,12 @@ export default function HomePage() {
                                   )
                                 }
                               />
+                              <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                                <p className="text-sm text-white text-center mt-2">
+                                  {getFormattedDate(msg.created_at)}
+                                </p>
+                              </div>
                             </div>
                           </Link>
                         </motion.div>
@@ -342,9 +302,9 @@ export default function HomePage() {
                 <div className="flex items-center justify-center gap-4 mt-8">
                   <button
                     onClick={handlePrevious}
-                    className="p-2 rounded-full bg-gray-200 shadow-md hover:shadow-lg transition-shadow"
+                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
                   >
-                    <ChevronLeft className="h-6 w-6 text-gray-700" />
+                    <ChevronLeft className="h-6 w-6 text-gray-300" />
                   </button>
                   
                   <div className="flex gap-2">
@@ -353,7 +313,7 @@ export default function HomePage() {
                         key={idx}
                         onClick={() => setCurrentCard(idx)}
                         className={`h-3 w-3 rounded-full transition-colors ${
-                          idx === currentCard ? 'bg-gray-700' : 'bg-gray-300'
+                          idx === currentCard ? 'bg-gray-300' : 'bg-gray-600'
                         }`}
                       />
                     ))}
@@ -361,9 +321,9 @@ export default function HomePage() {
 
                   <button
                     onClick={handleNext}
-                    className="p-2 rounded-full bg-gray-200 shadow-md hover:shadow-lg transition-shadow"
+                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
                   >
-                    <ChevronRight className="h-6 w-6 text-gray-700" />
+                    <ChevronRight className="h-6 w-6 text-gray-300" />
                   </button>
                 </div>
               </div>
@@ -374,5 +334,5 @@ export default function HomePage() {
 
       <Footer />
     </div>
-  );
+  ); 
 }
