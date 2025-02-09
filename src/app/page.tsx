@@ -72,9 +72,12 @@ export default function HomePage() {
     }
   };
 
-  const isNightTime = () => {
+  const getTimeStatus = () => {
     const currentHour = new Date().getHours();
-    return currentHour >= 18;
+    return {
+      isNight: currentHour >= 18 || currentHour < 7,
+      isMorning: currentHour >= 7 && currentHour < 18
+    };
   };
 
   useEffect(() => {
@@ -143,6 +146,36 @@ export default function HomePage() {
     exit: { opacity: 0, scale: 0.8, rotate: 5 }
   };
 
+  const renderTimeIcon = () => {
+    const { isNight, isMorning } = getTimeStatus();
+    
+    return (
+      <motion.div 
+        key={isNight ? 'moon' : 'sparkles'}
+        initial={{ scale: 0 }}
+        animate={{ rotate: isNight ? [0, 10, -10, 0] : 0, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {isNight ? (
+          <motion.span
+            className="text-4xl"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            🌙
+          </motion.span>
+        ) : (
+          <motion.div
+            animate={{ rotate: [0, 20, -20, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <Sparkles className="h-16 w-16 text-yellow-400 mx-auto" />
+          </motion.div>
+        )}
+      </motion.div>
+    );
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
@@ -157,17 +190,7 @@ export default function HomePage() {
               transition={{ duration: 0.8 }}
             >
               <div className="mb-8">
-                {isNightTime() ? (
-                  <motion.span 
-                    className="text-4xl"
-                    animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    🌙
-                  </motion.span>
-                ) : (
-                  <Sparkles className="h-16 w-16 text-yellow-400 mx-auto animate-pulse" />
-                )}
+                {renderTimeIcon()}
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
                 Menfess warga Unand
@@ -252,6 +275,16 @@ export default function HomePage() {
                       >
                         <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
                           <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <div className="px-4 pt-4">
+                              <div className="flex justify-between text-sm mb-2">
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">From:</span> {msg.sender}
+                                </div>
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">To:</span> {msg.recipient}
+                                </div>
+                              </div>
+                            </div>
                             <CarouselCard
                               recipient={msg.recipient || '-'}
                               sender={msg.sender || '-'}
