@@ -304,7 +304,7 @@ export default function HomePage() {
                     onClick={handlePrevious}
                     className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
                   >
-                    <ChevronLeft className="h-6 w-6 text-white-300" />
+                    <ChevronLeft className="h-6 w-6 text-gray-300" />
                   </button>
                   
                   <div className="flex gap-2">
