@@ -300,9 +300,8 @@ export default function HomePage() {
                           </Link>
                         </motion.div>
                       ))}
-                    </AnimatePresence>                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                    </AnimatePresence>
+                  </motion.div>
                 </div>
 
                 {isMobile && (
@@ -318,8 +317,15 @@ export default function HomePage() {
                       />
                     ))}
                   </div>
+                )}
 
-
+                <div className="flex justify-between items-center mt-4">
+                  <button
+                    onClick={handlePrevious}
+                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
+                  >
+                    <ChevronLeft className="h-6 w-6 text-gray-300" />
+                  </button>
                   <button
                     onClick={handleNext}
                     className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
@@ -327,7 +333,11 @@ export default function HomePage() {
                     <ChevronRight className="h-6 w-6 text-gray-300" />
                   </button>
                 </div>
-              </div>     </main>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
 
       <Footer />
     </div>
