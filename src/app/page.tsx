@@ -139,7 +139,7 @@ export default function HomePage() {
               <div className="mb-8">
                 <Sparkles className="h-16 w-16 text-gray-400 mx-auto animate-pulse" />
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-gray-300 to-gray-100 bg-clip-text text-transparent mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-gray-100 to-gray-300 bg-clip-text text-transparent mb-6 [text-shadow:_0_2px_4px_rgb(0_0_0_/_40%)]">
                 Menfess warga Unand
               </h1>
               <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-12">
@@ -206,7 +206,7 @@ export default function HomePage() {
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-300 to-gray-100 bg-clip-text text-transparent mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-100 to-gray-300 bg-clip-text text-transparent mb-4 [text-shadow:_0_2px_4px_rgb(0_0_0_/_40%)]">
                 MENFESS TERBARU
               </h2>
               <p className="text-gray-400 max-w-xl mx-auto">
