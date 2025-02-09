@@ -96,10 +96,7 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 640);
-      setCurrentCard(0);
-    };
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -230,10 +227,10 @@ export default function HomePage() {
             ) : recentlyAddedMessages.length === 0 ? (
               <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
             ) : (
-              <div className="relative max-w-[400px] mx-auto overflow-visible">
+              <div className="relative max-w-[400px] mx-auto">
                 <div 
                   ref={containerRef}
-                  className="flex overflow-hidden justify-center"
+                  className={`flex overflow-hidden justify-center`}
                 >
                   <motion.div
                     drag="x"
@@ -246,20 +243,26 @@ export default function HomePage() {
                     className="flex cursor-grab active:cursor-grabbing h-full"
                   >
                     <AnimatePresence initial={false}>
-                      {recentlyAddedMessages.map((msg, index) => (
+                      {recentlyAddedMessages.map((msg) => (
                         <motion.div
                           key={msg.id}
-                          initial={{ opacity: 0, x: index > currentCard ? 100 : -100 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: index > currentCard ? -100 : 100 }}
-                          transition={{ duration: 0.3 }}
-                          className="w-full min-w-full md:w-[400px] h-full flex-shrink-0 px-4"
+                          className="w-full md:w-[400px] h-full flex-shrink-0 px-4"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ 
+                            opacity: 1,
+                            scale: 1,
+                            transition: { 
+                              type: "spring", 
+                              stiffness: 300, 
+                              damping: 30 
+                            }
+                          }}
                         >
                           <Link
                             href={`/message/${msg.id}`}
                             className="block h-full w-full p-4"
                           >
-                            <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 relative z-10">
+                            <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                               <CarouselCard
                                 recipient={msg.recipient || '-'}
                                 sender={msg.sender || '-'}
@@ -299,8 +302,7 @@ export default function HomePage() {
                 <div className="flex items-center justify-center gap-4 mt-8">
                   <button
                     onClick={handlePrevious}
-                    disabled={currentCard === 0}
-                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
                   >
                     <ChevronLeft className="h-6 w-6 text-gray-300" />
                   </button>
@@ -319,8 +321,7 @@ export default function HomePage() {
 
                   <button
                     onClick={handleNext}
-                    disabled={currentCard === recentlyAddedMessages.length - 1}
-                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
                   >
                     <ChevronRight className="h-6 w-6 text-gray-300" />
                   </button>
