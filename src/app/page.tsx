@@ -334,5 +334,59 @@ export default function HomePage() {
 
       <Footer />
     </div>
-  ); 
+  );
+}
+
+// components/carousel-card.tsx
+export function CarouselCard({
+  recipient,
+  sender,
+  message,
+  songTitle,
+  artist,
+  coverUrl,
+  spotifyEmbed,
+}: {
+  recipient: string;
+  sender: string;
+  message: string;
+  songTitle?: string;
+  artist?: string;
+  coverUrl?: string;
+  spotifyEmbed?: React.ReactNode;
+}) {
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 p-6">
+        <div className="space-y-4">
+          <div className="text-center">
+            <p className="text-sm text-gray-400">Untuk: {recipient}</p>
+            <p className="text-sm text-gray-400">Dari: {sender}</p>
+          </div>
+          
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <p className="text-gray-800 text-sm leading-relaxed">
+              {message}
+            </p>
+          </div>
+
+          {coverUrl && (
+            <div className="flex items-center space-x-4">
+              <img
+                src={coverUrl}
+                alt="Album cover"
+                className="w-16 h-16 rounded-lg"
+              />
+              <div>
+                <p className="text-sm font-medium text-gray-200">{songTitle}</p>
+                <p className="text-xs text-gray-400">{artist}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {spotifyEmbed}
+    </div>
+  );
 }
