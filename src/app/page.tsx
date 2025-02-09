@@ -124,7 +124,7 @@ export default function HomePage() {
   }, [recentlyAddedMessages]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-indigo-50 text-gray-800">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-100 to-gray-900 text-gray-300">
       <InitialAnimation />
       <Navbar />
       
@@ -137,15 +137,18 @@ export default function HomePage() {
               transition={{ duration: 0.8 }}
             >
               <div className="mb-8">
-                <Sparkles className="h-16 w-16 text-amber-400 mx-auto animate-pulse" />
+                <Sparkles className="h-16 w-16 text-gray-400 mx-auto animate-pulse" />
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-gray-300 to-gray-100 bg-clip-text text-transparent mb-6">
                 Menfess warga Unand
               </h1>
+              <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-12">
+                Sampaikan perasaanmu dengan cara yang berkesan 
+              </p>
               <div className="flex flex-col items-center gap-4 mb-8">
                 <Link
                   href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
-                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
+                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-300 hover:text-gray-100 transition-colors border border-gray-600 rounded-full hover:border-gray-400"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -163,76 +166,73 @@ export default function HomePage() {
             >
               <Button
                 asChild
-                className="group relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group relative overflow-hidden bg-gradient-to-r from-gray-600 to-gray-800 text-white px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Link href="/message">
                   <span className="relative z-10 flex items-center gap-2">
                     <MessageCircle className="h-5 w-5" />
                     Kirim Menfess
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
               </Button>
 
               <Button
                 asChild
-                className="group relative overflow-hidden bg-white border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group relative overflow-hidden bg-gray-800 border-2 border-gray-600 text-gray-300 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Link href="/search-message">
                   <span className="relative z-10 flex items-center gap-2">
                     <Heart className="h-5 w-5" />
                     Explore Menfess
                   </span>
-                  <div className="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
               </Button>
 
               <Button
                 asChild
-                className="group relative overflow-hidden bg-white border-2 border-indigo-600 text-indigo-600 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group relative overflow-hidden bg-gray-800 border-2 border-gray-600 text-gray-300 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Link href="https://ziwa-351410.web.app">
                   <span className="relative z-10 flex items-center gap-2">
                     <Heart className="h-5 w-5" />
                     Ziwa - Cari Teman baru & fun space
                   </span>
-                  <div className="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
               </Button>
             </motion.div>
           </div>
         </section>
 
-        <section className="py-16 md:py-24 bg-white">
+        <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-300 to-gray-100 bg-clip-text text-transparent mb-4">
                 MENFESS TERBARU
               </h2>
-              <p className="text-gray-600 max-w-xl mx-auto">
+              <p className="text-gray-400 max-w-xl mx-auto">
                 Trending menfess
               </p>
             </div>
 
             {loading ? (
               <div className="h-96 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent" />
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-500 border-t-transparent" />
               </div>
             ) : error ? (
-              <div className="text-center py-12 bg-red-50 rounded-xl">
-                <p className="text-red-600 flex items-center justify-center gap-2">
+              <div className="text-center py-12 bg-gray-800 rounded-xl">
+                <p className="text-gray-300 flex items-center justify-center gap-2">
                   <span className="text-xl">⚠️</span>
                   {error}
                 </p>
               </div>
             ) : recentlyAddedMessages.length === 0 ? (
-              <div className="text-center py-12 bg-blue-50 rounded-xl">
-                <p className="text-blue-600">Belum ada menfess terbaru</p>
+              <div className="text-center py-12 bg-gray-800 rounded-xl">
+                <p className="text-gray-300">Belum ada menfess terbaru</p>
               </div>
             ) : (
               <div className="relative overflow-hidden group">
-                <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
-                <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
+                <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-gray-900 via-gray-900/80 to-transparent z-10" />
+                <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-gray-900 via-gray-900/80 to-transparent z-10" />
 
                 <div className="relative h-[600px] w-full max-w-4xl mx-auto">
                   <motion.div
@@ -268,7 +268,7 @@ export default function HomePage() {
                             if (Math.abs(dragX.get()) > 10) e.preventDefault();
                           }}
                         >
-                          <div className="h-full w-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                             <CarouselCard
                               to={msg.recipient || '-'}
                               from={msg.sender || '-'}
@@ -291,9 +291,9 @@ export default function HomePage() {
                                 )
                               }
                             />
-                            <div className="p-4 bg-gray-50 rounded-b-2xl relative">
-                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-0.5 bg-indigo-200 rounded-full" />
-                              <p className="text-sm text-gray-500 text-center mt-2">
+                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <p className="text-sm text-gray-300 text-center mt-2">
                                 {getFormattedDate(msg.created_at)}
                               </p>
                             </div>
@@ -307,9 +307,9 @@ export default function HomePage() {
                 <div className="flex items-center justify-center gap-4 mt-8">
                   <button
                     onClick={handlePrevious}
-                    className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
+                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
                   >
-                    <ChevronLeft className="h-6 w-6 text-indigo-300" />
+                    <ChevronLeft className="h-6 w-6 text-gray-300" />
                   </button>
                   
                   <div className="flex gap-2">
@@ -318,7 +318,7 @@ export default function HomePage() {
                         key={idx}
                         onClick={() => setCurrentIndex(idx)}
                         className={`h-3 w-3 rounded-full transition-colors ${
-                          idx === currentIndex ? 'bg-indigo-300' : 'bg-gray-300'
+                          idx === currentIndex ? 'bg-gray-300' : 'bg-gray-600'
                         }`}
                       />
                     ))}
@@ -326,9 +326,9 @@ export default function HomePage() {
 
                   <button
                     onClick={handleNext}
-                    className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow"
+                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
                   >
-                    <ChevronRight className="h-6 w-6 text-indigo-300" />
+                    <ChevronRight className="h-6 w-6 text-gray-300" />
                   </button>
                 </div>
               </div>
