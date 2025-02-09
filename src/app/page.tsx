@@ -124,9 +124,9 @@ export default function HomePage() {
   }, [recentlyAddedMessages]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-100 to-gray-900 text-gray-300">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 text-gray-900">
       <InitialAnimation />
-      <Navbar className="bg-gray-900 text-gray-100" />
+      <Navbar className="bg-white shadow-sm" /> {/* Updated navbar */}
       
       <main className="flex-grow">
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
@@ -137,18 +137,18 @@ export default function HomePage() {
               transition={{ duration: 0.8 }}
             >
               <div className="mb-8">
-                <Sparkles className="h-16 w-16 text-gray-400 mx-auto animate-pulse" />
+                <Sparkles className="h-16 w-16 text-gray-600 mx-auto animate-pulse" /> {/* Updated icon color */}
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-black-100 mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6"> {/* Darker text */}
                 Menfess Warga Unand
               </h1>
-              <p className="text-lg md:text-xl text-black-300 max-w-3xl mx-auto mb-12">
+              <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto mb-12"> {/* Darker text */}
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
               <div className="flex flex-col items-center gap-4 mb-8">
                 <Link
                   href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
-                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-100 hover:text-gray-300 transition-colors border border-gray-600 rounded-full hover:border-gray-400"
+                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-700 hover:text-gray-900 transition-colors border border-gray-300 rounded-full hover:border-gray-400" {/* Updated colors */}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -166,7 +166,7 @@ export default function HomePage() {
             >
               <Button
                 asChild
-                className="group relative overflow-hidden bg-gradient-to-r from-gray-600 to-gray-800 text-white px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-blue-800 text-white px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300" {/* More contrast button */}
               >
                 <Link href="/message">
                   <span className="relative z-10 flex items-center gap-2">
@@ -178,7 +178,7 @@ export default function HomePage() {
 
               <Button
                 asChild
-                className="group relative overflow-hidden bg-gray-800 border-2 border-gray-600 text-gray-300 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group relative overflow-hidden bg-white border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-gray-50" {/* Updated colors */}
               >
                 <Link href="/search-message">
                   <span className="relative z-10 flex items-center gap-2">
@@ -190,7 +190,7 @@ export default function HomePage() {
 
               <Button
                 asChild
-                className="group relative overflow-hidden bg-gray-800 border-2 border-gray-600 text-gray-300 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="group relative overflow-hidden bg-white border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-gray-50" {/* Updated colors */}
               >
                 <Link href="https://ziwa-351410.web.app">
                   <span className="relative z-10 flex items-center gap-2">
@@ -203,13 +203,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-16 md:py-24 bg-gray-900">
+        <section className="py-16 md:py-24 bg-gray-50"> {/* Updated background */}
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-100 mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"> {/* Darker text */}
                 MENFESS TERBARU
               </h2>
-              <p className="text-gray-300 max-w-xl mx-auto">
+              <p className="text-gray-600 max-w-xl mx-auto"> {/* Updated text color */}
                 Trending menfess
               </p>
             </div>
@@ -219,20 +219,20 @@ export default function HomePage() {
                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-500 border-t-transparent" />
               </div>
             ) : error ? (
-              <div className="text-center py-12 bg-gray-800 rounded-xl">
-                <p className="text-gray-300 flex items-center justify-center gap-2">
+              <div className="text-center py-12 bg-white rounded-xl shadow-md"> {/* Updated background */}
+                <p className="text-gray-600 flex items-center justify-center gap-2"> {/* Updated text color */}
                   <span className="text-xl">⚠️</span>
                   {error}
                 </p>
               </div>
             ) : recentlyAddedMessages.length === 0 ? (
-              <div className="text-center py-12 bg-gray-800 rounded-xl">
-                <p className="text-gray-300">Belum ada menfess terbaru</p>
+              <div className="text-center py-12 bg-white rounded-xl shadow-md"> {/* Updated background */}
+                <p className="text-gray-600">Belum ada menfess terbaru</p> {/* Updated text color */}
               </div>
             ) : (
               <div className="relative overflow-hidden group">
-                <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-gray-900 via-gray-900/80 to-transparent z-10" />
-                <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-gray-900 via-gray-900/80 to-transparent z-10" />
+                <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-gray-50 via-gray-50/80 to-transparent z-10" /> {/* Updated gradient */}
+                <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-gray-50 via-gray-50/80 to-transparent z-10" /> {/* Updated gradient */}
 
                 <div className="relative h-[600px] w-full max-w-4xl mx-auto">
                   <motion.div
@@ -268,7 +268,7 @@ export default function HomePage() {
                             if (Math.abs(dragX.get()) > 10) e.preventDefault();
                           }}
                         >
-                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                          <div className="h-full w-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"> {/* Updated background */}
                             <CarouselCard
                               to={msg.recipient || '-'}
                               from={msg.sender || '-'}
@@ -291,9 +291,9 @@ export default function HomePage() {
                                 )
                               }
                             />
-                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text-gray-300 text-center mt-2">
+                            <div className="p-4 bg-gray-100 rounded-b-2xl relative"> {/* Updated background */}
+                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-300 rounded-full" /> {/* Updated color */}
+                              <p className="text-sm text-gray-600 text-center mt-2"> {/* Updated text color */}
                                 {getFormattedDate(msg.created_at)}
                               </p>
                             </div>
@@ -307,9 +307,9 @@ export default function HomePage() {
                 <div className="flex items-center justify-center gap-4 mt-8">
                   <button
                     onClick={handlePrevious}
-                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
+                    className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow border border-gray-200" {/* Updated background */}
                   >
-                    <ChevronLeft className="h-6 w-6 text-gray-300" />
+                    <ChevronLeft className="h-6 w-6 text-gray-700" /> {/* Updated color */}
                   </button>
                   
                   <div className="flex gap-2">
@@ -318,7 +318,7 @@ export default function HomePage() {
                         key={idx}
                         onClick={() => setCurrentIndex(idx)}
                         className={`h-3 w-3 rounded-full transition-colors ${
-                          idx === currentIndex ? 'bg-gray-300' : 'bg-gray-600'
+                          idx === currentIndex ? 'bg-gray-700' : 'bg-gray-300' // Updated colors
                         }`}
                       />
                     ))}
@@ -326,9 +326,9 @@ export default function HomePage() {
 
                   <button
                     onClick={handleNext}
-                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
+                    className="p-2 rounded-full bg-white shadow-md hover:shadow-lg transition-shadow border border-gray-200" {/* Updated background */}
                   >
-                    <ChevronRight className="h-6 w-6 text-gray-300" />
+                    <ChevronRight className="h-6 w-6 text-gray-700" /> {/* Updated color */}
                   </button>
                 </div>
               </div>
@@ -337,7 +337,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      <Footer />
+      <Footer className="bg-white text-gray-700" /> {/* Updated footer */}
     </div>
   );
-} 
+}
