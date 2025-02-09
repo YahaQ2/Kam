@@ -131,6 +131,12 @@ export default function HomePage() {
     return () => clearInterval(intervalRef.current!);
   }, [recentlyAddedMessages]);
 
+  // Function to determine if it's night time (after 6 PM)
+  const isNightTime = () => {
+    const currentHour = new Date().getHours();
+    return currentHour >= 18; // 6 PM
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
@@ -145,7 +151,11 @@ export default function HomePage() {
               transition={{ duration: 0.8 }}
             >
               <div className="mb-8">
-                <Sparkles className="h-16 w-16 text-gray-400 mx-auto animate-pulse" />
+                {isNightTime() ? (
+                  <span className="text-4xl">🌙</span>
+                ) : (
+                  <Sparkles className="h-16 w-16 text-blue-500 mx-auto animate-pulse" />
+                )}
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
                 Menfess warga Unand
@@ -217,7 +227,7 @@ export default function HomePage() {
               <div className="relative">
                 <div 
                   ref={containerRef}
-                  className={`flex overflow-hidden`}
+                  className={`flex overflow-hidden justify-center`}
                 >
                   <motion.div
                     drag="x"
