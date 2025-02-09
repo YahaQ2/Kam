@@ -267,7 +267,7 @@ export default function HomePage() {
                                 recipient={msg.recipient || '-'}
                                 sender={msg.sender || '-'}
                                 message={msg.message || 'Pesan tidak tersedia'}
- songTitle={msg.track?.title}
+songTitle={msg.track?.title}
                                 artist={msg.track?.artist}
                                 coverUrl={msg.track?.cover_img}
                                 spotifyEmbed={
