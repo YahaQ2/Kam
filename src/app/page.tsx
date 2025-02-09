@@ -6,9 +6,9 @@ import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
-import { motion, AnimatePresence, useMotionValue } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Menfess {
   id: number;
@@ -31,7 +31,6 @@ interface MenfessResponse {
   data: Menfess[];
 }
 
-const SWIPE_THRESHOLD = 100;
 const VISIBLE_MESSAGES = 6;
 
 export default function HomePage() {
@@ -40,9 +39,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
-  const dragX = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout>();
 
   const shuffleArray = (array: Menfess[]) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -61,27 +58,6 @@ export default function HomePage() {
     );
   };
 
-  const onDragEnd = () => {
-    const x = dragX.get();
-    if (x <= -SWIPE_THRESHOLD) handleNext();
-    else if (x >= SWIPE_THRESHOLD) handlePrevious();
-  };
-
-  const handleNext = () => {
-    setCurrentCard(prev => (prev + 1) % recentlyAddedMessages.length);
-    resetAutoSlide();
-  };
-
-  const handlePrevious = () => {
-    setCurrentCard(prev => (prev - 1 + recentlyAddedMessages.length) % recentlyAddedMessages.length);
-    resetAutoSlide();
-  };
-
-  const resetAutoSlide = () => {
-    clearInterval(intervalRef.current!);
-    intervalRef.current = setInterval(handleNext, 5000);
-  };
-
   const getFormattedDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('id-ID', {
@@ -93,6 +69,11 @@ export default function HomePage() {
     } catch {
       return 'Tanggal tidak valid';
     }
+  };
+
+  const isNightTime = () => {
+    const currentHour = new Date().getHours();
+    return currentHour >= 18;
   };
 
   useEffect(() => {
@@ -128,16 +109,18 @@ export default function HomePage() {
     fetchMessages();
   }, []);
 
-  useEffect(() => {
-    if (recentlyAddedMessages.length > 0) {
-      resetAutoSlide();
+  const handleScroll = () => {
+    if (containerRef.current) {
+      const scrollPosition = containerRef.current.scrollLeft;
+      const cardWidth = containerRef.current.offsetWidth;
+      setCurrentCard(Math.round(scrollPosition / cardWidth));
     }
-    return () => clearInterval(intervalRef.current!);
-  }, [recentlyAddedMessages]);
+  };
 
-  const isNightTime = () => {
-    const currentHour = new Date().getHours();
-    return currentHour >= 18;
+  const cardVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -50 }
   };
 
   return (
@@ -166,17 +149,6 @@ export default function HomePage() {
               <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
-              <div className="flex flex-col items-center gap-4 mb-8">
-                <Link
-                  href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
-                  className="inline-flex items-center justify-center px-4 py-2 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span>Kirim Saran/Masukan</span>
-                  <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-                </Link>
-              </div>
             </motion.div>
 
             <motion.div
@@ -227,105 +199,82 @@ export default function HomePage() {
             ) : recentlyAddedMessages.length === 0 ? (
               <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
             ) : (
-              <div className="relative max-w-[400px] mx-auto">
+              <div className="relative">
                 <div 
                   ref={containerRef}
-                  className={`flex overflow-hidden justify-center`}
+                  className={`flex ${
+                    isMobile 
+                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide' 
+                      : 'overflow-hidden'
+                  }`}
+                  onScroll={handleScroll}
                 >
-                  <motion.div
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    onDragEnd={onDragEnd}
-                    style={{ 
-                      x: dragX,
-                      translateX: `-${currentCard * 100}%`
-                    }}
-                    className="flex cursor-grab active:cursor-grabbing h-full"
-                  >
-                    <AnimatePresence initial={false}>
-                      {recentlyAddedMessages.map((msg) => (
-                        <motion.div
-                          key={msg.id}
-                          className="w-full md:w-[400px] h-full flex-shrink-0 px-4"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ 
-                            opacity: 1,
-                            scale: 1,
-                            transition: { 
-                              type: "spring", 
-                              stiffness: 300, 
-                              damping: 30 
-                            }
-                          }}
-                        >
-                          <Link
-                            href={`/message/${msg.id}`}
-                            className="block h-full w-full p-4"
-                          >
-                            <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                              <CarouselCard
-                                recipient={msg.recipient || '-'}
-                                sender={msg.sender || '-'}
-                                message={msg.message || 'Pesan tidak tersedia'}
-                                songTitle={msg.track?.title}
-                                artist={msg.track?.artist}
-                                coverUrl={msg.track?.cover_img}
-                                spotifyEmbed={
-                                  msg.spotify_id && (
-                                    <div className="px-4 pb-4">
-                                      <iframe
-                                        className="w-full rounded-lg shadow-md"
-                                        src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                        width="100%"
-                                        height="80"
-                                        frameBorder="0"
-                                        allow="encrypted-media"
-                                      />
-                                    </div>
-                                  )
-                                }
-                              />
-                              <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                                <p className="text-sm text-white text-center mt-2">
-                                  {getFormattedDate(msg.created_at)}
-                                </p>
-                              </div>
+                  <AnimatePresence initial={false}>
+                    {recentlyAddedMessages.map((msg, index) => (
+                      <motion.div
+                        key={msg.id}
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        transition={{ duration: 0.3 }}
+                        className={`${
+                          isMobile 
+                            ? 'flex-shrink-0 w-full snap-center p-4' 
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                        }`}
+                      >
+                        <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
+                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <CarouselCard
+                              recipient={msg.recipient || '-'}
+                              sender={msg.sender || '-'}
+                              message={msg.message || 'Pesan tidak tersedia'}
+                              songTitle={msg.track?.title}
+                              artist={msg.track?.artist}
+                              coverUrl={msg.track?.cover_img}
+                              spotifyEmbed={
+                                msg.spotify_id && (
+                                  <div className="px-4 pb-4">
+                                    <iframe
+                                      className="w-full rounded-lg shadow-md"
+                                      src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                      width="100%"
+                                      height="80"
+                                      frameBorder="0"
+                                      allow="encrypted-media"
+                                    />
+                                  </div>
+                                )
+                              }
+                            />
+                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <p className="text-sm text-white text-center mt-2">
+                                {getFormattedDate(msg.created_at)}
+                              </p>
                             </div>
-                          </Link>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </motion.div>
+                          </div>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
 
-                <div className="flex items-center justify-center gap-4 mt-8">
-                  <button
-                    onClick={handlePrevious}
-                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    <ChevronLeft className="h-6 w-6 text-gray-300" />
-                  </button>
-                  
-                  <div className="flex gap-2">
-                    {recentlyAddedMessages.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setCurrentCard(idx)}
-                        className={`h-3 w-3 rounded-full transition-colors ${
-                          idx === currentCard ? 'bg-gray-300' : 'bg-gray-600'
+                {isMobile && (
+                  <div className="flex justify-center space-x-2 mt-4">
+                    {recentlyAddedMessages.map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${
+                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
                         }`}
+                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        transition={{ duration: 0.2 }}
                       />
                     ))}
                   </div>
-
-                  <button
-                    onClick={handleNext}
-                    className="p-2 rounded-full bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    <ChevronRight className="h-6 w-6 text-gray-300" />
-                  </button>
-                </div>
+                )}
               </div>
             )}
           </div>
