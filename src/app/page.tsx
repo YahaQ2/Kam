@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
-// Tambahkan di bagian atas file setelah import lainnya
+
 const ADMIN_MESSAGES = [
   "semangat untuk hari ini kamu selalu luar biasa",
   "kamu harus jaga kesehatan mu,tidurnya di jaga ya! 😊",
@@ -133,9 +133,11 @@ export default function HomePage() {
       typeof data?.message === 'string'
     );
   };
-const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
-  ssr: false,
-});
+
+  const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
+    ssr: false,
+  });
+
   const getFormattedDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('id-ID', {
@@ -198,10 +200,8 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
         const newArray = [...prev];
         const randomIndex = Math.floor(Math.random() * (newArray.length - 1)) + 1;
         [newArray[0], newArray[randomIndex]] = [newArray[randomIndex], newArray[0]];
-        return newArray; 
-        const resetAutoSlide = () =>
+        return newArray;
       });
-    resetAutoSlide();
     }, 5000);
 
     return () => clearInterval(interval);
@@ -214,23 +214,24 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
       setCurrentCard(Math.round(scrollPosition / cardWidth));
     }
   };
-const cardVariants = {
-  hidden: { opacity: 0, x: 100 },
-  visible: { 
-    opacity: 1, 
-    x: 0,
-    transition: { 
-      type: 'spring', 
-      stiffness: 120,
-      damping: 20 
-    } 
-  },
-  exit: { 
-    opacity: 0, 
-    x: -100,
-    transition: { duration: 0.3 } 
-  }
-};
+
+  const cardVariants = {
+    hidden: { opacity: 0, x: 100 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: { 
+        type: 'spring', 
+        stiffness: 120,
+        damping: 20 
+      } 
+    },
+    exit: { 
+      opacity: 0, 
+      x: -100,
+      transition: { duration: 0.3 } 
+    }
+  };
 
   const renderTimeIcon = () => {
     const { isNight, isMorning } = getTimeStatus();
@@ -312,15 +313,16 @@ const cardVariants = {
                   Ziwa - Cari Teman baru & fun space
                 </Link>
               </Button>
-              <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
-            <DynamicCarousel />
-          </div>
-
             </motion.div>
+
+            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+              <DynamicCarousel />
+            </div>
           </div>
         </section>
-// Di dalam return HomePage, tambahkan sebelum </div>
-<PopupAdminMessage />
+
+        <PopupAdminMessage />
+
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">          
             <div className="text-center mb-16">
