@@ -37,7 +37,7 @@ const PopupAdminMessage = () => {
       
       timeoutRef.current = setTimeout(() => {
         setShowPopup(false);
-      }, 10000);
+      }, 1000000);
     }
 
     return () => {
