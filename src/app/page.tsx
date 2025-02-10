@@ -137,17 +137,23 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
       setCurrentCard(Math.round(scrollPosition / cardWidth));
     }
   };
-
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.8, rotate: -5 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      rotate: 0,
-      transition: { type: 'spring', stiffness: 120 } 
-    },
-    exit: { opacity: 0, scale: 0.8, rotate: 5 }
-  };
+const cardVariants = {
+  hidden: { opacity: 0, x: 100 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: { 
+      type: 'spring', 
+      stiffness: 120,
+      damping: 20 
+    } 
+  },
+  exit: { 
+    opacity: 0, 
+    x: -100,
+    transition: { duration: 0.3 } 
+  }
+};
 
   const renderTimeIcon = () => {
     const { isNight, isMorning } = getTimeStatus();
