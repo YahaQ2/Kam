@@ -122,8 +122,9 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
         if (prev.length < 2) return prev;
         const newArray = [...prev];
         const randomIndex = Math.floor(Math.random() * (newArray.length - 1)) + 1;
+        < 2) return prev;
         [newArray[0], newArray[randomIndex]] = [newArray[randomIndex], newArray[0]];
-        return newArray; < 2) return prev;
+        return newArray; 
       });
     }, 5000);
 
