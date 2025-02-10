@@ -17,7 +17,7 @@ export const BackgroundVideo = () => {
     <div className="relative w-full h-full rounded-[40px] overflow-hidden border-2 border-white/20 m-4 shadow-2xl">
       {mounted && (
         <ReactPlayer
-          url={isNight ? '/videos/night.mp4' : '/videos/day.mp4'}
+          url={isNight ? 'https://res.cloudinary.com/depbfbxtm/video/upload/v1739168678/Background_Video_Animasi_Awan_Bergerak_eovhes.mp4' : 'https://res.cloudinary.com/depbfbxtm/video/upload/v1739169325/Cartoon_Cloud_background___Free_motion_graphics_clouds_overlay___After_Effects_Clouds_animation_sk6kbr.mp4'}
           playing
           loop
           muted
