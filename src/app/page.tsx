@@ -287,7 +287,7 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
                                   <span className="font-semibold">From:</span> {msg.sender}
                                 </div>
                                 <div className="text-gray-300">
-                                  <span className="font-semibold">To:</span> {msg.recipient}
+                                  <span className="font-semibold">:</span> {msg.recipient}
                                 </div>
                               </div>
                             </div>
