@@ -10,10 +10,10 @@ import dynamic from "next/dynamic"
 import { Sparkles } from "lucide-react"
 import { CarouselCard } from "@/components/carousel-card"
 import { motion, AnimatePresence } from "framer-motion"
-};
+
 const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
   ssr: false,
-});
+})
 
 const ADMIN_MESSAGES = [
   "semangat untuk hari ini kamu selalu luar biasa",
@@ -300,10 +300,12 @@ export default function HomePage() {
                 className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors"
               >
                 <Link href="https://ziwa-351410.web.app">Ziwa - Cari Teman baru & fun space</Link>
-              </Button>  <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
-            <DynamicCarousel />
-          </div>
+              </Button>
             </motion.div>
+
+            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+              <DynamicCarousel />
+            </div>
           </div>
         </section>
 
