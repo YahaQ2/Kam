@@ -119,7 +119,7 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
   useEffect(() => {
     const interval = setInterval(() => {
       setRecentlyAddedMessages(prev => {
-        if (prev.length < 6) return prev; 
+        if (prev.length < 50) return prev; 
         
         const newArray = [...prev];
         const randomIndex = Math.floor(Math.random() * (newArray.length - 1)) + 1;
