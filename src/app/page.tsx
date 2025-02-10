@@ -232,11 +232,12 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
             </motion.div>
           </div>
         </section>
-
-        <section className="py-16 md:py-24 bg-gray-900">
-          <div className="container mx-auto px-4">          <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+<div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
           </div>
+
+        <section className="py-16 md:py-24 bg-gray-900">
+          <div className="container mx-auto px-4">          
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
                 MENFESS TERBARU
