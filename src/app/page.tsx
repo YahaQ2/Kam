@@ -233,6 +233,7 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
             <DynamicCarousel />
             </motion.div>
           </div>
+          
         </section>
 
         <section className="py-16 md:py-24 bg-gray-900">
