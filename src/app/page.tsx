@@ -319,7 +319,7 @@ const cardVariants = {
             </motion.div>
           </div>
         </section>
-// Di dalam return HomePage, tambahkan sebelum
+// Di dalam return HomePage, tambahkan sebelum </div>
 <PopupAdminMessage />
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">          
