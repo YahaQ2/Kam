@@ -284,7 +284,7 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
                             <div className="px-4 pt-4">
                               <div className="flex justify-between text-sm mb-2">
                                 <div className="text-gray-300">
-                                  <span className="font-semibold"></span> {msg.sender}
+                                  <span className="font-semibold">m</span> {msg.sender}
                                 </div>
                                 <div className="text-gray-300">
                                   <span className="font-semibold">:</span> {msg.recipient}
