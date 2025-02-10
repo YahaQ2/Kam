@@ -10,6 +10,80 @@ import dynamic from "next/dynamic";
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
+// Tambahkan di bagian atas file setelah import lainnya
+const ADMIN_MESSAGES = [
+  "semangat untuk hari ini kamu selalu luar biasa",
+  "kamu harus jaga kesehatan mu,tidurnya di jaga ya! 😊",
+  "Sudahkah kamu menyapa temanmu hari ini? 👋",
+  "Cinta itu indah, tapi jangan lupa kuliah! 📚",
+  "Tetap semangat dan jaga kesehatan! 💪",
+];
+
+const PopupAdminMessage = () => {
+  const [showPopup, setShowPopup] = useState(false);
+  const [message, setMessage] = useState("");
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const lastShownDate = localStorage.getItem('popupLastShown');
+    const today = new Date().toDateString();
+    
+    if (lastShownDate !== today) {
+      const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+      const randomIndex = dayOfYear % ADMIN_MESSAGES.length;
+      setMessage(ADMIN_MESSAGES[randomIndex]);
+      setShowPopup(true);
+      localStorage.setItem('popupLastShown', today);
+      
+      timeoutRef.current = setTimeout(() => {
+        setShowPopup(false);
+      }, 10000);
+    }
+
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const handleClose = () => {
+    setShowPopup(false);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  };
+
+  return (
+    <AnimatePresence>
+      {showPopup && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="fixed bottom-4 right-4 z-50 max-w-xs"
+        >
+          <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-200 relative">
+            <button
+              onClick={handleClose}
+              className="absolute top-1 right-1 text-gray-400 hover:text-gray-600"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <Sparkles className="h-6 w-6 text-yellow-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-900">Pesan Admin</p>
+                <p className="text-sm text-gray-500 mt-1">{message}</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 interface Menfess {
   id: number;
@@ -245,7 +319,8 @@ const cardVariants = {
             </motion.div>
           </div>
         </section>
-
+// Di dalam return HomePage, tambahkan sebelum
+<PopupAdminMessage />
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">          
             <div className="text-center mb-16">
