@@ -59,7 +59,9 @@ export default function HomePage() {
       typeof data?.message === 'string'
     );
   };
-
+const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
+  ssr: false,
+});
   const getFormattedDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('id-ID', {
