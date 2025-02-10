@@ -231,9 +231,10 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
               </Button>
               <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
+          </div>
+
             </motion.div>
           </div>
-          
         </section>
 
         <section className="py-16 md:py-24 bg-gray-900">
@@ -284,7 +285,7 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
                             <div className="px-4 pt-4">
                               <div className="flex justify-between text-sm mb-2">
                                 <div className="text-gray-300">
-                                  <span className="font-semibold">m</span> {msg.sender}
+                                  <span className="font-semibold">:</span> {msg.sender}
                                 </div>
                                 <div className="text-gray-300">
                                   <span className="font-semibold">:</span> {msg.recipient}
