@@ -120,13 +120,14 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
     const interval = setInterval(() => {
       setRecentlyAddedMessages(prev => {
         if (prev.length < 6) return prev; 
-        resetAutoSlide();
+        
         const newArray = [...prev];
         const randomIndex = Math.floor(Math.random() * (newArray.length - 1)) + 1;
         [newArray[0], newArray[randomIndex]] = [newArray[randomIndex], newArray[0]];
         return newArray; 
         const resetAutoSlide = () =>
       });
+    resetAutoSlide();
     }, 5000);
 
     return () => clearInterval(interval);
