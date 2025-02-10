@@ -6,6 +6,7 @@ import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -231,7 +232,9 @@ export default function HomePage() {
         </section>
 
         <section className="py-16 md:py-24 bg-gray-900">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4">          <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+            <DynamicCarousel />
+          </div>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
                 MENFESS TERBARU
