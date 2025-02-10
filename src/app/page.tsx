@@ -141,7 +141,8 @@ export default function HomePage() {
       typeof data?.id === "number" &&
       typeof data?.sender === "string" &&
       typeof data?.recipient === "string" &&
-      typeof data?.message === "string"
+      typeof data?.message === "string" &&
+      typeof data?.created_at === "string"
     )
   }
 
@@ -199,7 +200,7 @@ export default function HomePage() {
     }
 
     fetchMessages()
-  }, [shuffleArray]) // Added shuffleArray to dependencies
+  }, [shuffleArray, validateMenfess]) // Added shuffleArray and validateMenfess to dependencies
 
   useEffect(() => {
     if (messages.length > 0) {
