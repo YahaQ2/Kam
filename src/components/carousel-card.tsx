@@ -103,8 +103,7 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
             </div>
           )}
 
-          {/* Spotify Embed */}
-          {spotifyEmbed && <div className="mt-4">{spotifyEmbed}</div>}
+
         </CardContent>
       </Card>
     </motion.div>
