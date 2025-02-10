@@ -309,7 +309,6 @@ export default function HomePage() {
               </Button>
             </motion.div>
           </div>
-                      <DynamicCarousel />
         </section>
 
         <PopupAdminMessage />
@@ -370,7 +369,7 @@ export default function HomePage() {
                                   message={msg.message || 'Pesan tidak tersedia'}
                                   songTitle={msg.track?.title}
                                   artist={msg.track?.artist}
-                                  coverUrl={msg .track?.cover_img}
+                                  coverUrl={msg.track?.cover_img}
                                   spotifyEmbed={
                                     msg.spotify_id && (
                                       <div className="px-4 pb-4">
