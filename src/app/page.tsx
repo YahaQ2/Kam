@@ -229,12 +229,13 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
                   Ziwa - Cari Teman baru & fun space
                 </Link>
               </Button>
+              <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+            <DynamicCarousel />
+          </div>
+
             </motion.div>
           </div>
         </section>
-<div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
-            <DynamicCarousel />
-          </div>
 
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">          
