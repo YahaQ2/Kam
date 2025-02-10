@@ -309,6 +309,7 @@ export default function HomePage() {
               </Button>
             </motion.div>
           </div>
+                      <DynamicCarousel />
         </section>
 
         <PopupAdminMessage />
