@@ -231,8 +231,6 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
               </Button>
               <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
-          </div>
-
             </motion.div>
           </div>
         </section>
