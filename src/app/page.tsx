@@ -37,8 +37,7 @@ const PopupAdminMessage = () => {
       const lastShownDate = localStorage.getItem("popupLastShown");
       const today = new Date().toDateString();
 
-      if (lastShownDate !== today) {
-        const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length);
+      if (lastShownDate !== today) 
         setMessage(ADMIN_MESSAGES[randomIndex]);
         setShowPopup(true);
         localStorage.setItem("popupLastShown", today);
