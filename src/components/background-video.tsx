@@ -76,10 +76,3 @@ body {
   }
 
 
-/* Tambahkan di global CSS */
-.flex-shrink-0 {
-  flex-shrink: 0;
-}
-.min-w-full {
-  min-width: 100%;
-}
