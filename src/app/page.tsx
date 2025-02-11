@@ -25,31 +25,28 @@ const ADMIN_MESSAGES = [
   "Hari ini adalah kesempatan baru untuk memulai hal baru",
 ];
 
-// Fungsi untuk menghasilkan angka acak menggunakan crypto.getRandomValues()
-const getRandomInt = (max: number) => {
-  const array = new Uint32Array(1);
-  window.crypto.getRandomValues(array);
-  return array[0] % max;
-};
-
 const PopupAdminMessage = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [message, setMessage] = useState("");
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const lastShownDate = localStorage.getItem("popupLastShown");
-    const today = new Date().toDateString();
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      const lastShownDate = localStorage.getItem("popupLastShown");
+      const today = new Date().toDateString();
 
-    if (lastShownDate !== today) {
-      const randomIndex = getRandomInt(ADMIN_MESSAGES.length);
-      setMessage(ADMIN_MESSAGES[randomIndex]);
-      setShowPopup(true);
-      localStorage.setItem("popupLastShown", today);
+      if (lastShownDate !== today) {
+        const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length);
+        setMessage(ADMIN_MESSAGES[randomIndex]);
+        setShowPopup(true);
+        localStorage.setItem("popupLastShown", today);
 
-      timeoutRef.current = setTimeout(() => {
-        setShowPopup(false);
-      }, 100000);
+        timeoutRef.current = setTimeout(() => {
+          setShowPopup(false);
+        }, 100000);
+      }
     }
 
     return () => {
@@ -61,6 +58,8 @@ const PopupAdminMessage = () => {
     setShowPopup(false);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
   };
+
+  if (!mounted) return null;
 
   return (
     <AnimatePresence>
@@ -129,14 +128,14 @@ export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [isNight, setIsNight] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fungsi untuk mengacak array menggunakan getRandomInt
   const shuffleArray = (array: Menfess[]) => {
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
-      const j = getRandomInt(i + 1);
+      const j = Math.floor(Math.random() * (i + 1));
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
     return newArray;
@@ -166,15 +165,15 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    setMounted(true);
     const handleResize = () => setIsMobile(window.innerWidth < 640);
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
+    
     const currentHour = new Date().getHours();
     setIsNight(currentHour >= 18 || currentHour < 7);
+    
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -218,6 +217,8 @@ export default function HomePage() {
   }, [messages.length]);
 
   const renderTimeIcon = () => {
+    if (!mounted) return <div className="h-16 w-16" />;
+
     return (
       <motion.div
         key={isNight ? "moon" : "sparkles"}
@@ -261,7 +262,7 @@ export default function HomePage() {
       <Navbar />
 
       <div className="absolute inset-0 z-0 opacity-20">
-        <DynamicBackgroundVideo />
+        {mounted && <DynamicBackgroundVideo />}
       </div>
 
       <main className="flex-grow relative z-10">
@@ -355,6 +356,7 @@ export default function HomePage() {
                               <Link href={`/message/${msg.id}`} className="block h-full w-full">
                                 <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                                   <div className="px-4 pt-4">
+                                    ```typescript
                                     <div className="flex justify-between text-sm mb-2">
                                       <div className="text-gray-300">
                                         <span className="font-semibold">From:</span> {msg.sender}
