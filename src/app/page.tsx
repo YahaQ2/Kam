@@ -37,7 +37,8 @@ const PopupAdminMessage = () => {
       const lastShownDate = localStorage.getItem("popupLastShown");
       const today = new Date().toDateString();
 
-      if (lastShownDate !== today) 
+      if (lastShownDate !== today) {
+        const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length) +1 ;
         setMessage(ADMIN_MESSAGES[randomIndex]);
         setShowPopup(true);
         localStorage.setItem("popupLastShown", today);
@@ -133,7 +134,8 @@ export default function HomePage() {
 
   const shuffleArray = (array: Menfess[]) => {
     const newArray = [...array];
-    for (let i = newArray.length - 1; i > 0; i--) 
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
     return newArray;
