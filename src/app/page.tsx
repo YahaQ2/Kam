@@ -116,7 +116,7 @@ interface MenfessResponse {
 const VISIBLE_MESSAGES = 8
 const SLIDE_DURATION = 8000
 
-const DynamicBackgroundVideo = dynamic(() => import("@/components/background-vidio"), { ssr: false })
+const DynamicBackgroundVideo = dynamic(() => import("@/components/background-video"), { ssr: false })
 
 export default function HomePage() {
   const [messages, setMessages] = useState<Menfess[][]>([])
