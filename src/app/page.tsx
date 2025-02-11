@@ -1,21 +1,19 @@
-"use client";
+"use client"
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Footer } from "@/components/ui/footer";
-import { InitialAnimation } from "@/components/initial-animation";
-import { Navbar } from "@/components/ui/navbar";
-import Link from "next/link";
-import dynamic from "next/dynamic";
-import { Sparkles } from "lucide-react";
-import { CarouselCard } from "@/components/carousel-card";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState, useRef } from "react"
+import { Button } from "@/components/ui/button"
+import { Footer } from "@/components/ui/footer"
+import { InitialAnimation } from "@/components/initial-animation"
+import { Navbar } from "@/components/ui/navbar"
+import Link from "next/link"
+import dynamic from "next/dynamic"
+import { Sparkles } from "lucide-react"
+import { CarouselCard } from "@/components/carousel-card"
+import { motion, AnimatePresence } from "framer-motion"
 
 const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
   ssr: false,
-});
-
-const DynamicBackgroundVideo = dynamic(() => import("@/components/background-video"), { ssr: false });
+})
 
 const ADMIN_MESSAGES = [
   "semangat untuk hari ini kamu selalu luar biasa",
@@ -26,37 +24,37 @@ const ADMIN_MESSAGES = [
   "Jangan lupa minum air putih hari ini! 💧",
   "Ingat ya, kamu itu spesial dan unik! ✨",
   "Hari ini adalah kesempatan baru untuk memulai hal baru",
-];
+]
 
 const PopupAdminMessage = () => {
-  const [showPopup, setShowPopup] = useState(false);
-  const [message, setMessage] = useState("");
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [showPopup, setShowPopup] = useState(false)
+  const [message, setMessage] = useState("")
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    const lastShownDate = localStorage.getItem("popupLastShown");
-    const today = new Date().toDateString();
+    const lastShownDate = localStorage.getItem("popupLastShown")
+    const today = new Date().toDateString()
 
     if (lastShownDate !== today) {
-      const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length);
-      setMessage(ADMIN_MESSAGES[randomIndex]);
-      setShowPopup(true);
-      localStorage.setItem("popupLastShown", today);
+      const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length)
+      setMessage(ADMIN_MESSAGES[randomIndex])
+      setShowPopup(true)
+      localStorage.setItem("popupLastShown", today)
 
       timeoutRef.current = setTimeout(() => {
-        setShowPopup(false);
-      }, 100000);
+        setShowPopup(false)
+      }, 100000)
     }
 
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
 
   const handleClose = () => {
-    setShowPopup(false);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-  };
+    setShowPopup(false)
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+  }
 
   return (
     <AnimatePresence>
@@ -91,60 +89,62 @@ const PopupAdminMessage = () => {
         </motion.div>
       )}
     </AnimatePresence>
-  );
-};
+  )
+}
 
 interface Menfess {
-  id: number;
-  sender: string;
-  recipient: string;
-  message: string;
-  spotify_id?: string;
+  id: number
+  sender: string
+  recipient: string
+  message: string
+  spotify_id?: string
   track?: {
-    title: string;
-    artist: string;
-    cover_img: string;
-  };
-  created_at: string;
+    title: string
+    artist: string
+    cover_img: string
+  }
+  created_at: string
 }
 
 interface MenfessResponse {
-  status: boolean;
-  success: boolean;
-  message: string | null;
-  data: Menfess[];
+  status: boolean
+  success: boolean
+  message: string | null
+  data: Menfess[]
 }
 
-const VISIBLE_MESSAGES = 8;
-const SLIDE_DURATION = 8000;
+const VISIBLE_MESSAGES = 8
+const SLIDE_DURATION = 8000
+
+const DynamicBackgroundVideo = dynamic(() => import("@/components/background-video"), { ssr: false })
 
 export default function HomePage() {
-  const [messages, setMessages] = useState<Menfess[][]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [messages, setMessages] = useState<Menfess[][]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const shuffleArray = useCallback((array: Menfess[]) => {
-    const newArray = [...array];
+  const shuffleArray = (array: Menfess[]) => {
+    const newArray = [...array]
     for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
     }
-    return newArray;
-  }, []);
+    return newArray
+  }
 
-  const validateMenfess = useCallback((data: any): data is Menfess => {
+  const validateMenfess = (data: any): data is Menfess => {
     return (
       typeof data?.id === "number" &&
       typeof data?.sender === "string" &&
       typeof data?.recipient === "string" &&
       typeof data?.message === "string" &&
-      typeof data?.created_at === "string" &&
-      (!data.spotify_id || typeof data.spotify_id === "string")
-    );
-  }, []);
+      typeof data?.created_at === "string"
+    )
+  }
 
   const getFormattedDate = (dateString: string) => {
     try {
@@ -153,62 +153,69 @@ export default function HomePage() {
         year: "numeric",
         month: "long",
         day: "numeric",
-      });
+      })
     } catch {
-      return "Tanggal tidak valid";
+      return "Tanggal tidak valid"
     }
-  };
+  }
 
   const getTimeStatus = () => {
-    const currentHour = new Date().getHours();
+    const currentHour = new Date().getHours()
     return {
       isNight: currentHour >= 18 || currentHour < 7,
       isMorning: currentHour >= 7 && currentHour < 18,
-    };
-  };
+    }
+  }
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640)
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
-        if (!response.ok) throw new Error("Gagal memuat pesan");
+        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`)
+        if (!response.ok) throw new Error("Gagal memuat pesan")
 
-        const data: MenfessResponse = await response.json();
+        const data: MenfessResponse = await response.json()
 
-        if (data?.success && Array.isArray(data.data)) {
-          const validMessages = data.data.filter(validateMenfess);
-          const shuffled = shuffleArray(validMessages);
-          const randomMessages = shuffled.slice(0, VISIBLE_MESSAGES);
-          const latestMessages = validMessages.slice(0, VISIBLE_MESSAGES);
-          setMessages([randomMessages, latestMessages]);
+        if (data?.status && Array.isArray(data.data)) {
+          const validMessages = data.data.filter(validateMenfess)
+          const shuffled = shuffleArray(validMessages)
+          const randomMessages = shuffled.slice(0, VISIBLE_MESSAGES)
+          const latestMessages = validMessages.slice(0, VISIBLE_MESSAGES)
+          setMessages([randomMessages, latestMessages])
         } else {
-          throw new Error("Format data tidak valid");
+          throw new Error("Format data tidak valid")
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-        console.error("Fetch error:", err);
+        setError(err instanceof Error ? err.message : "Terjadi kesalahan")
+        console.error("Fetch error:", err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchMessages();
-  }, [shuffleArray, validateMenfess]);
+    fetchMessages()
+  }, [shuffleArray, validateMenfess]) // Added shuffleArray and validateMenfess to dependencies
 
   useEffect(() => {
     if (messages.length > 0) {
       timeoutRef.current = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % messages.length);
-      }, SLIDE_DURATION);
+        setCurrentSlide((prev) => (prev + 1) % messages.length)
+      }, SLIDE_DURATION)
     }
 
     return () => {
-      if (timeoutRef.current) clearInterval(timeoutRef.current);
-    };
-  }, [messages.length]);
+      if (timeoutRef.current) clearInterval(timeoutRef.current)
+    }
+  }, [messages.length])
 
   const renderTimeIcon = () => {
-    const { isNight } = getTimeStatus();
+    const { isNight } = getTimeStatus()
 
     return (
       <motion.div
@@ -244,8 +251,8 @@ export default function HomePage() {
           </motion.div>
         )}
       </motion.div>
-    );
-  };
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800 relative overflow-hidden">
@@ -330,7 +337,7 @@ export default function HomePage() {
                     (slideMessages, index) =>
                       currentSlide === index && (
                         <motion.div
-                          key={`slide-${index}-${slideMessages[0]?.id}`}
+                          key={index}
                           initial={{ opacity: 0, x: 100 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -100 }}
@@ -339,7 +346,7 @@ export default function HomePage() {
                         >
                           {slideMessages.map((msg) => (
                             <motion.div
-                              key={`${msg.id}-${index}`}
+                              key={msg.id}
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.4 }}
@@ -347,24 +354,49 @@ export default function HomePage() {
                               <Link href={`/message/${msg.id}`} className="block h-full w-full">
                                 <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                                   <div className="px-4 pt-4">
-                                    <div className="flex justify-between text-gray-400 text-sm">
-                                      <span>{msg.sender}</span>
-                                      <span>{getFormattedDate(msg.created_at)}</span>
+                                    <div className="flex justify-between text-sm mb-2">
+                                      <div className="text-gray-300">
+                                        <span className="font-semibold">From:</span> {msg.sender}
+                                      </div>
+                                      <div className="text-gray-300">
+                                        <span className="font-semibold">To:</span> {msg.recipient}
+                                      </div>
                                     </div>
-                                    <p className="text-white mt-2">{msg.message}</p>
                                   </div>
-                                  {msg.track && (
-                                    <div className="px-4 pb-4">
-                                      <img src={msg.track.cover_img} alt={msg.track.title} className="rounded-lg" />
-                                      <p className="text-gray-300 text-sm mt-1">{msg.track.title} - {msg.track.artist}</p>
-                                    </div>
-                                  )}
+                                  <CarouselCard
+                                    recipient={msg.recipient || "-"}
+                                    sender={msg.sender || "-"}
+                                    message={msg.message || "Pesan tidak tersedia"}
+                                    songTitle={msg.track?.title}
+                                    artist={msg.track?.artist}
+                                    coverUrl={msg.track?.cover_img}
+                                    spotifyEmbed={
+                                      msg.spotify_id && (
+                                        <div className="px-4 pb-4">
+                                          <iframe
+                                            className="w-full rounded-lg shadow-md"
+                                            src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                            width="100%"
+                                            height="80"
+                                            frameBorder="0"
+                                            allow="encrypted-media"
+                                          />
+                                        </div>
+                                      )
+                                    }
+                                  />
+                                  <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                                    <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                                    <p className="text-sm text-white text-center mt-2">
+                                      {getFormattedDate(msg.created_at)}
+                                    </p>
+                                  </div>
                                 </div>
                               </Link>
                             </motion.div>
                           ))}
                         </motion.div>
-                      )
+                      ),
                   )}
                 </AnimatePresence>
               </div>
@@ -375,5 +407,5 @@ export default function HomePage() {
 
       <Footer />
     </div>
-  );
+  )
 }
