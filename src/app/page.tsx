@@ -1,19 +1,18 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Footer } from "@/components/ui/footer"
-import { InitialAnimation } from "@/components/initial-animation"
-import { Navbar } from "@/components/ui/navbar"
-import Link from "next/link"
-import dynamic from "next/dynamic"
-import { Sparkles } from "lucide-react"
-import { CarouselCard } from "@/components/carousel-card"
-import { motion, AnimatePresence } from "framer-motion"
+import { useEffect, useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Footer } from "@/components/ui/footer";
+import { InitialAnimation } from "@/components/initial-animation";
+import { Navbar } from "@/components/ui/navbar";
+import Link from "next/link";
+import dynamic from "next/dynamic";
+import { Sparkles } from "lucide-react";
+import { CarouselCard } from "@/components/carousel-card";
+import { motion, AnimatePresence } from "framer-motion";
 
-const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
-  ssr: false,
-})
+const DynamicCarousel = dynamic(() => import("@/components/carousel"), { ssr: false });
+const DynamicBackgroundVideo = dynamic(() => import("@/components/background-video"), { ssr: false });
 
 const ADMIN_MESSAGES = [
   "semangat untuk hari ini kamu selalu luar biasa",
@@ -24,37 +23,37 @@ const ADMIN_MESSAGES = [
   "Jangan lupa minum air putih hari ini! 💧",
   "Ingat ya, kamu itu spesial dan unik! ✨",
   "Hari ini adalah kesempatan baru untuk memulai hal baru",
-]
+];
 
 const PopupAdminMessage = () => {
-  const [showPopup, setShowPopup] = useState(false)
-  const [message, setMessage] = useState("")
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [showPopup, setShowPopup] = useState(false);
+  const [message, setMessage] = useState("");
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const lastShownDate = localStorage.getItem("popupLastShown")
-    const today = new Date().toDateString()
+    const lastShownDate = localStorage.getItem("popupLastShown");
+    const today = new Date().toDateString();
 
     if (lastShownDate !== today) {
-      const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length)
-      setMessage(ADMIN_MESSAGES[randomIndex])
-      setShowPopup(true)
-      localStorage.setItem("popupLastShown", today)
+      const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length);
+      setMessage(ADMIN_MESSAGES[randomIndex]);
+      setShowPopup(true);
+      localStorage.setItem("popupLastShown", today);
 
       timeoutRef.current = setTimeout(() => {
-        setShowPopup(false)
-      }, 100000)
+        setShowPopup(false);
+      }, 100000);
     }
 
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    }
-  }, [])
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const handleClose = () => {
-    setShowPopup(false)
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-  }
+    setShowPopup(false);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  };
 
   return (
     <AnimatePresence>
@@ -89,52 +88,51 @@ const PopupAdminMessage = () => {
         </motion.div>
       )}
     </AnimatePresence>
-  )
-}
+  );
+};
 
 interface Menfess {
-  id: number
-  sender: string
-  recipient: string
-  message: string
-  spotify_id?: string
+  id: number;
+  sender: string;
+  recipient: string;
+  message: string;
+  spotify_id?: string;
   track?: {
-    title: string
-    artist: string
-    cover_img: string
-  }
-  created_at: string
+    title: string;
+    artist: string;
+    cover_img: string;
+  };
+  created_at: string;
 }
 
 interface MenfessResponse {
-  status: boolean
-  success: boolean
-  message: string | null
-  data: Menfess[]
+  status: boolean;
+  success: boolean;
+  message: string | null;
+  data: Menfess[];
 }
 
-const VISIBLE_MESSAGES = 8
-const SLIDE_DURATION = 8000
-
-const DynamicBackgroundVideo = dynamic(() => import("@/components/background-video"), { ssr: false })
+const VISIBLE_MESSAGES = 8;
+const SLIDE_DURATION = 8000;
 
 export default function HomePage() {
-  const [messages, setMessages] = useState<Menfess[][]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [isMobile, setIsMobile] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [messages, setMessages] = useState<Menfess[][]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isNight, setIsNight] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const shuffleArray = (array: Menfess[]) => {
-    const newArray = [...array]
+    const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-    return newArray
-  }
+    return newArray;
+  };
 
   const validateMenfess = (data: any): data is Menfess => {
     return (
@@ -143,8 +141,8 @@ export default function HomePage() {
       typeof data?.recipient === "string" &&
       typeof data?.message === "string" &&
       typeof data?.created_at === "string"
-    )
-  }
+    );
+  };
 
   const getFormattedDate = (dateString: string) => {
     try {
@@ -153,70 +151,65 @@ export default function HomePage() {
         year: "numeric",
         month: "long",
         day: "numeric",
-      })
+      });
     } catch {
-      return "Tanggal tidak valid"
+      return "Tanggal tidak valid";
     }
-  }
-
-  const getTimeStatus = () => {
-    const currentHour = new Date().getHours()
-    return {
-      isNight: currentHour >= 18 || currentHour < 7,
-      isMorning: currentHour >= 7 && currentHour < 18,
-    }
-  }
+  };
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640)
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const currentHour = new Date().getHours();
+    setIsNight(currentHour >= 18 || currentHour < 7);
+  }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`)
-        if (!response.ok) throw new Error("Gagal memuat pesan")
+        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
+        if (!response.ok) throw new Error("Gagal memuat pesan");
 
-        const data: MenfessResponse = await response.json()
+        const data: MenfessResponse = await response.json();
 
         if (data?.status && Array.isArray(data.data)) {
-          const validMessages = data.data.filter(validateMenfess)
-          const shuffled = shuffleArray(validMessages)
-          const randomMessages = shuffled.slice(0, VISIBLE_MESSAGES)
-          const latestMessages = validMessages.slice(0, VISIBLE_MESSAGES)
-          setMessages([randomMessages, latestMessages])
+          const validMessages = data.data.filter(validateMenfess);
+          const shuffled = shuffleArray(validMessages);
+          const randomMessages = shuffled.slice(0, VISIBLE_MESSAGES);
+          const latestMessages = validMessages.slice(0, VISIBLE_MESSAGES);
+          setMessages([randomMessages, latestMessages]);
         } else {
-          throw new Error("Format data tidak valid")
+          throw new Error("Format data tidak valid");
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Terjadi kesalahan")
-        console.error("Fetch error:", err)
+        setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+        console.error("Fetch error:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchMessages()
-  }, [shuffleArray, validateMenfess]) // Added shuffleArray and validateMenfess to dependencies
+    fetchMessages();
+  }, []);
 
   useEffect(() => {
     if (messages.length > 0) {
       timeoutRef.current = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % messages.length)
-      }, SLIDE_DURATION)
+        setCurrentSlide((prev) => (prev + 1) % messages.length);
+      }, SLIDE_DURATION);
     }
 
     return () => {
-      if (timeoutRef.current) clearInterval(timeoutRef.current)
-    }
-  }, [messages.length])
+      if (timeoutRef.current) clearInterval(timeoutRef.current);
+    };
+  }, [messages.length]);
 
   const renderTimeIcon = () => {
-    const { isNight } = getTimeStatus()
-
     return (
       <motion.div
         key={isNight ? "moon" : "sparkles"}
@@ -251,8 +244,8 @@ export default function HomePage() {
           </motion.div>
         )}
       </motion.div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800 relative overflow-hidden">
@@ -407,5 +400,5 @@ export default function HomePage() {
 
       <Footer />
     </div>
-  )
+  );
 }
