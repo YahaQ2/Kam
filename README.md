@@ -1,1 +1,1 @@
-jadikuli jadi kuli aje
+jadikuli jadi kuli aje kontollll kontoll
