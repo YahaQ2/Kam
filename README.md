@@ -1,2 +1,1 @@
-
-klxl
+jadikuli jadi kuli aje
