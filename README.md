@@ -1,3 +1,3 @@
 
 koaozzh
-. kontrol 
+. kontrol alah kosp
