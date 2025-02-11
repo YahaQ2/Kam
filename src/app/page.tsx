@@ -23,7 +23,7 @@ const ADMIN_MESSAGES = [
   "Tetap semangat dan jaga kesehatan! 💪",
   "Jangan lupa minum air putih hari ini! 💧",
   "Ingat ya, kamu itu spesial dan unik! ✨",
-  "Hari ini adalah kesempatan baru untuk berkarya! 🎨",
+  "Hari ini adalah kesempatan baru untuk memulai hal baru",
 ]
 
 const PopupAdminMessage = () => {
@@ -81,7 +81,7 @@ const PopupAdminMessage = () => {
                 <Sparkles className="h-6 w-6 text-yellow-400" />
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Pesan Admin</p>
+                <p className="text-sm font-medium text-gray-900">Pesan dari unandfess.xyz</p>
                 <p className="text-sm text-gray-500 mt-1">{message}</p>
               </div>
             </div>
