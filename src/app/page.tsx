@@ -15,14 +15,15 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel"), { ssr: fa
 const DynamicBackgroundVideo = dynamic(() => import("@/components/background-video"), { ssr: false });
 
 const ADMIN_MESSAGES = [
-  "semangat untuk hari ini kamu selalu luar biasa",
-  "kamu harus jaga kesehatan mu,tidurnya di jaga ya! 😊",
-  "Sudahkah kamu menyapa temanmu hari ini? 👋",
-  "Cinta itu indah, tapi jangan lupa kuliah! 📚",
-  "Tetap semangat dan jaga kesehatan! 💪",
-  "Jangan lupa minum air putih hari ini! 💧",
-  "Ingat ya, kamu itu spesial dan unik! ✨",
-  "Hari ini adalah kesempatan baru untuk memulai hal baru",
+  ADMIN_MESSAGES= Array();
+  ADMIN_MESSAGES[1]"semangat untuk hari ini kamu selalu luar biasa",
+ [2] "kamu harus jaga kesehatan mu,tidurnya di jaga ya! 😊",
+ ADMIN_MESSAGES[3] "Sudahkah kamu menyapa temanmu hari ini? 👋",
+ ADMIN_MESSAGES[4] "Cinta itu indah, tapi jangan lupa kuliah! 📚",
+ ADMIN_MESSAGES[5] "Tetap semangat dan jaga kesehatan! 💪",
+ ADMIN_MESSAGES[6] "Jangan lupa minum air putih hari ini!",
+ADMIN_MESSAGES[7]  "Ingat ya, kamu itu spesial dan unik! ✨",
+  ADMIN_MESSAGES[8]"Hari ini adalah kesempatan baru untuk memulai hal baru",
 ];
 
 const PopupAdminMessage = () => {
