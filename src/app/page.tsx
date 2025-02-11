@@ -25,6 +25,13 @@ const ADMIN_MESSAGES = [
   "Hari ini adalah kesempatan baru untuk memulai hal baru",
 ];
 
+// Fungsi untuk menghasilkan angka acak menggunakan crypto.getRandomValues()
+const getRandomInt = (max: number) => {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  return array[0] % max;
+};
+
 const PopupAdminMessage = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [message, setMessage] = useState("");
@@ -35,7 +42,7 @@ const PopupAdminMessage = () => {
     const today = new Date().toDateString();
 
     if (lastShownDate !== today) {
-      const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length);
+      const randomIndex = getRandomInt(ADMIN_MESSAGES.length);
       setMessage(ADMIN_MESSAGES[randomIndex]);
       setShowPopup(true);
       localStorage.setItem("popupLastShown", today);
@@ -125,10 +132,11 @@ export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Fungsi untuk mengacak array menggunakan getRandomInt
   const shuffleArray = (array: Menfess[]) => {
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = getRandomInt(i + 1);
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
     return newArray;
