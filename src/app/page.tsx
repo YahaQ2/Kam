@@ -10,7 +10,6 @@ import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
-import dynamic from "next/dynamic";
 
 interface Track {
   title?: string;
@@ -34,11 +33,6 @@ interface MenfessResponse {
 }
 
 const VISIBLE_MESSAGES = 6;
-
-const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
-  ssr: false,
-  loading: () => <div className="h-40 flex items-center justify-center text-gray-300">Memuat carousel...</div>
-});
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -200,11 +194,11 @@ export default function HomePage() {
       <Navbar />
       
       <main className="flex-grow">
+        {/* Video Section */}
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32 min-h-[600px]">
           <div className="absolute inset-0 z-0">
             <BackgroundVideo />
-            <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent backdrop-blur-[2px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-transparent backdrop-blur-[2px]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/60 via-transparent to-white/60 backdrop-blur-[1px]" />
           </div>
 
           <div className="container mx-auto px-4 text-center relative z-10">
@@ -232,36 +226,39 @@ export default function HomePage() {
             >
               <Button
                 asChild
-                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
+                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors shadow-lg"
               >
                 <Link href="/message">Kirim Menfess</Link>
               </Button>
               <Button
                 asChild
-                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors shadow-lg"
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
               <Button
                 asChild
-                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors"
+                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg"
               >
-                <Link href="https://ziwa-351410.web.app">
+                <Link 
+                  href="https://ziwa-351410.web.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Ziwa - Cari Teman baru & fun space
                   <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </motion.div>
           </div>
-          
-          <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
-            <DynamicCarousel />
-          </div>
         </section>
 
-        <section className="py-16 md:py-24">
+        {/* Carousel Section */}
+        <div className="border-t-2 border-gray-200 mx-8" />
+
+        <section className="py-12 md:py-16 bg-white">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
+            <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 MENFESS TERBARU
               </h2>
@@ -303,13 +300,13 @@ export default function HomePage() {
                         }`}
                       >
                         <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
-                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                          <div className="h-full w-full bg-gray-50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border-2 border-gray-100">
                             <div className="px-4 pt-4">
                               <div className="flex justify-between text-sm mb-2">
-                                <div className="text-gray-300">
+                                <div className="text-gray-600">
                                   <span className="font-semibold">From:</span> {msg.sender}
                                 </div>
-                                <div className="text-gray-300">
+                                <div className="text-gray-600">
                                   <span className="font-semibold">To:</span> {msg.recipient}
                                 </div>
                               </div>
@@ -336,40 +333,4 @@ export default function HomePage() {
                                 )
                               }
                             />
-                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text-white text-center mt-2">
-                                {getFormattedDate(msg.created_at)}
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-
-                {isMobile && (
-                  <div className="flex justify-center space-x-2 mt-4">
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
-                      <motion.div
-                        key={index}
-                        className={`h-2 w-2 rounded-full ${
-                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
-                        }`}
-                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
-      </main>
-
-      <Footer />
-    </div>
-  );
-}
+                            <div className="p-4 bg-gray
