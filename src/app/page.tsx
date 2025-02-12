@@ -226,8 +226,7 @@ export default function HomePage() {
                     <BackgroundVideo />
                   </div>
       
-          
-          
+           
           </div>
 
           <div className="container mx-auto px-4 text-center relative z-10">
