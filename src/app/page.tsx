@@ -404,7 +404,7 @@ export default function HomePage() {
                           isMobile 
                             ? 'flex-shrink-0 max-w-7xl mx-auto snap-center p-4 ' 
                             : 'flex-shrink-0 w-1/3 p-4'
-                        } bg-white rounded-lg shadow-lg`}
+                        } bg-white rounded-lg shadow-lg max-w-7xl mx-auto`}
                       >
                         <div className="flex flex-col">
                           <h3 className="font-bold text-lg">{msg.sender}</h3>
