@@ -69,7 +69,7 @@ const PopupAdminMessage = () => {
 
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== "undefined") {
+    const handlePopup = () => {
       const lastShownDate = localStorage.getItem("popupLastShown");
       const today = new Date().toDateString();
 
@@ -86,6 +86,10 @@ const PopupAdminMessage = () => {
           setShowPopup(false);
         }, 100000);
       }
+    };
+
+    if (typeof window !== "undefined") {
+      handlePopup();
     }
 
     return () => {
@@ -177,6 +181,8 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    if (!isMounted) return;
+
     const fetchMessages = async () => {
       try {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
@@ -193,7 +199,7 @@ export default function HomePage() {
             typeof m?.created_at === "string"
           ));
           
-          const shuffled = isMounted ? shuffleArray(validMessages) : validMessages;
+          const shuffled = shuffleArray(validMessages);
           const randomMessages = shuffled.slice(0, VISIBLE_MESSAGES);
           const latestMessages = validMessages.slice(0, VISIBLE_MESSAGES);
           setMessages([randomMessages, latestMessages]);
@@ -332,8 +338,7 @@ export default function HomePage() {
               </h2>
               <p className="text-gray-400 max-w-xl mx-auto">
                 {currentSlide === 0 ? "Pesan-pesan menarik untuk Anda" : "Trending menfess"}
-              </p>
-            </div>
+              </p </div>
 
             {loading ? (
               <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
@@ -369,7 +374,7 @@ export default function HomePage() {
                                       <div className="text-gray-300">
                                         <span className="font-semibold">From:</span> {msg.sender}
                                       </div>
-                                      <div className="text-gray- 500">
+                                      <div className="text-gray-500">
                                         {getFormattedDate(msg.created_at)}
                                       </div>
                                     </div>
