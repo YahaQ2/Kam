@@ -10,6 +10,7 @@ import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
+import dynamic from "next/dynamic";
 
 interface Track {
   title?: string;
@@ -33,6 +34,11 @@ interface MenfessResponse {
 }
 
 const VISIBLE_MESSAGES = 6;
+
+const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
+  ssr: false,
+  loading: () => <div className="h-40 flex items-center justify-center text-gray-300">Memuat carousel...</div>
+});
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -272,6 +278,10 @@ export default function HomePage() {
                 </Link>
               </Button>
             </motion.div>
+
+            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+              <DynamicCarousel />
+            </div>
           </div>
         </section>
 
