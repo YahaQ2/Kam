@@ -9,7 +9,12 @@ import Link from "next/link";
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
-import { BackgroundVideo } from "@/components/background-video";
+
+interface Track {
+  title?: string;
+  artist?: string;
+  cover_img?: string;
+}
 
 interface Menfess {
   id: number;
@@ -17,18 +22,12 @@ interface Menfess {
   recipient: string;
   message: string;
   spotify_id?: string;
-  track?: {
-    title: string;
-    artist: string;
-    cover_img: string;
-  };
+  track?: Track;
   created_at: string;
 }
 
 interface MenfessResponse {
   status: boolean;
-  success: boolean;
-  message: string | null;
   data: Menfess[];
 }
 
@@ -41,15 +40,15 @@ export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isNight, setIsNight] = useState(false);
 
   const shuffleArray = (array: Menfess[]) => {
+    if (!array.length) return [];
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-    return newArray;
+    return newArray.slice(0, VISIBLE_MESSAGES * 2);
   };
 
   const validateMenfess = (data: any): data is Menfess => {
@@ -76,11 +75,9 @@ export default function HomePage() {
 
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
-    const night = currentHour >= 18 || currentHour < 7;
-    setIsNight(night);
     return {
-      isNight: night,
-      isMorning: !night
+      isNight: currentHour >= 18 || currentHour < 7,
+      isMorning: currentHour >= 7 && currentHour < 18
     };
   };
 
@@ -92,29 +89,37 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchMessages = async () => {
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`);
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/menfess-spotify-search`,
+          { signal: controller.signal }
+        );
+        
         if (!response.ok) throw new Error("Gagal memuat pesan");
         
         const data: MenfessResponse = await response.json();
         
         if (data?.status && Array.isArray(data.data)) {
           const validMessages = data.data.filter(validateMenfess);
-          const shuffled = shuffleArray(validMessages).slice(0, VISIBLE_MESSAGES * 2);
+          const shuffled = shuffleArray(validMessages);
           setRecentlyAddedMessages(shuffled);
         } else {
           throw new Error("Format data tidak valid");
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-        console.error('Fetch error:', err);
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+          console.error('Fetch error:', err);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchMessages();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -186,13 +191,8 @@ export default function HomePage() {
       <Navbar />
       
       <main className="flex-grow">
-        <section className="relative overflow-hidden pt-24 pb-16 md:py-32 min-h-[600px]">
-          {/* Background Video */}
-          <div className="absolute inset-0 z-0">
-            <BackgroundVideo />
-          </div>
-          
-          <div className="container mx-auto px-4 text-center relative z-10">
+        <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
+          <div className="container mx-auto px-4 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -201,10 +201,10 @@ export default function HomePage() {
               <div className="mb-8">
                 {renderTimeIcon()}
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500">
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
                 Menfess warga Unand
               </h1>
-              <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto mb-12 backdrop-blur-sm bg-white/30 p-4 rounded-2xl shadow-sm">
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
             </motion.div>
@@ -217,23 +217,26 @@ export default function HomePage() {
             >
               <Button
                 asChild
-                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors backdrop-blur-sm bg-opacity-90"
+                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
               >
                 <Link href="/message">Kirim Menfess</Link>
               </Button>
               <Button
                 asChild
-                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors backdrop-blur-sm bg-opacity-90"
+                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
               <Button
                 asChild
-                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors backdrop-blur-sm bg-opacity-90"
+                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors"
               >
-                <Link href="https://ziwa-351410.web.app">
+                <Link 
+                  href="https://ziwa-351410.web.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Ziwa - Cari Teman baru & fun space
-                  <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </motion.div>
@@ -269,7 +272,7 @@ export default function HomePage() {
                   onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg, index) => (
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
                       <motion.div
                         key={msg.id}
                         variants={cardVariants}
