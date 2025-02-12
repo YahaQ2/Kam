@@ -10,7 +10,8 @@ import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
-import { DynamicCarousel } from"@/components/carousel";
+import dynamic from 'next/dynamic';
+
 interface Track {
   title?: string;
   artist?: string;
@@ -33,6 +34,11 @@ interface MenfessResponse {
 }
 
 const VISIBLE_MESSAGES = 6;
+
+const DynamicCarousel = dynamic(() => import('@/components/carousel'), {
+  loading: () => <div className="h-64 w-full bg-gray-100 animate-pulse rounded-xl" />,
+  ssr: false
+});
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -144,8 +150,6 @@ export default function HomePage() {
       setCurrentCard(Math.round(scrollPosition / cardWidth));
     }
   };
-const DynamicCarousel = {loading: () => <div className="h-64 w-full bg-gray-100 animate-pulse rounded-xl" />
-});
 
   const cardVariants = {
     hidden: { opacity: 0, scale: 0.8, rotate: -5 },
@@ -195,7 +199,6 @@ const DynamicCarousel = {loading: () => <div className="h-64 w-full bg-gray-100 
       
       <main className="flex-grow">
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          {/* Background Video */}
           <div className="absolute inset-0 z-0">
             <BackgroundVideo />
           </div>
