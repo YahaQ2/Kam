@@ -281,7 +281,6 @@ export default function HomePage() {
 
             <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
               <DynamicCarousel />
-            </div>
           </div>
         </section>
 
