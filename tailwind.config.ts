@@ -76,4 +76,16 @@ module.exports = {
 	plugins: [require("tailwindcss-animate")],
   }
   
-  
+  module.exports = {
+     // ...
+     theme: {
+       extend: {
+         animation: {
+           'spin-slow': 'spin 3s linear infinite',
+         },
+         boxShadow: {
+           glow: '0 0 10px rgba(255,255,255,0.5)',
+         }
+       }
+     }
+   }
