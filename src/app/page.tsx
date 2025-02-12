@@ -225,8 +225,9 @@ export default function HomePage() {
                   <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
                     <BackgroundVideo />
                   </div>
-      
-           
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="container mx-auto px-4 text-center relative z-10">
@@ -277,6 +278,7 @@ export default function HomePage() {
                 </Link>
               </Button>
             </motion.div>
+
 
           </div>
         </section>
