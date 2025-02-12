@@ -193,11 +193,21 @@ export default function HomePage() {
       
       <main className="flex-grow">
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          {/* Background Video */}
-          <div className="absolute inset-0 z-0">
-            <BackgroundVideo />
+          {/* Background Video Container with Border Effect */}
+          <div className="absolute inset-0 z-0 h-[600px] overflow-hidden">
+            <div className="relative h-full w-full">
+              {/* Cloud-like Border Effect */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -inset-4 lg:-inset-6">
+                  <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
+                    <BackgroundVideo />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="container mx-auto px-4 text-center">
+
+          <div className="container mx-auto px-4 text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -222,19 +232,19 @@ export default function HomePage() {
             >
               <Button
                 asChild
-                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
+                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors shadow-lg"
               >
                 <Link href="/message">Kirim Menfess</Link>
               </Button>
               <Button
                 asChild
-                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors shadow-lg"
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
               <Button
                 asChild
-                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors"
+                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg"
               >
                 <Link 
                   href="https://ziwa-351410.web.app"
