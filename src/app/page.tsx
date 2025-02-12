@@ -10,6 +10,7 @@ import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
+import dynamic from "next/dynamic";
 
 interface Track {
   title?: string;
@@ -200,7 +201,6 @@ export default function HomePage() {
       
       <main className="flex-grow">
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32 min-h-[600px]">
-          {/* Background Video Section */}
           <div className="absolute inset-0 z-0">
             <BackgroundVideo />
             <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent backdrop-blur-[2px]" />
@@ -251,14 +251,14 @@ export default function HomePage() {
                   <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              
             </motion.div>
-            </div>      
-            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+          </div>
+          
+          <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
           </div>
         </section>
-.
+
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -354,7 +354,7 @@ export default function HomePage() {
                     {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
                       <motion.div
                         key={index}
-                        className={` h-2 w-2 rounded-full ${
+                        className={`h-2 w-2 rounded-full ${
                           currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
                         }`}
                         animate={{ scale: currentCard === index ? 1.2 : 1 }}
