@@ -194,7 +194,7 @@ export default function HomePage() {
       <main className="flex-grow">
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
           {/* Background Video Container with Border Effect */}
-          <div className="absolute inset-0 z-0 h-[600px] overflow-hidden">
+          <div className="absolute inset-0 z-0 h-[700px] overflow-hidden">
             <div className="relative h-full w-full">
               {/* Cloud-like Border Effect */}
               <div className="absolute inset-0 overflow-hidden">
