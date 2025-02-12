@@ -35,6 +35,7 @@ const PopupAdminMessage = () => {
       const today = new Date().toDateString();
 
       if (lastShownDate !== today) {
+        // Pindahkan randomisasi ke dalam useEffect
         const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length);
         setMessage(ADMIN_MESSAGES[randomIndex]);
         setShowPopup(true);
@@ -176,7 +177,8 @@ export default function HomePage() {
 
         if (data?.status && Array.isArray(data.data)) {
           const validMessages = data.data.filter(validateMenfess);
-          const shuffled = shuffleArray(validMessages);
+          // Pindahkan randomisasi ke dalam useEffect
+          const shuffled = isMounted ? shuffleArray(validMessages) : validMessages;
           const randomMessages = shuffled.slice(0, VISIBLE_MESSAGES);
           const latestMessages = validMessages.slice(0, VISIBLE_MESSAGES);
           setMessages([randomMessages, latestMessages]);
@@ -192,7 +194,7 @@ export default function HomePage() {
     };
 
     fetchMessages();
-  }, []);
+  }, [isMounted]);
 
   useEffect(() => {
     if (messages.length > 0) {
