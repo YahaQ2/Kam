@@ -201,7 +201,6 @@ export default function HomePage() {
                 <div className="absolute -inset-4 lg:-inset-4">
                   <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_0%,transparent_90%)]">
                     <BackgroundVideo />
-                  </div>
                 </div>
               </div>
             </div>
