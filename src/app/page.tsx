@@ -10,7 +10,7 @@ import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
-
+import { DynamicCarousel } from"@/components/carousel";
 interface Track {
   title?: string;
   artist?: string;
@@ -144,6 +144,8 @@ export default function HomePage() {
       setCurrentCard(Math.round(scrollPosition / cardWidth));
     }
   };
+const DynamicCarousel = {loading: () => <div className="h-64 w-full bg-gray-100 animate-pulse rounded-xl" />
+});
 
   const cardVariants = {
     hidden: { opacity: 0, scale: 0.8, rotate: -5 },
@@ -245,6 +247,9 @@ export default function HomePage() {
                 </Link>
               </Button>
             </motion.div>
+            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+              <DynamicCarousel />
+            </div>
           </div>
         </section>
 
