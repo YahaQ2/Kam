@@ -542,5 +542,28 @@ export default function HomePage() {
                   </AnimatePresence>
                 </div>
 
+                
                 {isMobile && (
-                  <div className="flex justi
+                  <div className="flex justify-center space-x-2 mt-4">
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${
+                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
+                        }`}
+                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
