@@ -402,7 +402,7 @@ export default function HomePage() {
                         transition={{ duration: 0.3 }}
                         className={`${
                           isMobile 
-                            ? 'flex-shrink-0 w-full snap-center p-4 ' 
+                            ? 'flex-shrink-0 max-w-7xl mx-auto snap-center p-4 ' 
                             : 'flex-shrink-0 w-1/3 p-4'
                         } bg-white rounded-lg shadow-lg`}
                       >
