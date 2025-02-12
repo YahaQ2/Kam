@@ -11,6 +11,7 @@ import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 interface Track {
   title?: string;
@@ -34,6 +35,25 @@ interface MenfessResponse {
 }
 
 const VISIBLE_MESSAGES = 6;
+const MESSAGES = [
+  "semangat untuk hari ini kamu selalu luar biasa",
+  "kamu harus jaga kesehatan mu,tidurnya di jaga ya! 😊",
+  "Sudahkah kamu menyapa temanmu hari ini? 👋",
+  "Cinta itu indah, tapi jangan lupa kuliah! 📚",
+  "Tetap semangat dan jaga kesehatan! 💪",
+  "Jangan lupa minum air putih hari ini! 💧",
+  "Ingat ya, kamu itu spesial dan unik! ✨",
+  "Hari ini adalah kesempatan baru untuk memulai hal baru"
+];
+
+interface FlyingObject {
+  id: number;
+  type: 'bird' | 'plane';
+  message: string;
+  direction: 'left' | 'right';
+  top: number;
+  duration: number;
+}
 
 const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
   ssr: false,
@@ -46,6 +66,8 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
+  const [flyingObjects, setFlyingObjects] = useState<FlyingObject[]>([]);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const shuffleArray = (array: Menfess[]) => {
@@ -143,6 +165,34 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const messageInterval = setInterval(() => {
+      setCurrentMessageIndex(prev => (prev + 1) % MESSAGES.length);
+    }, 180000);
+
+    const spawnInterval = setInterval(() => {
+      const newObject: FlyingObject = {
+        id: Date.now(),
+        type: Math.random() > 0.5 ? 'bird' : 'plane',
+        message: MESSAGES[currentMessageIndex],
+        direction: Math.random() > 0.5 ? 'left' : 'right',
+        top: Math.random() * 70 + 15,
+        duration: Math.random() * 5 + 8
+      };
+
+      setFlyingObjects(prev => [...prev, newObject]);
+
+      setTimeout(() => {
+        setFlyingObjects(prev => prev.filter(obj => obj.id !== newObject.id));
+      }, 15000);
+    }, 10000);
+
+    return () => {
+      clearInterval(messageInterval);
+      clearInterval(spawnInterval);
+    };
+  }, [currentMessageIndex]);
+
   const handleScroll = () => {
     if (containerRef.current) {
       const scrollPosition = containerRef.current.scrollLeft;
@@ -211,12 +261,51 @@ export default function HomePage() {
     );
   };
 
+  const FlyingObject = ({ object }: { object: FlyingObject }) => (
+    <motion.div
+      initial={{
+        x: object.direction === 'right' ? '-100vw' : '100vw',
+        opacity: 0
+      }}
+      animate={{
+        x: object.direction === 'right' ? '100vw' : '-100vw',
+        opacity: [0, 1, 1, 0]
+      }}
+      transition={{
+        duration: object.duration,
+        ease: 'linear',
+        times: [0, 0.1, 0.9, 1]
+      }}
+      className="fixed z-50 pointer-events-none"
+      style={{ top: `${object.top}%` }}
+    >
+      <div className="relative flex flex-col items-center">
+        <Image
+          src={`/${object.type}.png`}
+          alt={object.type}
+          width={object.type === 'bird' ? 80 : 120}
+          height={object.type === 'bird' ? 60 : 80}
+          className="object-contain"
+        />
+        <div className="absolute top-full mt-2 bg-white px-4 py-2 rounded-full shadow-lg text-sm max-w-xs text-center border border-gray-200">
+          {object.message}
+        </div>
+      </div>
+    </motion.div>
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
       <Navbar />
       
       <main className="flex-grow">
+        <AnimatePresence>
+          {flyingObjects.map(object => (
+            <FlyingObject key={object.id} object={object} />
+          ))}
+        </AnimatePresence>
+
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
           <div className="absolute inset-0 z-0 h-[700px] w-[120%] -left-[10%] overflow-hidden">
             <div className="relative h-full w-full transform translate-y-10">
@@ -242,7 +331,7 @@ export default function HomePage() {
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
                 Menfess warga Unand
               </h1>
-              <p className="text-lg md:text-xl text-white-600 max-w-3xl mx-auto mb-12">
+              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
             </motion.div>
@@ -279,12 +368,11 @@ export default function HomePage() {
               </Button>
             </motion.div>
 
-
+            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+              <DynamicCarousel />
+            </div>
           </div>
         </section>
-                    <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
-              <DynamicCarousel />
-          </div>
 
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
@@ -309,7 +397,7 @@ export default function HomePage() {
                   ref={containerRef}
                   className={`flex ${
                     isMobile 
-                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
+                      ? ' overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
                       : 'overflow-hidden justify-center'
                   }`}
                   onScroll={handleScroll}
@@ -325,71 +413,19 @@ export default function HomePage() {
                         transition={{ duration: 0.3 }}
                         className={`${
                           isMobile 
-                            ? 'flex-shrink-0 w-full snap-center p-4' 
-                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-                        }`}
+                            ? 'flex-shrink-0 w-full snap-center p-4 ' 
+                            : 'flex-shrink-0 w-1/3 p-4'
+                        } bg-white rounded-lg shadow-lg`}
                       >
-                        <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
-                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                            <div className="px-4 pt-4">
-                              <div className="flex justify-between text-sm mb-2">
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">From:</span> {msg.sender}
-                                </div>
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">To:</span> {msg.recipient}
-                                </div>
-                              </div>
-                            </div>
-                            <CarouselCard
-                              recipient={msg.recipient || '-'}
-                              sender={msg.sender || '-'}
-                              message={msg.message || 'Pesan tidak tersedia'}
-                              songTitle={msg.track?.title}
-                              artist={msg.track?.artist}
-                              coverUrl={msg.track?.cover_img}
-                              spotifyEmbed={
-                                msg.spotify_id && (
-                                  <div className="px-4 pb-4">
-                                    <iframe
-                                      className="w-full rounded-lg shadow-md"
-                                      src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                      width="100%"
-                                      height="80"
-                                      frameBorder="0"
-                                      allow="encrypted-media"
-                                    />
-                                  </div>
-                                )
-                              }
-                            />
-                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text-white text-center mt-2">
-                                {getFormattedDate(msg.created_at)}
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
+                        <div className="flex flex-col">
+                          <h3 className="font-bold text-lg">{msg.sender}</h3>
+                          <p className="text-gray-600">{msg.message}</p>
+                          <span className="text-gray-400 text-sm">{getFormattedDate(msg.created_at)}</span>
+                        </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
                 </div>
-
-                {isMobile && (
-                  <div className="flex justify-center space-x-2 mt-4">
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
-                      <motion.div
-                        key={index}
-                        className={`h-2 w-2 rounded-full ${
-                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
-                        }`}
-                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    ))}
-                  </div>
-                )}
               </div>
             )}
           </div>
