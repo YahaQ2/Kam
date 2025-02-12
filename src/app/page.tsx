@@ -251,14 +251,15 @@ export default function HomePage() {
                   <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              </div>
+              
+            </motion.div>
+            </div>
           <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
           </div>
-            </motion.div>
           </div>
         </section>
-
+.
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
