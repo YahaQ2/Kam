@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
+import { BackgroundVideo } from "@/components/background-video";
 
 interface Track {
   title?: string;
@@ -192,6 +193,10 @@ export default function HomePage() {
       
       <main className="flex-grow">
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
+          {/* Background Video */}
+          <div className="absolute inset-0 z-0">
+            <BackgroundVideo />
+          </div>
           <div className="container mx-auto px-4 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
