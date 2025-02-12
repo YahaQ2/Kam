@@ -13,7 +13,7 @@ export const BackgroundVideo = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-full rounded-[40px] overflow-hidden border-0 border-white/20 m-4 shadow-2xl">
+    <div className="relative w-full h-full rounded-[40px] overflow-hidden border-2 border-white/20 m-4 shadow-2xl">
       {mounted && (
         <video
           key={isNight ? 'night-video' : 'day-video'}
