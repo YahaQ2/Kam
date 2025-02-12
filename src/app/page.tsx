@@ -254,7 +254,6 @@ export default function HomePage() {
               
             </motion.div>
             </div>
-    
             <DynamicCarousel />
           </div>
           </div>
