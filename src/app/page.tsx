@@ -253,8 +253,6 @@ export default function HomePage() {
               </Button>
               
             </motion.div>
-
-            </div>
             </div>      
             <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
             <DynamicCarousel />
