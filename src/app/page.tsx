@@ -67,9 +67,11 @@ export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
   const [flyingObjects, setFlyingObjects] = useState<FlyingObject[]>([]);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const nextTypeRef = useRef<'bird' | 'plane'>('bird');
+  const messageIndexRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Fungsi untuk shuffle array
   const shuffleArray = (array: Menfess[]) => {
     if (!array.length) return [];
     const newArray = [...array];
@@ -80,6 +82,7 @@ export default function HomePage() {
     return newArray.slice(0, VISIBLE_MESSAGES * 2);
   };
 
+  // Validasi data menfess
   const validateMenfess = (data: any): data is Menfess => {
     return (
       typeof data?.id === 'number' &&
@@ -89,6 +92,7 @@ export default function HomePage() {
     );
   };
 
+  // Format tanggal
   const getFormattedDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('id-ID', {
@@ -102,6 +106,7 @@ export default function HomePage() {
     }
   };
 
+  // Cek waktu saat ini
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
     return {
@@ -110,6 +115,7 @@ export default function HomePage() {
     };
   };
 
+  // Effect untuk responsive design
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
     handleResize();
@@ -117,6 +123,7 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Fetch data menfess
   useEffect(() => {
     const controller = new AbortController();
     const fetchMessages = async () => {
@@ -151,67 +158,81 @@ export default function HomePage() {
     return () => controller.abort();
   }, []);
 
+  // Effect untuk flying objects
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRecentlyAddedMessages(prev => {
-        if (prev.length < 2) return prev;
-        const newArray = [...prev];
-        const randomIndex = Math.floor(Math.random() * (newArray.length - 1)) + 1;
-        [newArray[0], newArray[randomIndex]] = [newArray[randomIndex], newArray[0]];
-        return newArray;
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const messageInterval = setInterval(() => {
-      setCurrentMessageIndex(prev => (prev + 1) % MESSAGES.length);
-    }, 180000);
-
     const spawnInterval = setInterval(() => {
       const newObject: FlyingObject = {
         id: Date.now(),
-        type: Math.random() > 0.5 ? 'bird' : 'plane',
-        message: MESSAGES[currentMessageIndex],
+        type: nextTypeRef.current,
+        message: MESSAGES[messageIndexRef.current],
         direction: Math.random() > 0.5 ? 'left' : 'right',
-        top: Math.random() *1,
-        duration:8000
+        top: Math.random() * 80 + 10,
+        duration: 20000
       };
 
       setFlyingObjects(prev => [...prev, newObject]);
 
       setTimeout(() => {
         setFlyingObjects(prev => prev.filter(obj => obj.id !== newObject.id));
-      }, 15000);
-    }, 10000);
+      }, newObject.duration);
 
-    return () => {
-      clearInterval(messageInterval);
-      clearInterval(spawnInterval);
-    };
-  }, [currentMessageIndex]);
+      nextTypeRef.current = nextTypeRef.current === 'bird' ? 'plane' : 'bird';
+      messageIndexRef.current = (messageIndexRef.current + 1) % MESSAGES.length;
+    }, 720000);
 
-  const handleScroll = () => {
-    if (containerRef.current) {
-      const scrollPosition = containerRef.current.scrollLeft;
-      const cardWidth = containerRef.current.offsetWidth;
-      setCurrentCard(Math.round(scrollPosition / cardWidth));
-    }
+    return () => clearInterval(spawnInterval);
+  }, []);
+
+  // Komponen glowing text
+  const GlowingText = () => {
+    const { isNight } = getTimeStatus();
+    
+    return (
+      <motion.h1
+        className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 relative"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ 
+          opacity: 1,
+          y: 0,
+          textShadow: isNight ? [
+            "0 0 10px rgba(255,255,255,0.5)",
+            "0 0 20px rgba(255,228,0,0.8)",
+            "0 0 10px rgba(255,255,255,0.5)"
+          ] : "none"
+        }}
+        transition={{ 
+          duration: 0.8,
+          textShadow: {
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }
+        }}
+      >
+        Menfess warga Unand
+        {isNight && (
+          <motion.div
+            className="absolute inset-0 blur-md pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: [0, 0.5, 0],
+              scale: [1, 1.2, 1]
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity
+            }}
+          >
+            <Sparkles className="absolute -top-2 left-1/4 w-6 h-6 text-yellow-400" />
+            <Sparkles className="absolute top-1/2 right-1/3 w-5 h-5 text-yellow-400" />
+            <Sparkles className="absolute bottom-0 left-1/2 w-4 h-4 text-yellow-400" />
+          </motion.div>
+        )}
+      </motion.h1>
+    );
   };
 
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.8, rotate: -5 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      rotate: 0,
-      transition: { type: 'spring', stiffness: 120 } 
-    },
-    exit: { opacity: 0, scale: 0.8, rotate: 5 }
-  };
-
+  // Render time icon
   const renderTimeIcon = () => {
     const { isNight } = getTimeStatus();
     
@@ -247,20 +268,30 @@ export default function HomePage() {
             className="relative"
           >
             <Sparkles className="h-16 w-16 text-yellow-400 mx-auto drop-shadow-glow" />
-            <motion.div 
-              className="absolute inset-0 w-full h-full blur-md bg-yellow-400/30"
-              animate={{
-                opacity: [0, 0.5, 0],
-                scale: [1, 1.5, 1]
-              }}
-              transition={{ duration: 10, repeat: Infinity }}
-            />
           </motion.div>
         )}
       </motion.div>
     );
   };
 
+  // Background section
+  const BackgroundSection = () => (
+    <div className="absolute inset-0 z-0 h-[700px] w-[120%] -left-[10%] overflow-hidden">
+      <div className="relative h-full w-full transform translate-y-5">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -inset-4 lg:-inset-6">
+            <div className="relative h-full w-full">
+              <BackgroundVideo />
+              <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-transparent backdrop-blur-lg" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent backdrop-blur-lg" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Flying object component
   const FlyingObject = ({ object }: { object: FlyingObject }) => (
     <motion.div
       initial={{
@@ -287,9 +318,14 @@ export default function HomePage() {
           height={object.type === 'bird' ? 60 : 80}
           className="object-contain"
         />
-        <div className="absolute top-full mt-2 bg-white px-4 py-2 rounded-full shadow-lg text-sm max-w-xs text-center border border-gray-200">
+        <motion.div 
+          className="absolute top-full mt-2 bg-white px-4 py-2 rounded-full shadow-lg text-sm max-w-xs text-center border border-gray-200"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.5 }}
+        >
           {object.message}
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );
@@ -307,18 +343,8 @@ export default function HomePage() {
         </AnimatePresence>
 
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          <div className="absolute inset-0 z-0 h-[700px] w-[120%] -left-[10%] overflow-hidden">
-            <div className="relative h-full w-full transform translate-y-5">
-              <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -inset-4 lg:-inset-6">
-                  <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
-                    <BackgroundVideo />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+          <BackgroundSection />
+          
           <div className="container mx-auto px-4 text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -327,10 +353,8 @@ export default function HomePage() {
             >
               <div className="mb-8">
                 {renderTimeIcon()}
+                <GlowingText />
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                Menfess warga Unand
-              </h1>
               <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
@@ -364,15 +388,27 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                 >
                   Ziwa - Cari Teman baru & fun space
+                  <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </motion.div>
-
           </div>
         </section>
+
+        <section className="py-16 md:py-24 bg-gray-900">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
+                MENFESS TERBARU
+              </h2>
+              <p className="text-gray-400 max-w-xl mx-auto">
+                Trending menfess
+              </p>
+            </div>
+
             <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
               <DynamicCarousel />
-                          </div>
+            </div>
 
             {loading ? (
               <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
@@ -386,10 +422,9 @@ export default function HomePage() {
                   ref={containerRef}
                   className={`flex ${
                     isMobile 
-                      ? ' overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
+                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
                       : 'overflow-hidden justify-center'
-                  }`}
-                  onScroll={handleScroll}
+                  }`}={handleScroll}
                 >
                   <AnimatePresence initial={false}>
                     {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
@@ -415,7 +450,7 @@ export default function HomePage() {
                     ))}
                   </AnimatePresence>
                 </div>
-        <section className="py-16 md:py-24 bg-gray-900">
+                          <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
@@ -508,26 +543,4 @@ export default function HomePage() {
                 </div>
 
                 {isMobile && (
-                  <div className="flex justify-center space-x-2 mt-4">
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
-                      <motion.div
-                        key={index}
-                        className={`h-2 w-2 rounded-full ${
-                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
-                        }`}
-                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
-      </main>
-
-      <Footer />
-    </div>
-  );
-}
+                  <div className="flex justi
