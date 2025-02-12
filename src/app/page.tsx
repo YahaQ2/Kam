@@ -169,17 +169,36 @@ export default function HomePage() {
         {isNight ? (
           <motion.span
             className="text-4xl"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={{
+              textShadow: [
+                "0 0 5px rgba(255,255,255,0.3)",
+                "0 0 20px rgba(255,255,255,0.8)",
+                "0 0 5px rgba(255,255,255,0.3)"
+              ]
+            }}
+            transition={{ duration: 10, repeat: Infinity }}
           >
             🌙
           </motion.span>
         ) : (
           <motion.div
-            animate={{ rotate: [0, 20, -20, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={{ 
+              rotate: [0, 20, -20, 0],
+              scale: [1, 1.3, 1],
+              opacity: [0.8, 1, 0.8]
+            }}
+            transition={{ duration: 10, repeat: Infinity }}
+            className="relative"
           >
-            <Sparkles className="h-16 w-16 text-yellow-400 mx-auto" />
+            <Sparkles className="h-16 w-16 text-yellow-400 mx-auto drop-shadow-glow" />
+            <motion.div 
+              className="absolute inset-0 w-full h-full blur-md bg-yellow-400/30"
+              animate={{
+                opacity: [0, 0.5, 0],
+                scale: [1, 1.5, 1]
+              }}
+              transition={{ duration: 10, repeat: Infinity }}
+            />
           </motion.div>
         )}
       </motion.div>
@@ -193,10 +212,8 @@ export default function HomePage() {
       
       <main className="flex-grow">
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          {/* Background Video Container with Border Effect */}
-          <div className="absolute inset-0 z-0 h-[600px] overflow-hidden">
-            <div className="relative h-full w-full">
-              {/* Cloud-like Border Effect */}
+          <div className="absolute inset-0 z-0 h-[700px] w-[120%] -left-[10%] overflow-hidden">
+            <div className="relative h-full w-full transform translate-y-10">
               <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute -inset-4 lg:-inset-6">
                   <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
