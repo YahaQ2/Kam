@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
+import { BackgroundVideo } from "@/components/background-video";
 
 interface Menfess {
   id: number;
@@ -40,6 +41,7 @@ export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isNight, setIsNight] = useState(false);
 
   const shuffleArray = (array: Menfess[]) => {
     const newArray = [...array];
@@ -74,9 +76,11 @@ export default function HomePage() {
 
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
+    const night = currentHour >= 18 || currentHour < 7;
+    setIsNight(night);
     return {
-      isNight: currentHour >= 18 || currentHour < 7,
-      isMorning: currentHour >= 7 && currentHour < 18
+      isNight: night,
+      isMorning: !night
     };
   };
 
@@ -147,7 +151,7 @@ export default function HomePage() {
   };
 
   const renderTimeIcon = () => {
-    const { isNight, isMorning } = getTimeStatus();
+    const { isNight } = getTimeStatus();
     
     return (
       <motion.div 
@@ -182,8 +186,13 @@ export default function HomePage() {
       <Navbar />
       
       <main className="flex-grow">
-        <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          <div className="container mx-auto px-4 text-center">
+        <section className="relative overflow-hidden pt-24 pb-16 md:py-32 min-h-[600px]">
+          {/* Background Video */}
+          <div className="absolute inset-0 z-0">
+            <BackgroundVideo />
+          </div>
+          
+          <div className="container mx-auto px-4 text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -192,10 +201,10 @@ export default function HomePage() {
               <div className="mb-8">
                 {renderTimeIcon()}
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500">
                 Menfess warga Unand
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+              <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto mb-12 backdrop-blur-sm bg-white/30 p-4 rounded-2xl shadow-sm">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
             </motion.div>
@@ -208,22 +217,23 @@ export default function HomePage() {
             >
               <Button
                 asChild
-                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors"
+                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors backdrop-blur-sm bg-opacity-90"
               >
                 <Link href="/message">Kirim Menfess</Link>
               </Button>
               <Button
                 asChild
-                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors"
+                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors backdrop-blur-sm bg-opacity-90"
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
               <Button
                 asChild
-                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors"
+                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors backdrop-blur-sm bg-opacity-90"
               >
                 <Link href="https://ziwa-351410.web.app">
                   Ziwa - Cari Teman baru & fun space
+                  <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </motion.div>
