@@ -11,6 +11,21 @@ import { Sparkles } from "lucide-react";
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Polyfill untuk browser yang tidak mendukung crypto
+if (typeof window !== "undefined" && !window.crypto?.getRandomValues) {
+  window.crypto = {
+    getRandomValues: <T extends ArrayBufferView | null>(array: T): T => {
+      if (array) {
+        const uintArray = new Uint8Array(array.buffer);
+        for (let i = 0; i < uintArray.length; i++) {
+          uintArray[i] = (Math.random() * 256) | 0;
+        }
+      }
+      return array;
+    }
+  } as Crypto;
+}
+
 const ADMIN_MESSAGES = [
   "semangat untuk hari ini kamu selalu luar biasa",
   "kamu harus jaga kesehatan mu,tidurnya di jaga ya! 😊",
@@ -21,82 +36,6 @@ const ADMIN_MESSAGES = [
   "Ingat ya, kamu itu spesial dan unik! ✨",
   "Hari ini adalah kesempatan baru untuk memulai hal baru",
 ];
-
-const PopupAdminMessage = () => {
-  const [mounted, setMounted] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [message, setMessage] = useState("");
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-    if (typeof window !== "undefined") {
-      const lastShownDate = localStorage.getItem("popupLastShown");
-      const today = new Date().toDateString();
-
-      if (lastShownDate !== today) {
-        // Pindahkan randomisasi ke dalam useEffect
-        const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length);
-        setMessage(ADMIN_MESSAGES[randomIndex]);
-        setShowPopup(true);
-        localStorage.setItem("popupLastShown", today);
-
-        timeoutRef.current = setTimeout(() => {
-          setShowPopup(false);
-        }, 100000);
-      }
-    }
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
-
-  const handleClose = () => {
-    setShowPopup(false);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-  };
-
-  if (!mounted) return null;
-
-  return (
-    <AnimatePresence>
-      {showPopup && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="fixed bottom-4 right-4 z-50 max-w-xs"
-        >
-          <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-200 relative">
-            <button onClick={handleClose} className="absolute top-1 right-1 text-gray-400 hover:text-gray-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <Sparkles className="h-6 w-6 text-yellow-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-900">Pesan dari unandfess.xyz</p>
-                <p className="text-sm text-gray-500 mt-1">{message}</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
-
-const DynamicCarousel = dynamic(() => import("@/components/carousel"), { ssr: false });
-const DynamicBackgroundVideo = dynamic(() => import("@/components/background-video"), { ssr: false });
 
 interface Menfess {
   id: number;
@@ -122,37 +61,107 @@ interface MenfessResponse {
 const VISIBLE_MESSAGES = 8;
 const SLIDE_DURATION = 8000;
 
+const PopupAdminMessage = () => {
+  const [mounted, setMounted] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [message, setMessage] = useState("");
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      const lastShownDate = localStorage.getItem("popupLastShown");
+      const today = new Date().toDateString();
+
+      if (lastShownDate !== today) {
+        const buffer = new Uint32Array(1);
+        window.crypto.getRandomValues(buffer);
+        const randomIndex = buffer[0] % ADMIN_MESSAGES.length;
+        
+        setMessage(ADMIN_MESSAGES[randomIndex]);
+        setShowPopup(true);
+        localStorage.setItem("popupLastShown", today);
+
+        timeoutRef.current = setTimeout(() => {
+          setShowPopup(false);
+        }, 100000);
+      }
+    }
+
+    return () => {
+      timeoutRef.current && clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const handleClose = () => {
+    setShowPopup(false);
+    timeoutRef.current && clearTimeout(timeoutRef.current);
+  };
+
+  if (!mounted) return null;
+
+  return (
+    <AnimatePresence>
+      {showPopup && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="fixed bottom-4 right-4 z-50 max-w-xs"
+        >
+          <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-200 relative">
+            <button onClick={handleClose} className="absolute top-1 right-1 text-gray-400 hover:text-gray-600">
+              ×
+            </button>
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <Sparkles className="h-6 w-6 text-yellow-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-900">Pesan dari unandfess.xyz</p>
+                <p className="text-sm text-gray-500 mt-1">{message}</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const DynamicCarousel = dynamic(() => import("@/components/carousel"), { 
+  ssr: false,
+  loading: () => <div className="h-64 w-full bg-gray-100 animate-pulse rounded-xl" />
+});
+
+const DynamicBackgroundVideo = dynamic(() => import("@/components/background-video"), { 
+  ssr: false,
+  loading: () => <div className="absolute inset-0 bg-gray-100" />
+});
+
+const shuffleArray = (array: Menfess[]) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const buffer = new Uint32Array(1);
+    window.crypto.getRandomValues(buffer);
+    const j = buffer[0] % (i + 1);
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
 export default function HomePage() {
   const [messages, setMessages] = useState<Menfess[][]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  const shuffleArray = (array: Menfess[]) => {
-    const newArray = [...array];
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-    }
-    return newArray;
-  };
-
-  const validateMenfess = (data: any): data is Menfess => {
-    return (
-      typeof data?.id === "number" &&
-      typeof data?.sender === "string" &&
-      typeof data?.recipient === "string" &&
-      typeof data?.message === "string" &&
-      typeof data?.created_at === "string"
-    );
-  };
 
   const getFormattedDate = (dateString: string) => {
     try {
@@ -176,8 +185,14 @@ export default function HomePage() {
         const data: MenfessResponse = await response.json();
 
         if (data?.status && Array.isArray(data.data)) {
-          const validMessages = data.data.filter(validateMenfess);
-          // Pindahkan randomisasi ke dalam useEffect
+          const validMessages = data.data.filter((m): m is Menfess => (
+            typeof m?.id === "number" &&
+            typeof m?.sender === "string" &&
+            typeof m?.recipient === "string" &&
+            typeof m?.message === "string" &&
+            typeof m?.created_at === "string"
+          ));
+          
           const shuffled = isMounted ? shuffleArray(validMessages) : validMessages;
           const randomMessages = shuffled.slice(0, VISIBLE_MESSAGES);
           const latestMessages = validMessages.slice(0, VISIBLE_MESSAGES);
@@ -187,7 +202,6 @@ export default function HomePage() {
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-        console.error("Fetch error:", err);
       } finally {
         setLoading(false);
       }
@@ -204,7 +218,7 @@ export default function HomePage() {
     }
 
     return () => {
-      if (timeoutRef.current) clearInterval(timeoutRef.current);
+      timeoutRef.current && clearInterval(timeoutRef.current);
     };
   }, [messages.length]);
 
@@ -227,12 +241,12 @@ export default function HomePage() {
             <motion.div
               className="absolute inset-0 bg-blue-200 rounded-full blur-2xl opacity-30"
               animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+              transition={{ duration: 3, repeat: Infinity }}
             />
             <motion.span
               className="text-4xl relative z-10"
               animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+              transition={{ duration: 3, repeat: Infinity }}
             >
               🌙
             </motion.span>
@@ -240,7 +254,7 @@ export default function HomePage() {
         ) : (
           <motion.div
             animate={{ rotate: [0, 20, -20, 0] }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+            transition={{ duration: 2, repeat: Infinity }}
             className="relative"
           >
             <div className="absolute inset-0 bg-yellow-200 rounded-full blur-2xl opacity-30" />
@@ -355,45 +369,18 @@ export default function HomePage() {
                                       <div className="text-gray-300">
                                         <span className="font-semibold">From:</span> {msg.sender}
                                       </div>
-                                      <div className="text-gray-300">
-                                        <span className="font-semibold">To:</span> {msg.recipient}
+                                      <div className="text-gray- 500">
+                                        {getFormattedDate(msg.created_at)}
                                       </div>
                                     </div>
-                                  </div>
-                                  <CarouselCard
-                                    recipient={msg.recipient || "-"}
-                                    sender={msg.sender || "-"}
-                                    message={msg.message || "Pesan tidak tersedia"}
-                                    songTitle={msg.track?.title}
-                                    artist={msg.track?.artist}
-                                    coverUrl={msg.track?.cover_img}
-                                    spotifyEmbed={
-                                      msg.spotify_id && (
-                                        <div className="px-4 pb-4">
-                                          <iframe
-                                            className="w-full rounded-lg shadow-md"
-                                            src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                            width="100%"
-                                            height="80"
-                                            frameBorder="0"
-                                            allow="encrypted-media"
-                                          />
-                                        </div>
-                                      )
-                                    }
-                                  />
-                                  <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                                    <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                                    <p className="text-sm text-white text-center mt-2">
-                                      {getFormattedDate(msg.created_at)}
-                                    </p>
+                                    <p className="text-gray-200">{msg.message}</p>
                                   </div>
                                 </div>
                               </Link>
                             </motion.div>
                           ))}
                         </motion.div>
-                      ),
+                      )
                   )}
                 </AnimatePresence>
               </div>
