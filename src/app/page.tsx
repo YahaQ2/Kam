@@ -176,8 +176,8 @@ export default function HomePage() {
         type: Math.random() > 0.5 ? 'bird' : 'plane',
         message: MESSAGES[currentMessageIndex],
         direction: Math.random() > 0.5 ? 'left' : 'right',
-        top: Math.random() * 70 + 15,
-        duration: Math.random() * 5 + 8
+        top: Math.random() *1,
+        duration:8000
       };
 
       setFlyingObjects(prev => [...prev, newObject]);
@@ -372,16 +372,7 @@ export default function HomePage() {
         </section>
             <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
               <DynamicCarousel />
-        <section className="py-16 md:py-24 bg-gray-900">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
-                MENFESS TERBARU
-              </h2>
-              <p className="text-gray-400 max-w-xl mx-auto">
-                Trending menfess
-              </p>
-            </div>
+                          </div>
 
             {loading ? (
               <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
@@ -424,6 +415,16 @@ export default function HomePage() {
                     ))}
                   </AnimatePresence>
                 </div>
+        <section className="py-16 md:py-24 bg-gray-900">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
+                MENFESS TERBARU
+              </h2>
+              <p className="text-gray-400 max-w-xl mx-auto">
+                Trending menfess
+              </p>
+
               </div>
             )}
           </div>
