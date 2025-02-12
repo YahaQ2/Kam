@@ -30,18 +30,20 @@ const PopupAdminMessage = () => {
 
   useEffect(() => {
     setMounted(true);
-    const lastShownDate = localStorage.getItem("popupLastShown");
-    const today = new Date().toDateString();
+    if (typeof window !== "undefined") {
+      const lastShownDate = localStorage.getItem("popupLastShown");
+      const today = new Date().toDateString();
 
-    if (lastShownDate !== today) {
-      const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length);
-      setMessage(ADMIN_MESSAGES[randomIndex]);
-      setShowPopup(true);
-      localStorage.setItem("popupLastShown", today);
+      if (lastShownDate !== today) {
+        const randomIndex = Math.floor(Math.random() * ADMIN_MESSAGES.length);
+        setMessage(ADMIN_MESSAGES[randomIndex]);
+        setShowPopup(true);
+        localStorage.setItem("popupLastShown", today);
 
-      timeoutRef.current = setTimeout(() => {
-        setShowPopup(false);
-      }, 100000);
+        timeoutRef.current = setTimeout(() => {
+          setShowPopup(false);
+        }, 100000);
+      }
     }
 
     return () => {
@@ -124,10 +126,13 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isNight, setIsNight] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const shuffleArray = (array: Menfess[]) => {
     const newArray = [...array];
@@ -160,18 +165,6 @@ export default function HomePage() {
       return "Tanggal tidak valid";
     }
   };
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
-    const currentHour = new Date().getHours();
-    setIsNight(currentHour >= 18 || currentHour < 7);
-  }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -214,6 +207,11 @@ export default function HomePage() {
   }, [messages.length]);
 
   const renderTimeIcon = () => {
+    if (!isMounted) return <div className="h-16 w-16" />;
+
+    const currentHour = new Date().getHours();
+    const isNight = currentHour >= 18 || currentHour < 7;
+
     return (
       <motion.div
         key={isNight ? "moon" : "sparkles"}
