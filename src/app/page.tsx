@@ -36,14 +36,14 @@ interface MenfessResponse {
 
 const VISIBLE_MESSAGES = 6;
 const MESSAGES = [
-  "semangat untuk hari ini kamu selalu luar biasa",
-  "kamu harus jaga kesehatan mu,tidurnya di jaga ya! 😊",
+  "Semangat untuk hari ini, kamu selalu luar biasa!",
+  "Kamu harus jaga kesehatanmu, tidurnya dijaga ya! 😊",
   "Sudahkah kamu menyapa temanmu hari ini? 👋",
   "Cinta itu indah, tapi jangan lupa kuliah! 📚",
   "Tetap semangat dan jaga kesehatan! 💪",
   "Jangan lupa minum air putih hari ini! 💧",
   "Ingat ya, kamu itu spesial dan unik! ✨",
-  "Hari ini adalah kesempatan baru untuk memulai hal baru"
+  "Hari ini adalah kesempatan baru untuk memulai hal baru."
 ];
 
 interface FlyingObject {
@@ -125,7 +125,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
- const controller = new AbortController();
+    const controller = new AbortController();
     const fetchMessages = async () => {
       try {
         const response = await fetch(
@@ -373,7 +373,7 @@ export default function HomePage() {
             >
               <Button
                 asChild
-                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray -900 transition-colors shadow-lg"
+                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors shadow-lg"
               >
                 <Link href="/message">Kirim Menfess</Link>
               </Button>
@@ -480,7 +480,7 @@ export default function HomePage() {
                             />
                             <div className="p-4 bg-gray-700 rounded-b-2xl relative">
                               <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text -white text-center mt-2">
+                              <p className="text-sm text-white text-center mt-2">
                                 {getFormattedDate(msg.created_at)}
                               </p>
                             </div>
