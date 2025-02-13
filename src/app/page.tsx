@@ -60,6 +60,12 @@ const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod)
   loading: () => <div className="h-40 flex items-center justify-center text-gray-300">Memuat carousel...</div>
 });
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 }
+};
+
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +77,6 @@ export default function HomePage() {
   const messageIndexRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Fungsi untuk shuffle array
   const shuffleArray = (array: Menfess[]) => {
     if (!array.length) return [];
     const newArray = [...array];
@@ -82,7 +87,6 @@ export default function HomePage() {
     return newArray.slice(0, VISIBLE_MESSAGES * 2);
   };
 
-  // Validasi data menfess
   const validateMenfess = (data: any): data is Menfess => {
     return (
       typeof data?.id === 'number' &&
@@ -92,7 +96,6 @@ export default function HomePage() {
     );
   };
 
-  // Format tanggal
   const getFormattedDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('id-ID', {
@@ -106,7 +109,6 @@ export default function HomePage() {
     }
   };
 
-  // Cek waktu saat ini
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
     return {
@@ -115,7 +117,6 @@ export default function HomePage() {
     };
   };
 
-  // Effect untuk responsive design
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
     handleResize();
@@ -123,7 +124,6 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch data menfess
   useEffect(() => {
     const controller = new AbortController();
     const fetchMessages = async () => {
@@ -158,7 +158,6 @@ export default function HomePage() {
     return () => controller.abort();
   }, []);
 
-  // Effect untuk flying objects
   useEffect(() => {
     const spawnInterval = setInterval(() => {
       const newObject: FlyingObject = {
@@ -183,7 +182,6 @@ export default function HomePage() {
     return () => clearInterval(spawnInterval);
   }, []);
 
-  // Komponen glowing text
   const GlowingText = () => {
     const { isNight } = getTimeStatus();
     
@@ -232,7 +230,6 @@ export default function HomePage() {
     );
   };
 
-  // Render time icon
   const renderTimeIcon = () => {
     const { isNight } = getTimeStatus();
     
@@ -274,7 +271,6 @@ export default function HomePage() {
     );
   };
 
-  // Background section
   const BackgroundSection = () => (
     <div className="absolute inset-0 z-0 h-[700px] w-[120%] -left-[10%] overflow-hidden">
       <div className="relative h-full w-full transform translate-y-5">
@@ -291,7 +287,6 @@ export default function HomePage() {
     </div>
   );
 
-  // Flying object component
   const FlyingObject = ({ object }: { object: FlyingObject }) => (
     <motion.div
       initial={{
@@ -329,6 +324,16 @@ export default function HomePage() {
       </div>
     </motion.div>
   );
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (isMobile && containerRef.current) {
+      const container = containerRef.current;
+      const scrollLeft = container.scrollLeft;
+      const cardWidth = container.clientWidth;
+      const newIndex = Math.round(scrollLeft / cardWidth);
+      setCurrentCard(newIndex);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
@@ -395,6 +400,7 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* First Carousel Section for Recently Added Messages */}
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -405,63 +411,6 @@ export default function HomePage() {
                 Trending menfess
               </p>
             </div>
-
-            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
-              <DynamicCarousel />
-            </div>
-
-            {loading ? (
-              <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
-            ) : error ? (
-              <p className="text-red-500 text-center">{error}</p>
-            ) : recentlyAddedMessages.length === 0 ? (
-              <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
-            ) : (
-              <div className="relative">
-                <div 
-                  ref={containerRef}
-                  className={`flex ${
-                    isMobile 
-                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
-                      : 'overflow-hidden justify-center'
-                  }`}={handleScroll}
-                >
-                  <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
-                      <motion.div
-                        key={msg.id}
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        transition={{ duration: 0.3 }}
-                        className={`${
-                          isMobile 
-                            ? 'flex-shrink-0 max-w-7xl mx-auto snap-center p-4 ' 
-                            : 'flex-shrink-0 w-1/3 p-4'
-                        } bg-white rounded-lg shadow-lg max-w-7xl mx-auto`}
-                      >
-                        <div className="flex flex-col">
-                          <h3 className="font-bold text-lg">{msg.sender}</h3>
-                          <p className="text-gray-600">{msg.message}</p>
-                          <span className="text-gray-400 text-sm">{getFormattedDate(msg.created_at)}</span>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-                          <section className="py-16 md:py-24 bg-gray-900">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
-                MENFESS TERBARU
-              </h2>
-              <p className="text-gray-400 max-w-xl mx-auto">
-                Trending menfess
-              </p>
-
-              </div>
-                        </div>
 
             {loading ? (
               <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
@@ -542,7 +491,6 @@ export default function HomePage() {
                   </AnimatePresence>
                 </div>
 
-                
                 {isMobile && (
                   <div className="flex justify-center space-x-2 mt-4">
                     {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
@@ -559,6 +507,24 @@ export default function HomePage() {
                 )}
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Second Carousel Section for Dynamic Content */}
+        <section className="py-16 md:py-24 bg-gray-900">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
+                CAROUSEL DINAMIS
+              </h2>
+              <p className="text-gray-400 max-w-xl mx-auto">
+                Menampilkan konten dinamis
+              </p>
+            </div>
+
+            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+              <DynamicCarousel />
+            </div>
           </div>
         </section>
       </main>
