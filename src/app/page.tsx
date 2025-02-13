@@ -6,7 +6,7 @@ import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
@@ -125,7 +125,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    const controller = new AbortController();
+ const controller = new AbortController();
     const fetchMessages = async () => {
       try {
         const response = await fetch(
@@ -373,7 +373,7 @@ export default function HomePage() {
             >
               <Button
                 asChild
-                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors shadow-lg"
+                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray -900 transition-colors shadow-lg"
               >
                 <Link href="/message">Kirim Menfess</Link>
               </Button>
@@ -480,7 +480,7 @@ export default function HomePage() {
                             />
                             <div className="p-4 bg-gray-700 rounded-b-2xl relative">
                               <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text-white text-center mt-2">
+                              <p className="text-sm text -white text-center mt-2">
                                 {getFormattedDate(msg.created_at)}
                               </p>
                             </div>
