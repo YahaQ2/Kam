@@ -1,17 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Footer } from "@/components/ui/footer";
-import { InitialAnimation } from "@/components/initial-animation";
-import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
-import { CarouselCard } from "@/components/carousel-card";
-import { motion, AnimatePresence } from "framer-motion";
-import { BackgroundVideo } from "@/components/background-video";
-import dynamic from "next/dynamic";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 
 interface Track {
   title?: string;
@@ -55,16 +48,92 @@ const MESSAGES = [
   "Hari ini adalah kesempatan baru untuk memulai hal baru."
 ];
 
-const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
-  ssr: false,
-  loading: () => <div className="h-40 flex items-center justify-center text-gray-300">Memuat carousel...</div>
-});
-
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 }
 };
+
+// Komponen-komponen yang sebelumnya diimpor
+const Navbar = () => (
+  <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b">
+    <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <Link href="/" className="text-xl font-bold text-gray-900">Unand Menfess</Link>
+      <div className="space-x-4">
+        <Link href="/message" className="text-gray-600 hover:text-gray-900">Kirim Menfess</Link>
+        <Link href="/search-message" className="text-gray-600 hover:text-gray-900">Cari Menfess</Link>
+      </div>
+    </div>
+  </nav>
+);
+
+const Footer = () => (
+  <footer className="bg-gray-900 text-gray-300 py-8">
+    <div className="container mx-auto px-4 text-center">
+      <p>© 2024 Unand Menfess. All rights reserved.</p>
+    </div>
+  </footer>
+);
+
+const InitialAnimation = () => (
+  <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
+    <motion.div
+      initial={{ scale: 0 }}
+      animate={{ scale: 1, rotate: 360 }}
+      transition={{ duration: 0.5 }}
+      className="w-16 h-16 bg-blue-600 rounded-full"
+    />
+  </div>
+);
+
+const BackgroundVideo = () => (
+  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500">
+    <div className="absolute inset-0 bg-opacity-20 backdrop-blur-lg" />
+  </div>
+);
+
+const CarouselCard = ({
+  recipient,
+  sender,
+  message,
+  songTitle,
+  artist,
+  coverUrl
+}: {
+  recipient: string;
+  sender: string;
+  message: string;
+  songTitle?: string;
+  artist?: string;
+  coverUrl?: string;
+}) => (
+  <div className="h-full flex flex-col justify-between bg-white rounded-xl p-6 shadow-lg">
+    <div>
+      <div className="flex justify-between mb-4">
+        <div className="text-sm text-gray-500">To: {recipient}</div>
+        <div className="text-sm text-gray-500">From: {sender}</div>
+      </div>
+      <p className="text-gray-800 mb-4 line-clamp-3">{message}</p>
+    </div>
+    
+    {coverUrl && (
+      <div className="mt-4">
+        <div className="relative aspect-square w-full rounded-lg overflow-hidden">
+          <Image
+            src={coverUrl}
+            alt={`Album cover for ${songTitle}`}
+            fill
+            className="object-cover"
+          />
+        </div>
+        <div className="mt-2 text-sm text-gray-600">
+          {songTitle && <p className="font-medium">{songTitle}</p>}
+          {artist && <p className="text-xs">{artist}</p>}
+        </div>
+      </div>
+    )}
+  </div>
+);
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -298,7 +367,7 @@ export default function HomePage() {
         opacity: [0, 1, 1, 0]
       }}
       transition={{
-        duration: object.duration / 1000, // Convert to seconds
+        duration: object.duration / 1000,
         ease: 'linear',
         times: [0, 0.1, 0.9, 1]
       }}
@@ -371,21 +440,13 @@ export default function HomePage() {
               transition={{ delay: 0.5 }}
               className="flex flex-col sm:flex-row justify-center gap-6 mb-16"
             >
-              <Button
-                asChild
-                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors shadow-lg"
-              >
+              <button className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors shadow-lg">
                 <Link href="/message">Kirim Menfess</Link>
-              </Button>
-              <Button
-                asChild
-                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors shadow-lg">
+              </button>
+              <button className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors shadow-lg">
                 <Link href="/search-message">Explore Menfess</Link>
-              </Button>
-              <Button
-                asChild
-                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg"
-              >
+              </button>
+              <button className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg">
                 <Link 
                   href="https://ziwa-351410.web.app"
                   target="_blank"
@@ -394,12 +455,12 @@ export default function HomePage() {
                   Ziwa - Cari Teman baru & fun space
                   <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
-              </Button>
+              </button>
             </motion.div>
           </div>
         </section>
 
-        {/* First Carousel Section for Recently Added Messages */}
+        {/* Section Pesan Terbaru */}
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -413,124 +474,89 @@ export default function HomePage() {
 
             {loading ? (
               <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
-            ) : error ? (
-              <p className="text-red-500 text-center">{error}</p>
-            ) : recentlyAddedMessages.length === 0 ? (
-              <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
-            ) : (
-              <div className="relative">
-                <div 
-                  ref={containerRef}
-                  className={`flex ${
-                    isMobile 
-                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
-                      : 'overflow-hidden justify-center'
-                  } gap-6`}
-                  onScroll={handleScroll}
-                >
-                  <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
-                      <motion.div
-                        key={msg.id}
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        transition={{ duration: 0.3 }}
-                        className={`${
-                          isMobile 
-                            ? 'flex-shrink-0 w-full snap-center' 
-                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-                        }`}
-                      >
-                        <Link href={`/message/${msg.id}`} className="block h-full">
-                          <div className="h-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                            <div className="px-4 pt-4">
-                              <div className="flex justify-between text-sm mb-2">
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">From:</span> {msg.sender}
-                                </div>
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">To:</span> {msg.recipient}
-                                </div>
-                              </div>
+            ) : error ? (          <p className="text-red-500 text-center">{error}</p>
+        ) : recentlyAddedMessages.length === 0 ? (
+          <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
+        ) : (
+          <div className="relative">
+            <div 
+              ref={containerRef}
+              className={`flex ${
+                isMobile 
+                  ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
+                  : 'overflow-hidden justify-center'
+              } gap-6`}
+              onScroll={handleScroll}
+            >
+              <AnimatePresence initial={false}>
+                {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
+                  <motion.div
+                    key={msg.id}
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    transition={{ duration: 0.3 }}
+                    className={`${
+                      isMobile 
+                        ? 'flex-shrink-0 w-full snap-center' 
+                        : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                    }`}
+                  >
+                    <Link href={`/message/${msg.id}`} className="block h-full">
+                      <div className="h-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                        <div className="px-4 pt-4">
+                          <div className="flex justify-between text-sm mb-2">
+                            <div className="text-gray-300">
+                              <span className="font-semibold">From:</span> {msg.sender}
                             </div>
-                            <CarouselCard
-                              recipient={msg.recipient || '-'}
-                              sender={msg.sender || '-'}
-                              message={msg.message || 'Pesan tidak tersedia'}
-                              songTitle={msg.track?.title}
-                              artist={msg.track?.artist}
-                              coverUrl={msg.track?.cover_img}
-                              spotifyEmbed={
-                                msg.spotify_id ? (
-                                  <div className="px-4 pb-4">
-                                    <iframe
-                                      style={{ borderRadius: '12px' }}
-                                      src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                      width="100%"
-                                      height="80"
-                                      frameBorder="0"
-                                      allowFullScreen
-                                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                                      loading="lazy"
-                                    />
-                                  </div>
-                                ) : null
-                              }
-                            />
-                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text-white text-center mt-2">
-                                {getFormattedDate(msg.created_at)}
-                              </p>
+                            <div className="text-gray-300">
+                              <span className="font-semibold">To:</span> {msg.recipient}
                             </div>
                           </div>
-                        </Link>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
+                        </div>
+                        <CarouselCard
+                          recipient={msg.recipient || '-'}
+                          sender={msg.sender || '-'}
+                          message={msg.message || 'Pesan tidak tersedia'}
+                          songTitle={msg.track?.title}
+                          artist={msg.track?.artist}
+                          coverUrl={msg.track?.cover_img}
+                        />
+                        <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                          <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                          <p className="text-sm text-white text-center mt-2">
+                            {getFormattedDate(msg.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
 
-                {isMobile && (
-                  <div className="flex justify-center space-x-2 mt-4">
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
-                      <motion.div
-                        key={index}
-                        className={`h-2 w-2 rounded-full ${
-                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
-                        }`}
-                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    ))}
-                  </div>
-                )}
+            {isMobile && (
+              <div className="flex justify-center space-x-2 mt-4">
+                {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
+                  <motion.div
+                    key={index}
+                    className={`h-2 w-2 rounded-full ${
+                      currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
+                    }`}
+                    animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                ))}
               </div>
             )}
           </div>
-        </section>
+        )}
+      </div>
+    </section>
+  </main>
 
-        {/* Second Carousel Section for Dynamic Content */}
-        <section className="py-16 md:py-24 bg-gray-900">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
-                CAROUSEL DINAMIS
-              </h2>
-              <p className="text-gray-400 max-w-xl mx-auto">
-                Menampilkan konten dinamis
-              </p>
-            </div>
-
-            <div className="relative w-full max-w-7xl mx-auto overflow-hidden">
-              <DynamicCarousel />
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <Footer />
-    </div>
-  );
-}
+  <Footer />
+</div>
+);
+  }
