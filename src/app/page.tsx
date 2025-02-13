@@ -34,6 +34,15 @@ interface MenfessResponse {
   data: Menfess[];
 }
 
+interface FlyingObject {
+  id: number;
+  type: 'bird' | 'plane';
+  message: string;
+  direction: 'left' | 'right';
+  top: number;
+  duration: number;
+}
+
 const VISIBLE_MESSAGES = 6;
 const MESSAGES = [
   "Semangat untuk hari ini, kamu selalu luar biasa!",
@@ -45,15 +54,6 @@ const MESSAGES = [
   "Ingat ya, kamu itu spesial dan unik! ✨",
   "Hari ini adalah kesempatan baru untuk memulai hal baru."
 ];
-
-interface FlyingObject {
-  id: number;
-  type: 'bird' | 'plane';
-  message: string;
-  direction: 'left' | 'right';
-  top: number;
-  duration: number;
-}
 
 const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
   ssr: false,
@@ -298,7 +298,7 @@ export default function HomePage() {
         opacity: [0, 1, 1, 0]
       }}
       transition={{
-        duration: object.duration,
+        duration: object.duration / 1000, // Convert to seconds
         ease: 'linear',
         times: [0, 0.1, 0.9, 1]
       }}
@@ -379,8 +379,7 @@ export default function HomePage() {
               </Button>
               <Button
                 asChild
-                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors shadow-lg"
-              >
+                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors shadow-lg">
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
               <Button
@@ -426,7 +425,7 @@ export default function HomePage() {
                     isMobile 
                       ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
                       : 'overflow-hidden justify-center'
-                  }`}
+                  } gap-6`}
                   onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
@@ -440,12 +439,12 @@ export default function HomePage() {
                         transition={{ duration: 0.3 }}
                         className={`${
                           isMobile 
-                            ? 'flex-shrink-0 w-full snap-center p-4' 
+                            ? 'flex-shrink-0 w-full snap-center' 
                             : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
                         }`}
                       >
-                        <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
-                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                        <Link href={`/message/${msg.id}`} className="block h-full">
+                          <div className="h-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                             <div className="px-4 pt-4">
                               <div className="flex justify-between text-sm mb-2">
                                 <div className="text-gray-300">
@@ -464,18 +463,20 @@ export default function HomePage() {
                               artist={msg.track?.artist}
                               coverUrl={msg.track?.cover_img}
                               spotifyEmbed={
-                                msg.spotify_id && (
+                                msg.spotify_id ? (
                                   <div className="px-4 pb-4">
                                     <iframe
-                                      className="w-full rounded-lg shadow-md"
+                                      style={{ borderRadius: '12px' }}
                                       src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
                                       width="100%"
                                       height="80"
                                       frameBorder="0"
-                                      allow="encrypted-media"
+                                      allowFullScreen
+                                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                                      loading="lazy"
                                     />
                                   </div>
-                                )
+                                ) : null
                               }
                             />
                             <div className="p-4 bg-gray-700 rounded-b-2xl relative">
@@ -522,7 +523,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+            <div className="relative w-full max-w-7xl mx-auto overflow-hidden">
               <DynamicCarousel />
             </div>
           </div>
