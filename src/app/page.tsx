@@ -34,13 +34,14 @@ interface MenfessResponse {
 
 const VISIBLE_MESSAGES = 6;
 
-export default function HomePage() => {
+export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollInterval = useRef<NodeJS.Timeout>();
 
   const shuffleArray = (array: Menfess[]) => {
     if (!array.length) return [];
@@ -99,12 +100,15 @@ export default function HomePage() => {
           { signal: controller.signal }
         );
         
-        if (!response.ok) throw new Error("Gagal memuat pesan");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
         const data: MenfessResponse = await response.json();
         
         if (data?.status && Array.isArray(data.data)) {
           const validMessages = data.data.filter(validateMenfess);
+          if (validMessages.length === 0) {
+            throw new Error("Tidak ada data yang valid");
+          }
           const shuffled = shuffleArray(validMessages);
           setRecentlyAddedMessages(shuffled);
         } else {
@@ -113,7 +117,6 @@ export default function HomePage() => {
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-          console.error('Fetch error:', err);
         }
       } finally {
         setLoading(false);
@@ -125,18 +128,20 @@ export default function HomePage() => {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRecentlyAddedMessages(prev => {
-        if (prev.length < 2) return prev;
-        const newArray = [...prev];
-        const randomIndex = Math.floor(Math.random() * (newArray.length - 1)) + 1;
-        [newArray[0], newArray[randomIndex]] = [newArray[randomIndex], newArray[0]];
-        return newArray;
-      });
-    }, 5000);
+    if (recentlyAddedMessages.length > 1) {
+      scrollInterval.current = setInterval(() => {
+        setRecentlyAddedMessages(prev => {
+          const newArray = [...prev];
+          const first = newArray.shift();
+          return first ? [...newArray, first] : prev;
+        });
+      }, 5000);
+    }
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      if (scrollInterval.current) clearInterval(scrollInterval.current);
+    };
+  }, [recentlyAddedMessages.length]);
 
   const handleScroll = () => {
     if (containerRef.current) {
@@ -348,8 +353,7 @@ export default function HomePage() => {
                           currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
                         }`}
                         animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                        transition={{ duration
-: 0.2 }}
+                        transition={{ duration: 0.2 }}
                       />
                     ))}
                   </div>
