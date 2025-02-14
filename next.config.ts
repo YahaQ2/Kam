@@ -17,7 +17,7 @@ const nextConfig = {
     ignoreDuringBuilds: true
   },
   staticPageGenerationTimeout: 3600,
-  swcMinify: true, // Pindahkan ke root config
+  swcMinify: false, // Pindahkan ke root config
   compress: true,
   productionBrowserSourceMaps: false
 }
