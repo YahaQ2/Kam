@@ -34,7 +34,7 @@ interface MenfessResponse {
 
 const VISIBLE_MESSAGES = 6;
 
-export default function HomePage() {
+export default function HomePage() => {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -194,7 +194,6 @@ export default function HomePage() {
       
       <main className="flex-grow">
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          {/* Background Video Container */}
           <div className="absolute inset-0 z-0 overflow-hidden">
             <BackgroundVideo className="w-full h-full object-cover" />
           </div>
@@ -247,7 +246,10 @@ export default function HomePage() {
                 </Link>
               </Button>
             </motion.div>
-                    <section className="py-16 md:py-24 bg-gray-900">
+          </div>
+        </section>
+
+        <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
@@ -346,7 +348,8 @@ export default function HomePage() {
                           currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
                         }`}
                         animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration
+: 0.2 }}
                       />
                     ))}
                   </div>
