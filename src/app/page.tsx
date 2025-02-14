@@ -9,7 +9,6 @@ import Link from "next/link";
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
-import { BackgroundVideo } from "@/components/background-video";
 
 interface Track {
   title?: string;
@@ -33,6 +32,18 @@ interface MenfessResponse {
 }
 
 const VISIBLE_MESSAGES = 6;
+
+const BackgroundVideo = () => (
+  <video 
+    autoPlay 
+    muted 
+    loop 
+    playsInline
+    className="w-full h-full object-cover"
+  >
+    <source src="/background-video.mp4" type="video/mp4" />
+  </video>
+);
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -83,18 +94,7 @@ export default function HomePage() {
       isMorning: currentHour >= 7 && currentHour < 18
     };
   };
-// Komponen BackgroundVideo:
-const BackgroundVideo = ({ className }: { className?: string }) => (
-  <video 
-    autoPlay 
-    muted 
-    loop 
-    playsInline
-    className={`${className} w-full h-full object-cover`}
-  >
-    <source src="/background-video.mp4" type="video/mp4" />
-  </video>
-);
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
     handleResize();
@@ -209,14 +209,10 @@ const BackgroundVideo = ({ className }: { className?: string }) => (
       <Navbar />
       
       <main className="flex-grow">
-// Di dalam section hero:
-<section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32">
-  <div className="absolute inset-0 z-0 overflow-hidden">
-    <BackgroundVideo className="w-full h-full object-cover" />
-    <div className="absolute inset-0 bg-black/30" /> {/* Overlay untuk kontras */}
-  </div>
-  ...
-</section>
+        <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32">
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <BackgroundVideo />
+            <div className="absolute inset-0 bg-black/30" />
           </div>
       
           <div className="container mx-auto px-4 text-center relative z-10">
@@ -228,32 +224,25 @@ const BackgroundVideo = ({ className }: { className?: string }) => (
               <div className="mb-8">
                 {renderTimeIcon()}
               </div>
-              // Di dalam h1:
-<h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-  <motion.span
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className={`inline-block ${
-      getTimeStatus().isNight 
-        ? 'text-white drop-shadow-glow'
-        : 'text-gray-900'
-    }`}
-    transition={{ duration: 0.5 }}
-  >
-    Menfess warga Unand
-    {getTimeStatus().isNight && (
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 1, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
-      >
-        Menfess warga Unand
-      </motion.span>
-    )}
-  </motion.span>
-</h1>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                <motion.span
+                  className={`inline-block relative ${
+                    getTimeStatus().isNight 
+                      ? 'text-white drop-shadow-glow'
+                      : 'text-gray-900'
+                  }`}
+                >
+                  Menfess warga Unand
+                  {getTimeStatus().isNight && (
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+                      animate={{ opacity: [0, 1, 0] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                    />
+                  )}
+                </motion.span>
+              </h1>
+              <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
             </motion.div>
@@ -266,13 +255,13 @@ const BackgroundVideo = ({ className }: { className?: string }) => (
             >
               <Button
                 asChild
-                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors shadow-lg"
+                className="bg-gray-100 text-gray-900 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-200 transition-colors shadow-lg"
               >
                 <Link href="/message">Kirim Menfess</Link>
               </Button>
               <Button
                 asChild
-                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors shadow-lg"
+                className="border-2 border-gray-100 bg-transparent text-gray-100 hover:bg-gray-100/10 px-6 md:px-8 py-2.5 md:py-3 rounded-full transition-colors shadow-lg"
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
