@@ -151,7 +151,7 @@ export default function HomePage() {
       opacity: 1, 
       scale: 1, 
       rotate: 0,
-      transition: { type: 'spring', stiffness: 120 } 
+      transition: { type: 'spring', stiffness: 120, damping: 15 } // Adjusted for smoother transition
     },
     exit: { opacity: 0, scale: 0.8, rotate: 5 }
   };
@@ -195,7 +195,7 @@ export default function HomePage() {
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
           {/* Background Video Container */}
           <div className="absolute inset-0 z-0 overflow-hidden">
-            <BackgroundVideo />
+            <BackgroundVideo className="w-full h-full object-cover" />
           </div>
       
           <div className="container mx-auto px-4 text-center relative z-10">
@@ -246,10 +246,7 @@ export default function HomePage() {
                 </Link>
               </Button>
             </motion.div>
-          </div>
-        </section>
-
-        <section className="py-16 md:py-24 bg-gray-900">
+                    <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
@@ -285,7 +282,7 @@ export default function HomePage() {
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.5 }} // Increased duration for smoother transition
                         className={`${
                           isMobile 
                             ? 'flex-shrink-0 w-full snap-center p-4' 
