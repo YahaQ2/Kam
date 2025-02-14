@@ -57,7 +57,8 @@ export default function HomePage() {
       typeof data?.id === 'number' &&
       typeof data?.sender === 'string' &&
       typeof data?.recipient === 'string' &&
-      typeof data?.message === 'string'
+      typeof data?.message === 'string' &&
+      typeof data?.created_at === 'string'
     );
   };
 
@@ -151,7 +152,7 @@ export default function HomePage() {
       opacity: 1, 
       scale: 1, 
       rotate: 0,
-      transition: { type: 'spring', stiffness: 120, damping: 15 } // Adjusted for smoother transition
+      transition: { type: 'spring', stiffness: 120, damping: 15 } 
     },
     exit: { opacity: 0, scale: 0.8, rotate: 5 }
   };
@@ -275,14 +276,14 @@ export default function HomePage() {
                   onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
+                    {recentlyAddedMessages.slice(0, Math.min(recentlyAddedMessages.length, VISIBLE_MESSAGES)).map((msg) => (
                       <motion.div
                         key={msg.id}
                         variants={cardVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        transition={{ duration: 0.5 }} // Increased duration for smoother transition
+                        transition={{ duration: 0.5 }} 
                         className={`${
                           isMobile 
                             ? 'flex-shrink-0 w-full snap-center p-4' 
@@ -338,7 +339,7 @@ export default function HomePage() {
 
                 {isMobile && (
                   <div className="flex justify-center space-x-2 mt-4">
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
+                    {recentlyAddedMessages.slice(0, Math.min(recentlyAddedMessages.length, VISIBLE_MESSAGES)).map((_, index) => (
                       <motion.div
                         key={index}
                         className={`h-2 w-2 rounded-full ${
