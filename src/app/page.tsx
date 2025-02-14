@@ -6,12 +6,10 @@ import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
-import dynamic from "next/dynamic";
-import Image from "next/image";
 
 interface Track {
   title?: string;
@@ -35,36 +33,6 @@ interface MenfessResponse {
 }
 
 const VISIBLE_MESSAGES = 6;
-const MESSAGES = [
-  "Semangat untuk hari ini, kamu selalu luar biasa!",
-  "Kamu harus jaga kesehatanmu, tidurnya dijaga ya! 😊",
-  "Sudahkah kamu menyapa temanmu hari ini? 👋",
-  "Cinta itu indah, tapi jangan lupa kuliah! 📚",
-  "Tetap semangat dan jaga kesehatan! 💪",
-  "Jangan lupa minum air putih hari ini! 💧",
-  "Ingat ya, kamu itu spesial dan unik! ✨",
-  "Hari ini adalah kesempatan baru untuk memulai hal baru."
-];
-
-interface FlyingObject {
-  id: number;
-  type: 'bird' | 'plane';
-  message: string;
-  direction: 'left' | 'right';
-  top: number;
-  duration: number;
-}
-
-const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
-  ssr: false,
-  loading: () => <div className="h-40 flex items-center justify-center text-gray-300">Memuat carousel...</div>
-});
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 }
-};
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -72,9 +40,6 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
-  const [flyingObjects, setFlyingObjects] = useState<FlyingObject[]>([]);
-  const nextTypeRef = useRef<'bird' | 'plane'>('bird');
-  const messageIndexRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const shuffleArray = (array: Menfess[]) => {
@@ -159,75 +124,36 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    const spawnInterval = setInterval(() => {
-      const newObject: FlyingObject = {
-        id: Date.now(),
-        type: nextTypeRef.current,
-        message: MESSAGES[messageIndexRef.current],
-        direction: Math.random() > 0.5 ? 'left' : 'right',
-        top: Math.random() * 80 + 10,
-        duration: 20000
-      };
+    const interval = setInterval(() => {
+      setRecentlyAddedMessages(prev => {
+        if (prev.length < 2) return prev;
+        const newArray = [...prev];
+        const randomIndex = Math.floor(Math.random() * (newArray.length - 1)) + 1;
+        [newArray[0], newArray[randomIndex]] = [newArray[randomIndex], newArray[0]];
+        return newArray;
+      });
+    }, 5000);
 
-      setFlyingObjects(prev => [...prev, newObject]);
-
-      setTimeout(() => {
-        setFlyingObjects(prev => prev.filter(obj => obj.id !== newObject.id));
-      }, newObject.duration);
-
-      nextTypeRef.current = nextTypeRef.current === 'bird' ? 'plane' : 'bird';
-      messageIndexRef.current = (messageIndexRef.current + 1) % MESSAGES.length;
-    }, 720000);
-
-    return () => clearInterval(spawnInterval);
+    return () => clearInterval(interval);
   }, []);
 
-  const GlowingText = () => {
-    const { isNight } = getTimeStatus();
-    
-    return (
-      <motion.h1
-        className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 relative"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ 
-          opacity: 1,
-          y: 0,
-          textShadow: isNight ? [
-            "0 0 10px rgba(255,255,255,0.5)",
-            "0 0 20px rgba(255,228,0,0.8)",
-            "0 0 10px rgba(255,255,255,0.5)"
-          ] : "none"
-        }}
-        transition={{ 
-          duration: 0.8,
-          textShadow: {
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }
-        }}
-      >
-        Menfess warga Unand
-        {isNight && (
-          <motion.div
-            className="absolute inset-0 blur-md pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: [0, 0.5, 0],
-              scale: [1, 1.2, 1]
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity
-            }}
-          >
-            <Sparkles className="absolute -top-2 left-1/4 w-6 h-6 text-yellow-400" />
-            <Sparkles className="absolute top-1/2 right-1/3 w-5 h-5 text-yellow-400" />
-            <Sparkles className="absolute bottom-0 left-1/2 w-4 h-4 text-yellow-400" />
-          </motion.div>
-        )}
-      </motion.h1>
-    );
+  const handleScroll = () => {
+    if (containerRef.current) {
+      const scrollPosition = containerRef.current.scrollLeft;
+      const cardWidth = containerRef.current.offsetWidth;
+      setCurrentCard(Math.round(scrollPosition / cardWidth));
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.8, rotate: -5 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      rotate: 0,
+      transition: { type: 'spring', stiffness: 120 } 
+    },
+    exit: { opacity: 0, scale: 0.8, rotate: 5 }
   };
 
   const renderTimeIcon = () => {
@@ -243,96 +169,21 @@ export default function HomePage() {
         {isNight ? (
           <motion.span
             className="text-4xl"
-            animate={{
-              textShadow: [
-                "0 0 5px rgba(255,255,255,0.3)",
-                "0 0 20px rgba(255,255,255,0.8)",
-                "0 0 5px rgba(255,255,255,0.3)"
-              ]
-            }}
-            transition={{ duration: 10, repeat: Infinity }}
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
           >
             🌙
           </motion.span>
         ) : (
           <motion.div
-            animate={{ 
-              rotate: [0, 20, -20, 0],
-              scale: [1, 1.3, 1],
-              opacity: [0.8, 1, 0.8]
-            }}
-            transition={{ duration: 10, repeat: Infinity }}
-            className="relative"
+            animate={{ rotate: [0, 20, -20, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
           >
-            <Sparkles className="h-16 w-16 text-yellow-400 mx-auto drop-shadow-glow" />
+            <Sparkles className="h-16 w-16 text-yellow-400 mx-auto" />
           </motion.div>
         )}
       </motion.div>
     );
-  };
-
-  const BackgroundSection = () => (
-    <div className="absolute inset-0 z-0 h-[700px] w-[120%] -left-[10%] overflow-hidden">
-      <div className="relative h-full w-full transform translate-y-5">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -inset-4 lg:-inset-6">
-            <div className="relative h-full w-full">
-              <BackgroundVideo />
-              <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-transparent backdrop-blur-lg" />
-              <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent backdrop-blur-lg" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const FlyingObject = ({ object }: { object: FlyingObject }) => (
-    <motion.div
-      initial={{
-        x: object.direction === 'right' ? '-100vw' : '100vw',
-        opacity: 0
-      }}
-      animate={{
-        x: object.direction === 'right' ? '100vw' : '-100vw',
-        opacity: [0, 1, 1, 0]
-      }}
-      transition={{
-        duration: object.duration,
-        ease: 'linear',
-        times: [0, 0.1, 0.9, 1]
-      }}
-      className="fixed z-50 pointer-events-none"
-      style={{ top: `${object.top}%` }}
-    >
-      <div className="relative flex flex-col items-center">
-        <Image
-          src={`/${object.type}.png`}
-          alt={object.type}
-          width={object.type === 'bird' ? 80 : 120}
-          height={object.type === 'bird' ? 60 : 80}
-          className="object-contain"
-        />
-        <motion.div 
-          className="absolute top-full mt-2 bg-white px-4 py-2 rounded-full shadow-lg text-sm max-w-xs text-center border border-gray-200"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          {object.message}
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (isMobile && containerRef.current) {
-      const container = containerRef.current;
-      const scrollLeft = container.scrollLeft;
-      const cardWidth = container.clientWidth;
-      const newIndex = Math.round(scrollLeft / cardWidth);
-      setCurrentCard(newIndex);
-    }
   };
 
   return (
@@ -341,15 +192,21 @@ export default function HomePage() {
       <Navbar />
       
       <main className="flex-grow">
-        <AnimatePresence>
-          {flyingObjects.map(object => (
-            <FlyingObject key={object.id} object={object} />
-          ))}
-        </AnimatePresence>
-
         <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          <BackgroundSection />
-          
+          {/* Background Video Container with Border Effect */}
+          <div className="absolute inset-0 z-0 h-[600px] overflow-hidden">
+            <div className="relative h-full w-full">
+              {/* Cloud-like Border Effect */}
+              <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -inset-4 lg:-inset-6">
+                  <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
+                    <BackgroundVideo />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="container mx-auto px-4 text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -358,9 +215,11 @@ export default function HomePage() {
             >
               <div className="mb-8">
                 {renderTimeIcon()}
-                <GlowingText />
               </div>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+                Menfess warga Unand
+              </h1>
+              <p className="text-lg md:text-xl text-white-600 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
             </motion.div>
@@ -393,14 +252,12 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                 >
                   Ziwa - Cari Teman baru & fun space
-                  <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </motion.div>
           </div>
         </section>
 
-        {/* First Carousel Section for Recently Added Messages */}
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -507,24 +364,6 @@ export default function HomePage() {
                 )}
               </div>
             )}
-          </div>
-        </section>
-
-        {/* Second Carousel Section for Dynamic Content */}
-        <section className="py-16 md:py-24 bg-gray-900">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
-                CAROUSEL DINAMIS
-              </h2>
-              <p className="text-gray-400 max-w-xl mx-auto">
-                Menampilkan konten dinamis
-              </p>
-            </div>
-
-            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
-              <DynamicCarousel />
-            </div>
           </div>
         </section>
       </main>
