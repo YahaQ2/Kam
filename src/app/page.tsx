@@ -327,6 +327,18 @@ export default function HomePage() {
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
+               <Button
+                asChild
+                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg"
+              >
+                <Link 
+                  href="https://ziwa-351410.web.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Ziwa - Cari Teman baru & fun space
+                </Link>
+              </Button>
             </motion.div>
           </div>
         </section>
