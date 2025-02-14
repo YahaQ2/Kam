@@ -83,7 +83,18 @@ export default function HomePage() {
       isMorning: currentHour >= 7 && currentHour < 18
     };
   };
-
+// Komponen BackgroundVideo:
+const BackgroundVideo = ({ className }: { className?: string }) => (
+  <video 
+    autoPlay 
+    muted 
+    loop 
+    playsInline
+    className={`${className} w-full h-full object-cover`}
+  >
+    <source src="/background-video.mp4" type="video/mp4" />
+  </video>
+);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
     handleResize();
@@ -198,9 +209,14 @@ export default function HomePage() {
       <Navbar />
       
       <main className="flex-grow">
-        <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          <div className="absolute inset-0 z-0 overflow-hidden">
-            <BackgroundVideo className="w-full h-full object-cover" />
+// Di dalam section hero:
+<section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32">
+  <div className="absolute inset-0 z-0 overflow-hidden">
+    <BackgroundVideo className="w-full h-full object-cover" />
+    <div className="absolute inset-0 bg-black/30" /> {/* Overlay untuk kontras */}
+  </div>
+  ...
+</section>
           </div>
       
           <div className="container mx-auto px-4 text-center relative z-10">
@@ -212,9 +228,31 @@ export default function HomePage() {
               <div className="mb-8">
                 {renderTimeIcon()}
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                Menfess warga Unand
-              </h1>
+              // Di dalam h1:
+<h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+  <motion.span
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className={`inline-block ${
+      getTimeStatus().isNight 
+        ? 'text-white drop-shadow-glow'
+        : 'text-gray-900'
+    }`}
+    transition={{ duration: 0.5 }}
+  >
+    Menfess warga Unand
+    {getTimeStatus().isNight && (
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 1, 0] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+        className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+      >
+        Menfess warga Unand
+      </motion.span>
+    )}
+  </motion.span>
+</h1>
               <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
