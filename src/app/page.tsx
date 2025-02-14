@@ -8,9 +8,10 @@ import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 interface Track {
   title?: string;
@@ -34,6 +35,25 @@ interface MenfessResponse {
 }
 
 const VISIBLE_MESSAGES = 6;
+const MESSAGES = [
+  "semangat untuk hari ini kamu selalu luar biasa",
+  "kamu harus jaga kesehatan mu,tidurnya di jaga ya! 😊",
+  "Sudahkah kamu menyapa temanmu hari ini? 👋",
+  "Cinta itu indah, tapi jangan lupa kuliah! 📚",
+  "Tetap semangat dan jaga kesehatan! 💪",
+  "Jangan lupa minum air putih hari ini! 💧",
+  "Ingat ya, kamu itu spesial dan unik! ✨",
+  "Hari ini adalah kesempatan baru untuk memulai hal baru"
+];
+
+interface FlyingObject {
+  id: number;
+  type: 'bird' | 'plane';
+  message: string;
+  direction: 'left' | 'right';
+  top: number;
+  duration: number;
+}
 
 const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
   ssr: false,
@@ -45,22 +65,13 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [currentCard, setCurrentCard] = useState(0);
+  const [flyingObjects, setFlyingObjects] = useState<FlyingObject[]>([]);
+  const nextTypeRef = useRef<'bird' | 'plane'>('bird');
+  const messageIndexRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const controls = useAnimation();
 
-  // Glow animation controller
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      await controls.start({
-        scale: [1, 1.3, 1],
-        opacity: [1, 0.8, 1],
-        transition: { duration: 2 }
-      });
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, [controls]);
-
+  // Fungsi untuk shuffle array
   const shuffleArray = (array: Menfess[]) => {
     if (!array.length) return [];
     const newArray = [...array];
@@ -71,6 +82,7 @@ export default function HomePage() {
     return newArray.slice(0, VISIBLE_MESSAGES * 2);
   };
 
+  // Validasi data menfess
   const validateMenfess = (data: any): data is Menfess => {
     return (
       typeof data?.id === 'number' &&
@@ -80,6 +92,7 @@ export default function HomePage() {
     );
   };
 
+  // Format tanggal
   const getFormattedDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('id-ID', {
@@ -93,6 +106,7 @@ export default function HomePage() {
     }
   };
 
+  // Cek waktu saat ini
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
     return {
@@ -101,6 +115,7 @@ export default function HomePage() {
     };
   };
 
+  // Effect untuk responsive design
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
     handleResize();
@@ -108,6 +123,7 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Fetch data menfess
   useEffect(() => {
     const controller = new AbortController();
     const fetchMessages = async () => {
@@ -142,6 +158,81 @@ export default function HomePage() {
     return () => controller.abort();
   }, []);
 
+  // Effect untuk flying objects
+  useEffect(() => {
+    const spawnInterval = setInterval(() => {
+      const newObject: FlyingObject = {
+        id: Date.now(),
+        type: nextTypeRef.current,
+        message: MESSAGES[messageIndexRef.current],
+        direction: Math.random() > 0.5 ? 'left' : 'right',
+        top: Math.random() * 80 + 10,
+        duration: 20000
+      };
+
+      setFlyingObjects(prev => [...prev, newObject]);
+
+      setTimeout(() => {
+        setFlyingObjects(prev => prev.filter(obj => obj.id !== newObject.id));
+      }, newObject.duration);
+
+      nextTypeRef.current = nextTypeRef.current === 'bird' ? 'plane' : 'bird';
+      messageIndexRef.current = (messageIndexRef.current + 1) % MESSAGES.length;
+    }, 720000);
+
+    return () => clearInterval(spawnInterval);
+  }, []);
+
+  // Komponen glowing text
+  const GlowingText = () => {
+    const { isNight } = getTimeStatus();
+    
+    return (
+      <motion.h1
+        className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 relative"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ 
+          opacity: 1,
+          y: 0,
+          textShadow: isNight ? [
+            "0 0 10px rgba(255,255,255,0.5)",
+            "0 0 20px rgba(255,228,0,0.8)",
+            "0 0 10px rgba(255,255,255,0.5)"
+          ] : "none"
+        }}
+        transition={{ 
+          duration: 0.8,
+          textShadow: {
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }
+        }}
+      >
+        Menfess warga Unand
+        {isNight && (
+          <motion.div
+            className="absolute inset-0 blur-md pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: [0, 0.5, 0],
+              scale: [1, 1.2, 1]
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity
+            }}
+          >
+            <Sparkles className="absolute -top-2 left-1/4 w-6 h-6 text-yellow-400" />
+            <Sparkles className="absolute top-1/2 right-1/3 w-5 h-5 text-yellow-400" />
+            <Sparkles className="absolute bottom-0 left-1/2 w-4 h-4 text-yellow-400" />
+          </motion.div>
+        )}
+      </motion.h1>
+    );
+  };
+
+  // Render time icon
   const renderTimeIcon = () => {
     const { isNight } = getTimeStatus();
     
@@ -154,22 +245,90 @@ export default function HomePage() {
       >
         {isNight ? (
           <motion.span
-            className="text-4xl moon-glow"
-            animate={controls}
+            className="text-4xl"
+            animate={{
+              textShadow: [
+                "0 0 5px rgba(255,255,255,0.3)",
+                "0 0 20px rgba(255,255,255,0.8)",
+                "0 0 5px rgba(255,255,255,0.3)"
+              ]
+            }}
+            transition={{ duration: 10, repeat: Infinity }}
           >
             🌙
           </motion.span>
         ) : (
           <motion.div
-            className="glow-effect"
-            animate={controls}
+            animate={{ 
+              rotate: [0, 20, -20, 0],
+              scale: [1, 1.3, 1],
+              opacity: [0.8, 1, 0.8]
+            }}
+            transition={{ duration: 10, repeat: Infinity }}
+            className="relative"
           >
-            <Sparkles className="h-16 w-16 text-yellow-400 mx-auto" />
+            <Sparkles className="h-16 w-16 text-yellow-400 mx-auto drop-shadow-glow" />
           </motion.div>
         )}
       </motion.div>
     );
   };
+
+  // Background section
+  const BackgroundSection = () => (
+    <div className="absolute inset-0 z-0 h-[700px] w-[120%] -left-[10%] overflow-hidden">
+      <div className="relative h-full w-full transform translate-y-5">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -inset-4 lg:-inset-6">
+            <div className="relative h-full w-full">
+              <BackgroundVideo />
+              <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-transparent backdrop-blur-lg" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white/30 via-transparent to-transparent backdrop-blur-lg" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Flying object component
+  const FlyingObject = ({ object }: { object: FlyingObject }) => (
+    <motion.div
+      initial={{
+        x: object.direction === 'right' ? '-100vw' : '100vw',
+        opacity: 0
+      }}
+      animate={{
+        x: object.direction === 'right' ? '100vw' : '-100vw',
+        opacity: [0, 1, 1, 0]
+      }}
+      transition={{
+        duration: object.duration,
+        ease: 'linear',
+        times: [0, 0.1, 0.9, 1]
+      }}
+      className="fixed z-50 pointer-events-none"
+      style={{ top: `${object.top}%` }}
+    >
+      <div className="relative flex flex-col items-center">
+        <Image
+          src={`/${object.type}.png`}
+          alt={object.type}
+          width={object.type === 'bird' ? 80 : 120}
+          height={object.type === 'bird' ? 60 : 80}
+          className="object-contain"
+        />
+        <motion.div 
+          className="absolute top-full mt-2 bg-white px-4 py-2 rounded-full shadow-lg text-sm max-w-xs text-center border border-gray-200"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          {object.message}
+        </motion.div>
+      </div>
+    </motion.div>
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
@@ -177,14 +336,15 @@ export default function HomePage() {
       <Navbar />
       
       <main className="flex-grow">
-        <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          {/* Background Video Section */}
-          <div className="absolute inset-0 z-0 h-full w-full overflow-hidden">
-            <BackgroundVideo />
-            <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent backdrop-blur-[2px]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-transparent backdrop-blur-[2px]" />
-          </div>
+        <AnimatePresence>
+          {flyingObjects.map(object => (
+            <FlyingObject key={object.id} object={object} />
+          ))}
+        </AnimatePresence>
 
+        <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
+          <BackgroundSection />
+          
           <div className="container mx-auto px-4 text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -193,10 +353,8 @@ export default function HomePage() {
             >
               <div className="mb-8">
                 {renderTimeIcon()}
+                <GlowingText />
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                Menfess warga Unand
-              </h1>
               <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
@@ -230,6 +388,7 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                 >
                   Ziwa - Cari Teman baru & fun space
+                  <ArrowUpRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </motion.div>
@@ -247,6 +406,10 @@ export default function HomePage() {
               </p>
             </div>
 
+            <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+              <DynamicCarousel />
+            </div>
+
             {loading ? (
               <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
             ) : error ? (
@@ -254,57 +417,66 @@ export default function HomePage() {
             ) : recentlyAddedMessages.length === 0 ? (
               <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
             ) : (
-              <div className="relative" ref={containerRef}>
-                <DynamicCarousel
-                  items={recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => ({
-                    id: msg.id,
-                    content: (
-                      <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
-                        <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                          <div className="px-4 pt-4">
-                            <div className="flex justify-between text-sm mb-2">
-                              <div className="text-gray-300">
-                                <span className="font-semibold">From:</span> {msg.sender}
-                              </div>
-                              <div className="text-gray-300">
-                                <span className="font-semibold">To:</span> {msg.recipient}
-                              </div>
+              <div className="relative">
+                <div 
+                  ref={containerRef}
+                  className={`flex ${
+                    isMobile 
+                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
+                      : 'overflow-hidden justify-center'
+                  }`}
+                  onScroll={handleScroll}
+                >
+                  <AnimatePresence initial={false}>
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
+                      <motion.div
+                        key={msg.id}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.3 }}
+                        className={`${
+                          isMobile 
+                            ? 'flex-shrink-0 w-full snap-center p-4' 
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                        }`}
+                      >
+                        <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
+                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <CarouselCard
+                              recipient={msg.recipient || '-'}
+                              sender={msg.sender || '-'}
+                              message={msg.message || 'Pesan tidak tersedia'}
+                              songTitle={msg.track?.title}
+                              artist={msg.track?.artist}
+                              coverUrl={msg.track?.cover_img}
+                              spotifyEmbed={
+                                msg.spotify_id && (
+                                  <div className="px-4 pb-4">
+                                    <iframe
+                                      className="w-full rounded-lg shadow-md"
+                                      src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                      width="100%"
+                                      height="80"
+                                      frameBorder="0"
+                                      allow="encrypted-media"
+                                    />
+                                  </div>
+                                )
+                              }
+                            />
+                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <p className="text-sm text-white text-center mt-2">
+                                {getFormattedDate(msg.created_at)}
+                              </p>
                             </div>
                           </div>
-                          <CarouselCard
-                            recipient={msg.recipient || '-'}
-                            sender={msg.sender || '-'}
-                            message={msg.message || 'Pesan tidak tersedia'}
-                            songTitle={msg.track?.title}
-                            artist={msg.track?.artist}
-                            coverUrl={msg.track?.cover_img}
-                            spotifyEmbed={
-                              msg.spotify_id && (
-                                <div className="px-4 pb-4">
-                                  <iframe
-                                    className="w-full rounded-lg shadow-md"
-                                    src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                    width="100%"
-                                    height="80"
-                                    frameBorder="0"
-                                    allow="encrypted-media"
-                                  />
-                                </div>
-                              )
-                            }
-                          />
-                          <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                            <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                            <p className="text-sm text-white text-center mt-2">
-                              {getFormattedDate(msg.created_at)}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    )
-                  }))}
-                  isMobile={isMobile}
-                />
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
               </div>
             )}
           </div>
