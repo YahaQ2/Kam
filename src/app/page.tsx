@@ -480,23 +480,83 @@ export default function HomePage() {
                   onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
-                    {recentlyAddedMessages .map((message) => (
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
                       <motion.div
-                        key={message.id}
+                        key={msg.id}
                         variants={cardVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="bg-white rounded-lg shadow-md p-4"
+                        transition={{ duration: 0.3 }}
+                        className={`${
+                          isMobile 
+                            ? 'flex-shrink-0 w-full snap-center p-4' 
+                            : 'flex-shrink-0 w-full transition-transform duration-300'
+                        }`}
                       >
-                        <h3 className="font-semibold">{message.sender}</h3>
-                        <p>{message.message}</p>
-                        <span className="text-gray-500 text-sm">{getFormattedDate(message.created_at)}</span>
+                        <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
+                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <div className="px-4 pt-4">
+                              <div className="flex justify-between text-sm mb-2">
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">From:</span> {msg.sender}
+                                </div>
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">To:</span> {msg.recipient}
+                                </div>
+                              </div>
+                            </div>
+                            <CarouselCard
+                              recipient={msg.recipient || '-'}
+                              sender={msg.sender || '-'}
+                              message={msg.message || 'Pesan tidak tersedia'}
+                              songTitle={msg.track?.title}
+                              artist={msg.track?.artist}
+                              coverUrl={msg.track?.cover_img}
+                              spotifyEmbed={
+                                msg.spotify_id && (
+                                  <div className="px-4 pb-4">
+                                    <iframe
+                                      className="w-full rounded-lg shadow-md"
+                                      src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                      width="100%"
+                                      height="80"
+                                      frameBorder="0"
+                                      allow="encrypted-media"
+                                    />
+                                  </div>
+                                )
+                              }
+                            />
+                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2">
+                                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <p className="text-sm text-white text-center mt-2">
+                                {getFormattedDate(msg.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
                       </motion.div>
                     ))}
                   </AnimatePresence>
                 </div>
-              </div>
+
+                {isMobile && (
+                  <div className="flex justify-center space-x-2 mt-4">
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${
+                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
+                        }`}
+                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    ))}
+                  </div>
+                )}
+              
             )}
           </div>
         </section>
