@@ -54,6 +54,7 @@ export default function HomePage() {
   const [currentMessage, setCurrentMessage] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const messageInterval = useRef<NodeJS.Timeout>();
+  const carouselInterval = useRef<NodeJS.Timeout>();
 
   const shuffleArray = (array: Menfess[]) => {
     if (!array.length) return [];
@@ -62,7 +63,7 @@ export default function HomePage() {
       const j = Math.floor(Math.random() * (i + 1));
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-    return newArray.slice(0, VISIBLE_MESSAGES * 2);
+    return newArray;
   };
 
   const validateMenfess = (data: any): data is Menfess => {
@@ -121,8 +122,13 @@ export default function HomePage() {
         
         if (data?.status && Array.isArray(data.data)) {
           const validMessages = data.data.filter(validateMenfess);
-          const shuffled = shuffleArray(validMessages);
-          setRecentlyAddedMessages(shuffled);
+          validMessages.sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+          const latestMessage = validMessages[0];
+          const remainingMessages = shuffleArray(validMessages.slice(1));
+          const finalMessages = [latestMessage, ...remainingMessages].slice(0, VISIBLE_MESSAGES * 2);
+          setRecentlyAddedMessages(finalMessages);
         } else {
           throw new Error("Format data tidak valid");
         }
@@ -149,6 +155,26 @@ export default function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    carouselInterval.current = setInterval(() => {
+      setCurrentCard(prev => (prev + 1) % VISIBLE_MESSAGES);
+    }, 5000);
+
+    return () => {
+      if (carouselInterval.current) clearInterval(carouselInterval.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (containerRef.current && isMobile) {
+      const cardWidth = containerRef.current.offsetWidth;
+      containerRef.current.scrollTo({
+        left: currentCard * cardWidth,
+        behavior: 'smooth'
+      });
+    }
+  }, [currentCard, isMobile]);
+
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
     return {
@@ -164,17 +190,17 @@ export default function HomePage() {
       setCurrentCard(Math.round(scrollPosition / cardWidth));
     }
   };
-const cardVariants = {
-  hidden: { opacity: 0, scale: 0.8, rotate: -5 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    rotate: 0,
-    transition: { type: 'spring', stiffness: 120 } 
-  },
-  exit: { opacity: 0, scale: 0.8, rotate: 5 }
-};
-  
+
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.8, rotate: -5 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      rotate: 0,
+      transition: { type: 'spring', stiffness: 120 } 
+    },
+    exit: { opacity: 0, scale: 0.8, rotate: 5 }
+  };
 
   const renderTimeIcon = () => {
     const { isNight } = getTimeStatus();
@@ -290,18 +316,17 @@ const cardVariants = {
       <FlyingMessage />
 
       <main className="flex-grow">
-        <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32"><div className="absolute inset-0 z-0 h-[1000px] overflow-hidden">
-  <div className="relative h-[100%] w-[100%]">
-    {/* Perubahan pada div wrapper video */}
-    <div className="absolute inset-0 -left-[10%] w-[130%] lg:-left-[15%] lg:w-[130%]">
-      <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
-        <BackgroundVideo />
-      </div>
-    </div>
-  </div>
-</div>
+        <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32">
+          <div className="absolute inset-0 z-0 h-[1000px] overflow-hidden">
+            <div className="relative h-[100%] w-[100%]">
+              <div className="absolute inset-0 -left-[10%] -top-8 w-[130%] lg:-left-[15%] lg:w-[130%]">
+                <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
+                  <BackgroundVideo />
+                </div>
+              </div>
+            </div>
+          </div>
         
-      
           <div className="container mx-auto px-4 text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -388,28 +413,28 @@ const cardVariants = {
             ) : (
               <div className="relative">
                 <div 
-  ref={containerRef}
-  className={`flex ${
-    isMobile 
-      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
-      : 'overflow-hidden justify-center'
-  }`}
-  onScroll={handleScroll}
->
-  <AnimatePresence initial={false}>
-    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
-      <motion.div
-        key={msg.id}
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        transition={{ duration: 0.3 }}
-        className={`${
-          isMobile 
-            ? 'flex-shrink-0 w-full snap-center p-4' 
-            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-        }`}
+                  ref={containerRef}
+                  className={`flex ${
+                    isMobile 
+                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
+                      : 'overflow-hidden justify-center'
+                  }`}
+                  onScroll={handleScroll}
+                >
+                  <AnimatePresence initial={false}>
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
+                      <motion.div
+                        key={msg.id}
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        transition={{ duration: 0.3 }}
+                        className={`${
+                          isMobile 
+                            ? 'flex-shrink-0 w-full snap-center p-4' 
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                        }`}
                       >
                         <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
                           <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
@@ -440,13 +465,14 @@ const cardVariants = {
                                       height="80"
                                       frameBorder="0"
                                       allow="encrypted-media"
-                                    />
+     />
                                   </div>
                                 )
                               }
                             />
                             <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <div className="absolute top-1 left-1/2 transform -translate-x">
+                                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
                               <p className="text-sm text-white text-center mt-2">
                                 {getFormattedDate(msg.created_at)}
                               </p>
@@ -482,3 +508,4 @@ const cardVariants = {
     </div>
   );
 }
+                                    
