@@ -290,7 +290,7 @@ export default function HomePage() {
       <FlyingMessage />
 
       <main className="flex-grow">
-        <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32"><div className="absolute inset-0 z-0 h-[900px] overflow-hidden">
+        <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32"><div className="absolute inset-0 z-0 h-[1000px] overflow-hidden">
   <div className="relative h-[100%] w-[100%]">
     {/* Perubahan pada div wrapper video */}
     <div className="absolute inset-0 -left-[10%] w-[130%] lg:-left-[15%] lg:w-[130%]">
