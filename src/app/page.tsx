@@ -450,7 +450,6 @@ export default function HomePage() {
             </motion.div>
           </div>
         </section>
-
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -475,23 +474,23 @@ export default function HomePage() {
                   className={`flex ${
                     isMobile 
                       ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
-                      : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+                      : 'overflow-hidden justify-center'
                   }`}
                   onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg, index) => (
                       <motion.div
                         key={msg.id}
                         variants={cardVariants}
                         initial="hidden"
-                        animate="visible"
+                        animate={index === currentCard ? "visible" : "hidden"}
                         exit="exit"
                         transition={{ duration: 0.3 }}
                         className={`${
                           isMobile 
                             ? 'flex-shrink-0 w-full snap-center p-4' 
-                            : 'flex-shrink-0 w-full transition-transform duration-300'
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
                         }`}
                       >
                         <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
@@ -529,11 +528,9 @@ export default function HomePage() {
                               }
                             />
                             <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2">
-                                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text-white text-center mt-2">
-                                {getFormattedDate(msg.created_at)}
-                              </p>
+                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <p className="text-sm text-white text-center mt-"
+                                                            </div>
                             </div>
                           </div>
                         </Link>
@@ -556,7 +553,7 @@ export default function HomePage() {
                     ))}
                   </div>
                 )}
-              
+              </div>
             )}
           </div>
         </section>
