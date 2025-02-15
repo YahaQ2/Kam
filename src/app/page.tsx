@@ -215,13 +215,69 @@ export default function HomePage() {
         transition={{ duration: 0.5 }}
       >
         {isNight ? (
-          <motion.span
-            className="text-4xl"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
+          <motion.div
+            className="relative inline-block"
+            animate={{ 
+              rotate: [0, 5, -5, 0],
+              scale: [1, 1.05, 1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
           >
-            🌙
-          </motion.span>
+            {/* Moon Core */}
+            <motion.span
+              className="text-4xl relative z-10 block"
+              animate={{
+                filter: [
+                  'brightness(1)',
+                  'brightness(1.2)',
+                  'brightness(1)'
+                ],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+              }}
+            >
+              🌙
+            </motion.span>
+            
+            {/* Moon Shine Effect */}
+            <motion.div
+              className="absolute inset-0 -z-0"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0, 0.6, 0],
+                rotate: [0, 360],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-yellow-300/30 rounded-full blur-[20px]" />
+            </motion.div>
+
+            {/* Glow Effect */}
+            <motion.div
+              className="absolute inset-0"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.4, 0.6, 0.4],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+              }}
+            >
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-yellow-400/20 rounded-full blur-[30px]" />
+            </motion.div>
+          </motion.div>
         ) : (
           <motion.div
             animate={{ rotate: [0, 20, -20, 0] }}
@@ -424,82 +480,22 @@ export default function HomePage() {
                   onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
+                    {recentlyAddedMessages .map((message) => (
                       <motion.div
-                        key={msg.id}
+                        key={message.id}
                         variants={cardVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        transition={{ duration: 0.3 }}
-                        className={`${
-                          isMobile 
-                            ? 'flex-shrink-0 w-full snap-center p-4' 
-                            : 'flex-shrink-0 w-full transition-transform duration-300'
-                        }`}
+                        className="bg-white rounded-lg shadow-md p-4"
                       >
-                        <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
-                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                            <div className="px-4 pt-4">
-                              <div className="flex justify-between text-sm mb-2">
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">From:</span> {msg.sender}
-                                </div>
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">To:</span> {msg.recipient}
-                                </div>
-                              </div>
-                            </div>
-                            <CarouselCard
-                              recipient={msg.recipient || '-'}
-                              sender={msg.sender || '-'}
-                              message={msg.message || 'Pesan tidak tersedia'}
-                              songTitle={msg.track?.title}
-                              artist={msg.track?.artist}
-                              coverUrl={msg.track?.cover_img}
-                              spotifyEmbed={
-                                msg.spotify_id && (
-                                  <div className="px-4 pb-4">
-                                    <iframe
-                                      className="w-full rounded-lg shadow-md"
-                                      src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                      width="100%"
-                                      height="80"
-                                      frameBorder="0"
-                                      allow="encrypted-media"
-                                    />
-                                  </div>
-                                )
-                              }
-                            />
-                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2">
-                                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text-white text-center mt-2">
-                                {getFormattedDate(msg.created_at)}
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
+                        <h3 className="font-semibold">{message.sender}</h3>
+                        <p>{message.message}</p>
+                        <span className="text-gray-500 text-sm">{getFormattedDate(message.created_at)}</span>
                       </motion.div>
                     ))}
                   </AnimatePresence>
                 </div>
-
-                {isMobile && (
-                  <div className="flex justify-center space-x-2 mt-4">
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
-                      <motion.div
-                        key={index}
-                        className={`h-2 w-2 rounded-full ${
-                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
-                        }`}
-                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    ))}
-                  </div>
-                )}
               </div>
             )}
           </div>
