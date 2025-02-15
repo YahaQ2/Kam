@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { BackgroundVideo } from "@/components/background-video";
 interface Track {
   title?: string;
   artist?: string;
@@ -51,7 +51,7 @@ const BackgroundVideo = () => (
     playsInline
     className="w-full h-full object-cover"
   >
-    <source src="/background-video.mp4" type="video/mp4" />
+    <source src="@components/BackgroundVideo"/>
   </video>
 );
 
@@ -340,8 +340,7 @@ export default function HomePage() {
                 </Link>
               </Button>
             </motion.div>
-          </div>
-        </section>
+          </div>        </section>
 
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
@@ -369,6 +368,7 @@ export default function HomePage() {
                       ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
                       : 'overflow-hidden justify-center'
                   }`}
+                  onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
                     {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
@@ -378,18 +378,29 @@ export default function HomePage() {
                         initial="hidden"
                         animate="visible"
                         exit="exit"
+                        transition={{ duration: 0.3 }}
                         className={`${
                           isMobile 
                             ? 'flex-shrink-0 w-full snap-center p-4' 
-                            : 'flex-shrink-0 w-full md:w-[400px]'
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
                         }`}
                       >
                         <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
                           <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <div className="px-4 pt-4">
+                              <div className="flex justify-between text-sm mb-2">
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">From:</span> {msg.sender}
+                                </div>
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">To:</span> {msg.recipient}
+                                </div>
+                              </div>
+                            </div>
                             <CarouselCard
-                              recipient={msg.recipient}
-                              sender={msg.sender}
-                              message={msg.message}
+                              recipient={msg.recipient || '-'}
+                              sender={msg.sender || '-'}
+                              message={msg.message || 'Pesan tidak tersedia'}
                               songTitle={msg.track?.title}
                               artist={msg.track?.artist}
                               coverUrl={msg.track?.cover_img}
@@ -408,14 +419,10 @@ export default function HomePage() {
                                 )
                               }
                             />
-                            <div className="p-4 bg-gray-700 rounded-b-2xl">
-                              <p className="text-sm text-white text-center">
-                                {new Date(msg.created_at).toLocaleDateString('id-ID', {
-                                  weekday: 'long',
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric'
-                                })}
+                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <p className="text-sm text-white text-center mt-2">
+                                {getFormattedDate(msg.created_at)}
                               </p>
                             </div>
                           </div>
@@ -424,10 +431,26 @@ export default function HomePage() {
                     ))}
                   </AnimatePresence>
                 </div>
+
+                {isMobile && (
+                  <div className="flex justify-center space-x-2 mt-4">
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${
+                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
+                        }`}
+                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
         </section>
+
       </main>
 
       <Footer />
