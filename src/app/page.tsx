@@ -290,11 +290,17 @@ export default function HomePage() {
       <FlyingMessage />
 
       <main className="flex-grow">
-        <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32">
-          <div className="absolute inset-0 z-0 overflow-hidden">
-            <BackgroundVideo />
-            <div className="absolute inset-0 bg-black/30" />
-          </div>
+        <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32"><div className="absolute inset-0 z-0 h-[600px] overflow-hidden">
+  <div className="relative h-full w-full">
+    {/* Perubahan pada div wrapper video */}
+    <div className="absolute inset-0 -left-[10%] w-[120%] lg:-left-[15%] lg:w-[130%]">
+      <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
+        <BackgroundVideo />
+      </div>
+    </div>
+  </div>
+</div>
+        
       
           <div className="container mx-auto px-4 text-center relative z-10">
             <motion.div
