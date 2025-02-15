@@ -10,6 +10,7 @@ import { Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
+
 interface Track {
   title?: string;
   artist?: string;
@@ -43,18 +44,6 @@ const MOTIVATION_MESSAGES = [
   "Hari ini adalah kesempatan baru untuk memulai hal baru"
 ];
 
-const BackgroundVideo = () => (
-  <video 
-    autoPlay 
-    muted 
-    loop 
-    playsInline
-    className="w-full h-full object-cover"
-  >
-    <source src="@components/BackgroundVideo"/>
-  </video>
-);
-
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,10 +53,40 @@ export default function HomePage() {
   const [showFlyingObject, setShowFlyingObject] = useState<'bird' | 'plane' | null>(null);
   const [currentMessage, setCurrentMessage] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollInterval = useRef<NodeJS.Timeout>();
   const messageInterval = useRef<NodeJS.Timeout>();
 
-  // Fungsi untuk menampilkan pesan terbang
+  const shuffleArray = (array: Menfess[]) => {
+    if (!array.length) return [];
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray.slice(0, VISIBLE_MESSAGES * 2);
+  };
+
+  const validateMenfess = (data: any): data is Menfess => {
+    return (
+      typeof data?.id === 'number' &&
+      typeof data?.sender === 'string' &&
+      typeof data?.recipient === 'string' &&
+      typeof data?.message === 'string'
+    );
+  };
+
+  const getFormattedDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch {
+      return 'Tanggal tidak valid';
+    }
+  };
+
   const showRandomMessage = () => {
     const isBird = Math.random() < 0.5;
     const message = MOTIVATION_MESSAGES[Math.floor(Math.random() * MOTIVATION_MESSAGES.length)];
@@ -80,7 +99,14 @@ export default function HomePage() {
     }, 10000);
   };
 
-    useEffect(() => {
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
     const controller = new AbortController();
     const fetchMessages = async () => {
       try {
@@ -89,20 +115,21 @@ export default function HomePage() {
           { signal: controller.signal }
         );
         
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error("Gagal memuat pesan");
         
         const data: MenfessResponse = await response.json();
         
         if (data?.status && Array.isArray(data.data)) {
           const validMessages = data.data.filter(validateMenfess);
-          if (validMessages.length === 0) throw new Error("Tidak ada data valid");
-          setRecentlyAddedMessages(shuffleArray(validMessages));
+          const shuffled = shuffleArray(validMessages);
+          setRecentlyAddedMessages(shuffled);
         } else {
           throw new Error("Format data tidak valid");
         }
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+          console.error('Fetch error:', err);
         }
       } finally {
         setLoading(false);
@@ -114,24 +141,8 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (recentlyAddedMessages.length > 1) {
-      scrollInterval.current = setInterval(() => {
-        setRecentlyAddedMessages(prev => {
-          const newArray = [...prev];
-          const first = newArray.shift();
-          return first ? [...newArray, first] : prev;
-        });
-      }, 5000);
-    }
-
-    return () => {
-      if (scrollInterval.current) clearInterval(scrollInterval.current);
-    };
-  }, [recentlyAddedMessages.length]);
-
-  useEffect(() => {
-    messageInterval.current = setInterval(showRandomMessage, 720000); // 12 menit
-    showRandomMessage(); // Tampilkan pesan pertama
+    messageInterval.current = setInterval(showRandomMessage, 720000);
+    showRandomMessage();
 
     return () => {
       if (messageInterval.current) clearInterval(messageInterval.current);
@@ -146,13 +157,21 @@ export default function HomePage() {
     };
   };
 
+  const handleScroll = () => {
+    if (containerRef.current) {
+      const scrollPosition = containerRef.current.scrollLeft;
+      const cardWidth = containerRef.current.offsetWidth;
+      setCurrentCard(Math.round(scrollPosition / cardWidth));
+    }
+  };
+
   const cardVariants = {
     hidden: { opacity: 0, scale: 0.8, rotate: -5 },
     visible: { 
       opacity: 1, 
       scale: 1, 
       rotate: 0,
-      transition: { type: 'spring', stiffness: 120, damping: 15 } 
+      transition: { type: 'spring', stiffness: 120 } 
     },
     exit: { opacity: 0, scale: 0.8, rotate: 5 }
   };
@@ -327,7 +346,7 @@ export default function HomePage() {
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
-               <Button
+              <Button
                 asChild
                 className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg"
               >
@@ -340,7 +359,8 @@ export default function HomePage() {
                 </Link>
               </Button>
             </motion.div>
-          </div>        </section>
+          </div>
+        </section>
 
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
@@ -450,7 +470,6 @@ export default function HomePage() {
             )}
           </div>
         </section>
-
       </main>
 
       <Footer />
