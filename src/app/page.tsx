@@ -156,14 +156,16 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    carouselInterval.current = setInterval(() => {
-      setCurrentCard(prev => (prev + 1) % VISIBLE_MESSAGES);
-    }, 5000);
+    if (isMobile) {
+      carouselInterval.current = setInterval(() => {
+        setCurrentCard(prev => (prev + 1) % VISIBLE_MESSAGES);
+      }, 5000);
+    }
 
     return () => {
       if (carouselInterval.current) clearInterval(carouselInterval.current);
     };
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     if (containerRef.current && isMobile) {
@@ -184,7 +186,7 @@ export default function HomePage() {
   };
 
   const handleScroll = () => {
-    if (containerRef.current) {
+    if (containerRef.current && isMobile) {
       const scrollPosition = containerRef.current.scrollLeft;
       const cardWidth = containerRef.current.offsetWidth;
       setCurrentCard(Math.round(scrollPosition / cardWidth));
@@ -417,7 +419,7 @@ export default function HomePage() {
                   className={`flex ${
                     isMobile 
                       ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
-                      : 'overflow-hidden justify-center'
+                      : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
                   }`}
                   onScroll={handleScroll}
                 >
@@ -433,7 +435,7 @@ export default function HomePage() {
                         className={`${
                           isMobile 
                             ? 'flex-shrink-0 w-full snap-center p-4' 
-                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                            : 'flex-shrink-0 w-full transition-transform duration-300'
                         }`}
                       >
                         <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
@@ -465,14 +467,14 @@ export default function HomePage() {
                                       height="80"
                                       frameBorder="0"
                                       allow="encrypted-media"
-     />
+                                    />
                                   </div>
                                 )
                               }
                             />
                             <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-1 left-1/2 transform -translate-x">
-                                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2">
+                                <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
                               <p className="text-sm text-white text-center mt-2">
                                 {getFormattedDate(msg.created_at)}
                               </p>
@@ -508,4 +510,3 @@ export default function HomePage() {
     </div>
   );
 }
-                                    
