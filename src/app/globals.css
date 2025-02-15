@@ -86,7 +86,7 @@
 }
 @keyframes glow {
   0% { text-shadow: 0 0 10px rgba(96, 165, 250, 0.8); }
-  50% { text-shadow: 0 0 20px rgba(168, 85, 247, 0.8), 0 0 30px rgba(96, 165, 250, 0.8); }
+  50% { text-shadow: 0 0 20px rgba(34,197, 94, 0.8), 0 0 30px rgba(96, 165, 250, 0.8); }
   100% { text-shadow: 0 0 10px rgba(96, 165, 250, 0.8); }
 }
 
