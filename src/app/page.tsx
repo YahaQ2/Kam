@@ -1,4 +1,4 @@
-"use client";
+  "use client";
 
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -380,7 +380,113 @@ export default function HomePage() {
           </div>
         </section>
 
+        <section className="py-16 md:py-24 bg-gray-900">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
+                MENFESS TERBARU
+              </h2>
+              <p className="text-gray-400 max-w-xl mx-auto">
+                Trending menfess
+              </p>
+            </div>
 
+            {loading ? (
+              <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
+            ) : error ? (
+              <p className="text-red-500 text-center">{error}</p>
+            ) : recentlyAddedMessages.length === 0 ? (
+              <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
+            ) : (
+              <div className="relative">
+                <div 
+                  ref={containerRef}
+                  className={`flex ${
+                    isMobile 
+                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
+                      : 'overflow-hidden justify-center'
+                  }`}
+                  onScroll={handleScroll}
+                >
+                  <AnimatePresence initial={false}>
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg, index) => (
+                      <motion.div
+                        key={msg.id}
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate={index === currentCard ? "visible" : "hidden"}
+                        exit="exit"
+                        transition={{ duration: 0.3 }}
+                        className={`${
+                          isMobile 
+                            ? 'flex-shrink-0 w-full snap-center p-4' 
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                        }`}
+                      >
+                        <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
+                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <div className="px-4 pt-4">
+                              <div className="flex justify-between text-sm mb-2">
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">From:</span> {msg.sender}
+                                </div>
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">To:</span> {msg.recipient}
+                                </div>
+                              </div>
+                            </div>
+                            <CarouselCard
+                              recipient={msg.recipient || '-'}
+                              sender={msg.sender || '-'}
+                              message={msg.message || 'Pesan tidak tersedia'}
+                              songTitle={msg.track?.title}
+                              artist={msg.track?.artist}
+                              coverUrl={msg.track?.cover_img}
+                              spotifyEmbed={
+                                msg.spotify_id && (
+                                  <div className="px-4 pb-4">
+                                    <iframe
+                                      className="w-full rounded-lg shadow-md"
+                                      src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                      width="100%"
+                                      height="80"
+                                      frameBorder="0"
+                                      allow="encrypted-media"
+                                    />
+                                  </div>
+                                )
+                              }
+                            />
+                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <p className="text-sm text-white text-center mt-"
+                                                            </div>
+                            </div>
+                          </div>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+
+                {isMobile && (
+                  <div className="flex justify-center space-x-2 mt-4">
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${
+                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
+                        }`}
+                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
       </main>
 
       <Footer />
