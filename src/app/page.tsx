@@ -164,17 +164,17 @@ export default function HomePage() {
       setCurrentCard(Math.round(scrollPosition / cardWidth));
     }
   };
-
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.8, rotate: -5 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      rotate: 0,
-      transition: { type: 'spring', stiffness: 120 } 
-    },
-    exit: { opacity: 0, scale: 0.8, rotate: 5 }
-  };
+const cardVariants = {
+  hidden: { opacity: 0, scale: 0.8, rotate: -5 },
+  visible: { 
+    opacity: 1, 
+    scale: 1, 
+    rotate: 0,
+    transition: { type: 'spring', stiffness: 120 } 
+  },
+  exit: { opacity: 0, scale: 0.8, rotate: 5 }
+};
+  
 
   const renderTimeIcon = () => {
     const { isNight } = getTimeStatus();
@@ -388,28 +388,28 @@ export default function HomePage() {
             ) : (
               <div className="relative">
                 <div 
-                  ref={containerRef}
-                  className={`flex ${
-                    isMobile 
-                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
-                      : 'overflow-hidden justify-center'
-                  }`}
-                  onScroll={handleScroll}
-                >
-                  <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
-                      <motion.div
-                        key={msg.id}
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        transition={{ duration: 0.3 }}
-                        className={`${
-                          isMobile 
-                            ? 'flex-shrink-0 w-full snap-center p-4' 
-                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-                        }`}
+  ref={containerRef}
+  className={`flex ${
+    isMobile 
+      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
+      : 'overflow-hidden justify-center'
+  }`}
+  onScroll={handleScroll}
+>
+  <AnimatePresence initial={false}>
+    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
+      <motion.div
+        key={msg.id}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        transition={{ duration: 0.3 }}
+        className={`${
+          isMobile 
+            ? 'flex-shrink-0 w-full snap-center p-4' 
+            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+        }`}
                       >
                         <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
                           <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
