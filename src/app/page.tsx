@@ -7,7 +7,6 @@ import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
 import { Sparkles } from 'lucide-react';
-import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
 
@@ -32,7 +31,6 @@ interface MenfessResponse {
   data: Menfess[];
 }
 
-
 const VISIBLE_MESSAGES = 6;
 const MOTIVATION_MESSAGES = [
   "Semangat untuk hari ini kamu selalu luar biasa",
@@ -46,10 +44,41 @@ const MOTIVATION_MESSAGES = [
   "ingat ya harus tetap semangat, kamu sudah hebat hari ini",
 ];
 
+const MessageCard = ({ msg }: { msg: Menfess }) => (
+  <motion.div
+    variants={{
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0 }
+    }}
+    className="bg-white/10 backdrop-blur-lg rounded-xl p-6 shadow-lg border border-white/20"
+  >
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-gray-300">From: {msg.sender}</span>
+        {msg.track?.cover_img && (
+          <img
+            src={msg.track.cover_img}
+            alt="Track cover"
+            className="w-12 h-12 rounded-lg"
+          />
+        )}
+      </div>
+      <div className="text-left">
+        <p className="text-white font-medium mb-2">To: {msg.recipient}</p>
+        <p className="text-gray-300 text-sm leading-relaxed">{msg.message}</p>
+      </div>
+      <div className="text-right">
+        <p className="text-xs text-gray-400">
+          {new Date(msg.created_at).toLocaleDateString('id-ID')}
+        </p>
+      </div>
+    </div>
+  </motion.div>
+);
+
 export default function HomePage() {
-const [activeSlide, setActiveSlide] = useState(0);
-const [randomMessage, setRandomMessage] = useState(null);
-  
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [randomMessage, setRandomMessage] = useState<string | null>(null);
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,19 +107,6 @@ const [randomMessage, setRandomMessage] = useState(null);
       typeof data?.recipient === 'string' &&
       typeof data?.message === 'string'
     );
-  };
-
-  const getFormattedDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return 'Tanggal tidak valid';
-    }
   };
 
   const showRandomMessage = () => {
@@ -151,30 +167,24 @@ const [randomMessage, setRandomMessage] = useState(null);
     return () => controller.abort();
   }, []);
 
-useEffect(() => {
-  if (!isMobile && activeSlide === 1 && recentlyAddedMessages.length > 0) {
-    const randomIndex = Math.floor(Math.random() * recentlyAddedMessages.length);
-    setRandomMessage(recentlyAddedMessages[randomIndex]);
-  }
-}, [activeSlide, isMobile, recentlyAddedMessages]);
-  
-  const interval = setInterval(() => {
-    setActiveSlide(prev => (prev === 0 ? 1 : 0));
-  }, 5000); // Ganti slide setiap 5 detik
+  useEffect(() => {
+    messageInterval.current = setInterval(showRandomMessage, 720000);
+    showRandomMessage();
 
-  return () => clearInterval(interval);
-}, [isMobile]);
+    return () => {
+      if (messageInterval.current) clearInterval(messageInterval.current);
+    };
+  }, []);
 
-useEffect(() => {
-  if (isMobile) return;
-  
-  const interval = setInterval(() => {
-    setActiveSlide(prev => (prev === 0 ? 1 : 0));
-  }, 5000); // Ganti slide setiap 5 detik
+  useEffect(() => {
+    if (isMobile) return;
+    
+    const interval = setInterval(() => {
+      setActiveSlide(prev => (prev === 0 ? 1 : 0));
+    }, 5000);
 
-  return () => clearInterval(interval);
-}, [isMobile]);
-
+    return () => clearInterval(interval);
+  }, [isMobile]);
 
   useEffect(() => {
     if (containerRef.current && isMobile) {
@@ -202,17 +212,6 @@ useEffect(() => {
     }
   };
 
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.8, rotate: -5 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      rotate: 0,
-      transition: { type: 'spring', stiffness: 120 } 
-    },
-    exit: { opacity: 0, scale: 0.8, rotate: 5 }
-  };
-
   const renderTimeIcon = () => {
     const { isNight } = getTimeStatus();
     
@@ -224,7 +223,7 @@ useEffect(() => {
         transition={{ duration: 0.5 }}
       >
         {isNight ? (
-          <motion.div
+          <motion .div
             className="relative inline-block"
             animate={{ 
               rotate: [0, 5, -5, 0],
@@ -236,7 +235,6 @@ useEffect(() => {
               ease: "easeInOut"
             }}
           >
-            {/* Moon Core */}
             <motion.span
               className="text-4xl relative z-10 block"
               animate={{
@@ -253,8 +251,6 @@ useEffect(() => {
             >
               🌙
             </motion.span>
-            
-            {/* Moon Shine Effect */}
             <motion.div
               className="absolute inset-0 -z-0"
               initial={{ opacity: 0 }}
@@ -270,8 +266,6 @@ useEffect(() => {
             >
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-yellow-300/30 rounded-full blur-[20px]" />
             </motion.div>
-
-            {/* Glow Effect */}
             <motion.div
               className="absolute inset-0"
               initial={{ scale: 0.8, opacity: 0 }}
@@ -318,11 +312,9 @@ useEffect(() => {
                 animate={{ x: 0 }}
               />
             )}
-            
             <span className="text-gray-800 font-medium">
               {currentMessage}
             </span>
-
             {showFlyingObject === 'plane' && (
               <motion.img
                 src="/plane-flying.png"
@@ -355,7 +347,6 @@ useEffect(() => {
             <img src="/bird-flying.png" alt="Burung" className="w-24 h-24 animate-float" />
           </motion.div>
         )}
-
         {showFlyingObject === 'plane' && (
           <motion.div
             key="plane"
@@ -367,7 +358,7 @@ useEffect(() => {
             }}
             className="fixed z-40 pointer-events-none"
           >
-            <img src="/plane-flying.png" alt="Pesawat" className="w-32 h-32 animate-float" />
+            <img src="/plane-flying.png " alt="Pesawat" className="w-32 h-32 animate-float" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -459,92 +450,94 @@ useEffect(() => {
             </motion.div>
           </div>
         </section>
- <section className="py-16 md:py-24 bg-gray-900">
-  <div className="container mx-auto px-4">
-    <div className="text-center mb-16">
-      <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
-        MENFESS TERBARU
-      </h2>
-      <p className="text-gray-400 max-w-xl mx-auto">
-        Trending menfess
-      </p>
-    </div>
-
-    {loading ? (
-      <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
-    ) : error ? (
-      <p className="text-red-500 text-center">{error}</p>
-    ) : recentlyAddedMessages.length === 0 ? (
-      <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
-    ) : (
-      <div className="relative">
-        {/* Desktop View */}
-        {!isMobile && (
-          <div className="relative overflow-hidden">
-            <AnimatePresence mode='wait'>
-              {activeSlide === 0 ? (
-                <motion.div
-                  key="latest"
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
-                  transition={{ duration: 0.5 }}
-                  className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4"
-                >
-                  {recentlyAddedMessages.slice(0, 5).map((msg) => (
-                    <MessageCard key={msg.id} msg={msg} />
-                  ))}
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="random"
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
-                  transition={{ duration: 0.5 }}
-                  className="flex justify-center"
-                >
-                  {randomMessage && <MessageCard msg={randomMessage} />}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-
-        {/* Mobile View */}
-        {isMobile && (
-          <div 
-            ref={containerRef}
-            className="overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4"
-            onScroll={handleScroll}
-          >
-            <div className="flex">
-              {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg, index) => (
-                <motion.div
-                  key={msg.id}
-                  className="flex-shrink-0 w-full snap-center p-4"
-                >
-                  <MessageCard msg={msg} />
-                </motion.div>
-              ))}
+        <section className="py-16 md:py-24 bg-gray-900">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
+                MENFESS TERBARU
+              </h2>
+              < p className="text-gray-400 max-w-xl mx-auto">
+                Trending menfess
+              </p>
             </div>
-            <div className="flex justify-center space-x-2 mt-4">
-              {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
-                <motion.div
-                  key={index}
-                  className={`h-2 w-2 rounded-full ${
-                    currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
-                  }`}
-                  animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                />
-              ))}
-            </div>
+
+            {loading ? (
+              <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
+            ) : error ? (
+              <p className="text-red-500 text-center">{error}</p>
+            ) : recentlyAddedMessages.length === 0 ? (
+              <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
+            ) : (
+              <div className="relative">
+                {/* Desktop View */}
+                {!isMobile && (
+                  <div className="relative overflow-hidden">
+                    <AnimatePresence mode='wait'>
+                      {activeSlide === 0 ? (
+                        <motion.div
+                          key="latest"
+                          initial={{ opacity: 0, x: 100 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -100 }}
+                          transition={{ duration: 0.5 }}
+                          className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4"
+                        >
+                          {recentlyAddedMessages.slice(0, 5).map((msg) => (
+                            <MessageCard key={msg.id} msg={msg} />
+                          ))}
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="next"
+                          initial={{ opacity: 0, x: 100 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -100 }}
+                          transition={{ duration: 0.5 }}
+                          className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4"
+                        >
+                          {recentlyAddedMessages.slice(5, 10).map((msg) => (
+                            <MessageCard key={msg.id} msg={msg} />
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+
+                {/* Mobile View */}
+                {isMobile && (
+                  <div 
+                    ref={containerRef}
+                    className="overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4"
+                    onScroll={handleScroll}
+                  >
+                    <div className="flex">
+                      {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg, index) => (
+                        <motion.div
+                          key={msg.id}
+                          className="flex-shrink-0 w-full snap-center p-4"
+                        >
+                          <MessageCard msg={msg} />
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="flex justify-center space-x-2 mt-4">
+                      {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
+                        <motion.div
+                          key={index}
+                          className={`h-2 w-2 rounded-full ${
+                            currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
+                          }`}
+                          animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    )}
-  </div>
-</section>
+        </section>
       </main>
 
       <Footer />
