@@ -6,7 +6,7 @@ import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
@@ -32,7 +32,22 @@ interface MenfessResponse {
   data: Menfess[];
 }
 
+const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
+  ssr: false,
+});
+
+
 const VISIBLE_MESSAGES = 6;
+const MOTIVATION_MESSAGES = [
+  "Semangat untuk hari ini kamu selalu luar biasa",
+  "Kamu harus jaga kesehatan mu, tidurnya di jaga ya! 😊",
+  "Sudahkah kamu menyapa temanmu hari ini? 👋",
+  "Cinta itu indah, tapi jangan lupa kuliah! 📚",
+  "Tetap semangat dan jaga kesehatan! 💪",
+  "Jangan lupa minum air putih hari ini! 💧",
+  "Ingat ya, kamu itu spesial dan unik! ✨",
+  "Hari ini adalah kesempatan baru untuk memulai hal baru"
+];
 
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
@@ -40,7 +55,11 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
+  const [showFlyingObject, setShowFlyingObject] = useState<'bird' | 'plane' | null>(null);
+  const [currentMessage, setCurrentMessage] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const messageInterval = useRef<NodeJS.Timeout>();
+  const carouselInterval = useRef<NodeJS.Timeout>();
 
   const shuffleArray = (array: Menfess[]) => {
     if (!array.length) return [];
@@ -49,7 +68,7 @@ export default function HomePage() {
       const j = Math.floor(Math.random() * (i + 1));
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-    return newArray.slice(0, VISIBLE_MESSAGES * 2);
+    return newArray;
   };
 
   const validateMenfess = (data: any): data is Menfess => {
@@ -74,12 +93,16 @@ export default function HomePage() {
     }
   };
 
-  const getTimeStatus = () => {
-    const currentHour = new Date().getHours();
-    return {
-      isNight: currentHour >= 18 || currentHour < 7,
-      isMorning: currentHour >= 7 && currentHour < 18
-    };
+  const showRandomMessage = () => {
+    const isBird = Math.random() < 0.5;
+    const message = MOTIVATION_MESSAGES[Math.floor(Math.random() * MOTIVATION_MESSAGES.length)];
+    
+    setCurrentMessage(message);
+    setShowFlyingObject(isBird ? 'bird' : 'plane');
+
+    setTimeout(() => {
+      setShowFlyingObject(null);
+    }, 10000);
   };
 
   useEffect(() => {
@@ -104,8 +127,13 @@ export default function HomePage() {
         
         if (data?.status && Array.isArray(data.data)) {
           const validMessages = data.data.filter(validateMenfess);
-          const shuffled = shuffleArray(validMessages);
-          setRecentlyAddedMessages(shuffled);
+          validMessages.sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+          const latestMessage = validMessages[0];
+          const remainingMessages = shuffleArray(validMessages.slice(1));
+          const finalMessages = [latestMessage, ...remainingMessages].slice(0, VISIBLE_MESSAGES * 2);
+          setRecentlyAddedMessages(finalMessages);
         } else {
           throw new Error("Format data tidak valid");
         }
@@ -124,21 +152,46 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRecentlyAddedMessages(prev => {
-        if (prev.length < 2) return prev;
-        const newArray = [...prev];
-        const randomIndex = Math.floor(Math.random() * (newArray.length - 1)) + 1;
-        [newArray[0], newArray[randomIndex]] = [newArray[randomIndex], newArray[0]];
-        return newArray;
-      });
-    }, 5000);
+    messageInterval.current = setInterval(showRandomMessage, 720000);
+    showRandomMessage();
 
-    return () => clearInterval(interval);
+    return () => {
+      if (messageInterval.current) clearInterval(messageInterval.current);
+    };
   }, []);
 
+  useEffect(() => {
+    if (isMobile) {
+      carouselInterval.current = setInterval(() => {
+        setCurrentCard(prev => (prev + 1) % VISIBLE_MESSAGES);
+      }, 5000);
+    }
+
+    return () => {
+      if (carouselInterval.current) clearInterval(carouselInterval.current);
+    };
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (containerRef.current && isMobile) {
+      const cardWidth = containerRef.current.offsetWidth;
+      containerRef.current.scrollTo({
+        left: currentCard * cardWidth,
+        behavior: 'smooth'
+      });
+    }
+  }, [currentCard, isMobile]);
+
+  const getTimeStatus = () => {
+    const currentHour = new Date().getHours();
+    return {
+      isNight: currentHour >= 18 || currentHour < 7,
+      isMorning: currentHour >= 7 && currentHour < 18
+    };
+  };
+
   const handleScroll = () => {
-    if (containerRef.current) {
+    if (containerRef.current && isMobile) {
       const scrollPosition = containerRef.current.scrollLeft;
       const cardWidth = containerRef.current.offsetWidth;
       setCurrentCard(Math.round(scrollPosition / cardWidth));
@@ -167,13 +220,69 @@ export default function HomePage() {
         transition={{ duration: 0.5 }}
       >
         {isNight ? (
-          <motion.span
-            className="text-4xl"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
+          <motion.div
+            className="relative inline-block"
+            animate={{ 
+              rotate: [0, 5, -5, 0],
+              scale: [1, 1.05, 1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
           >
-            🌙
-          </motion.span>
+            {/* Moon Core */}
+            <motion.span
+              className="text-4xl relative z-10 block"
+              animate={{
+                filter: [
+                  'brightness(1)',
+                  'brightness(1.2)',
+                  'brightness(1)'
+                ],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+              }}
+            >
+              🌙
+            </motion.span>
+            
+            {/* Moon Shine Effect */}
+            <motion.div
+              className="absolute inset-0 -z-0"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0, 0.6, 0],
+                rotate: [0, 360],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-yellow-300/30 rounded-full blur-[20px]" />
+            </motion.div>
+
+            {/* Glow Effect */}
+            <motion.div
+              className="absolute inset-0"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.4, 0.6, 0.4],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+              }}
+            >
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-yellow-400/20 rounded-full blur-[30px]" />
+            </motion.div>
+          </motion.div>
         ) : (
           <motion.div
             animate={{ rotate: [0, 20, -20, 0] }}
@@ -186,27 +295,101 @@ export default function HomePage() {
     );
   };
 
+  const FlyingMessage = () => (
+    <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center">
+      <AnimatePresence>
+        {showFlyingObject && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-gray-200 flex items-center gap-3"
+          >
+            {showFlyingObject === 'bird' && (
+              <motion.img
+                src="/bird-flying.png"
+                alt="Burung"
+                className="h-12 w-12"
+                initial={{ x: -100 }}
+                animate={{ x: 0 }}
+              />
+            )}
+            
+            <span className="text-gray-800 font-medium">
+              {currentMessage}
+            </span>
+
+            {showFlyingObject === 'plane' && (
+              <motion.img
+                src="/plane-flying.png"
+                alt="Pesawat"
+                className="h-12 w-12"
+                initial={{ x: 100 }}
+                animate={{ x: 0 }}
+              />
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
+  const FlyingObjects = () => (
+    <>
+      <AnimatePresence>
+        {showFlyingObject === 'bird' && (
+          <motion.div
+            key="bird"
+            initial={{ x: '-100vw', y: '100vh' }}
+            animate={{ 
+              x: '100vw',
+              y: '30vh',
+              transition: { duration: 8, ease: 'linear' }
+            }}
+            className="fixed z-40 pointer-events-none"
+          >
+            <img src="/bird-flying.png" alt="Burung" className="w-24 h-24 animate-float" />
+          </motion.div>
+        )}
+
+        {showFlyingObject === 'plane' && (
+          <motion.div
+            key="plane"
+            initial={{ x: '100vw', y: '20vh' }}
+            animate={{ 
+              x: '-100vw',
+              y: '40vh',
+              transition: { duration: 6, ease: 'linear' }
+            }}
+            className="fixed z-40 pointer-events-none"
+          >
+            <img src="/plane-flying.png" alt="Pesawat" className="w-32 h-32 animate-float" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
       <Navbar />
       
+      <FlyingObjects />
+      <FlyingMessage />
+
       <main className="flex-grow">
-        <section className="relative overflow-hidden pt-24 pb-16 md:py-32">
-          {/* Background Video Container with Border Effect */}
-          <div className="absolute inset-0 z-0 overflow-hidden">
-            <div className="relative w-full h-full">
-              {/* Cloud-like Border Effect */}
-              <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -inset-4 lg:-inset-6">
-                  <div className="relative w-full h-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
-                    <BackgroundVideo />
-                  </div>
+        <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32">
+          <div className="absolute inset-0 z-0 h-[1000px] overflow-hidden">
+            <div className="relative h-[100%] w-[100%]">
+              <div className="absolute inset-0 -left-[10%] -top-9 w-[130%] lg:-left-[15%] lg:w-[130%]">
+                <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
+                  <BackgroundVideo />
                 </div>
               </div>
             </div>
           </div>
-      
+        
           <div className="container mx-auto px-4 text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -216,10 +399,25 @@ export default function HomePage() {
               <div className="mb-8">
                 {renderTimeIcon()}
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                Menfess warga Unand
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                <motion.span
+                  className={`inline-block relative ${
+                    getTimeStatus().isNight 
+                      ? 'text-white drop-shadow-glow'
+                      : 'text-gray-900'
+                  }`}
+                >
+                  Menfess warga Unand
+                  {getTimeStatus().isNight && (
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+                      animate={{ opacity: [0, 1, 0] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                    />
+                  )}
+                </motion.span>
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+              <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
             </motion.div>
@@ -232,13 +430,13 @@ export default function HomePage() {
             >
               <Button
                 asChild
-                className="bg-gray-800 text-white px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-900 transition-colors shadow-lg"
+                className="bg-gray-100 text-gray-900 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-200 transition-colors shadow-lg"
               >
                 <Link href="/message">Kirim Menfess</Link>
               </Button>
               <Button
                 asChild
-                className="border-2 border-gray-800 bg-white text-gray-800 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-100 transition-colors shadow-lg"
+                className="border-2 border-gray-100 bg-transparent text-gray-100 hover:bg-gray-100/10 px-6 md:px-8 py-2.5 md:py-3 rounded-full transition-colors shadow-lg"
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
@@ -257,7 +455,9 @@ export default function HomePage() {
             </motion.div>
           </div>
         </section>
-
+          <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
+            <DynamicCarousel />
+          </div>
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
