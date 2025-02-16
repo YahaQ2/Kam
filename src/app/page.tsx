@@ -36,13 +36,16 @@ const VISIBLE_MESSAGES = 6;
 const MOTIVATION_MESSAGES = [
   "Semangat untuk hari ini kamu selalu luar biasa",
   "Kamu harus jaga kesehatan mu, tidurnya di jaga ya! 😊",
-  "Sudahkah kamu menyapa temanmu hari ini? 👋",
+  "Apa kabar,kamu inget ya bahagia dulu. masalahnya lupain dulu! 👋",
   "Cinta itu indah, tapi jangan lupa kuliah! 📚",
   "Tetap semangat dan jaga kesehatan! 💪",
+   "Aku percaya kamu bisa! di selamat ya udah lewatin banyak tantangan di semester ini ",
+    "Capek ya! ututut tut..istirahat sebentar ya abis itu lanjut lagi💗",
+ "Kamu keren udaah nyampe ke tahap ini tetap semangat ya! 💪",
   "Jangan lupa minum air putih hari ini! 💧",
-  "Ingat ya, kamu itu spesial dan unik! ✨",
+  "Ingat ya, kamu itu spesial dan hebat! ✨",
   "Hari ini adalah kesempatan baru untuk memulai hal baru",
-  "ingat ya harus tetap semangat, kamu sudah hebat hari",
+  "ingat ya harus tetap semangat, kamu sudah hebat hari ini",
 ];
 
 export default function HomePage() {
