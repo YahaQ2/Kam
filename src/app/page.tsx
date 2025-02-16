@@ -7,7 +7,6 @@ import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
 import { Sparkles } from 'lucide-react';
-import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
 
@@ -45,6 +44,55 @@ const MOTIVATION_MESSAGES = [
   "ingat ya harus tetap semangat, kamu sudah hebat hari ini",
 ];
 
+const MessageCard = ({ msg }: { msg: Menfess }) => (
+  <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
+    <motion.div 
+      className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+      whileHover={{ scale: 1.02 }}
+    >
+      <div className="px-4 pt-4">
+        <div className="flex justify-between text-sm mb-2">
+          <div className="text-gray-300">
+            <span className="font-semibold">From:</span> {msg.sender}
+          </div>
+          <div className="text-gray-300">
+            <span className="font-semibold">To:</span> {msg.recipient}
+          </div>
+        </div>
+        
+        {msg.track?.cover_img && (
+          <div className="relative aspect-square w-full mb-4 rounded-xl overflow-hidden">
+            <img
+              src={msg.track.cover_img}
+              alt="Track cover"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className="text-gray-300 text-sm mb-4 line-clamp-3">
+          {msg.message}
+        </div>
+
+        <div className="flex justify-between items-center text-xs text-gray-400">
+          <span>
+            {new Date(msg.created_at).toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            })}
+          </span>
+          {msg.track?.title && (
+            <span className="truncate max-w-[120px]">
+              🎵 {msg.track.title}
+            </span>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  </Link>
+);
+
 export default function HomePage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [randomMessage, setRandomMessage] = useState<Menfess | null>(null);
@@ -57,10 +105,8 @@ export default function HomePage() {
   const [currentMessage, setCurrentMessage] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const messageInterval = useRef<NodeJS.Timeout>();
-  const carouselInterval = useRef<NodeJS.Timeout>();
 
   const shuffleArray = (array: Menfess[]) => {
-    if (!array.length) return [];
     const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -78,134 +124,20 @@ export default function HomePage() {
     );
   };
 
-  const getFormattedDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return 'Tanggal tidak valid';
-    }
-  };
-
   const showRandomMessage = () => {
     const isBird = Math.random() < 0.5;
     const message = MOTIVATION_MESSAGES[Math.floor(Math.random() * MOTIVATION_MESSAGES.length)];
-    
     setCurrentMessage(message);
     setShowFlyingObject(isBird ? 'bird' : 'plane');
-
-    setTimeout(() => {
-      setShowFlyingObject(null);
-    }, 10000);
+    setTimeout(() => setShowFlyingObject(null), 10000);
   };
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchMessages = async () => {
-      try {
-        const response = await fetch(
-          `https://unand.vercel.app/v1/api/menfess-spotify-search`,
-          { signal: controller.signal }
-        );
-        
-        if (!response.ok) throw new Error("Gagal memuat pesan");
-        
-        const data: MenfessResponse = await response.json();
-        
-        if (data?.status && Array.isArray(data.data)) {
-          const validMessages = data.data.filter(validateMenfess);
-          validMessages.sort((a, b) => 
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          );
-          const latestMessage = validMessages[0];
-          const remainingMessages = shuffleArray(validMessages.slice(1));
-          const finalMessages = [latestMessage, ...remainingMessages].slice(0, VISIBLE_MESSAGES * 2);
-          setRecentlyAddedMessages(finalMessages);
-          setRandomMessage(shuffleArray(validMessages.slice(5))[0]);
-        } else {
-          throw new Error("Format data tidak valid");
-        }
-      } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-          console.error('Fetch error:', err);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMessages();
-    return () => controller.abort();
-  }, []);
-
-  useEffect(() => {
-    messageInterval.current = setInterval(showRandomMessage, 720000);
-    showRandomMessage();
-
-    return () => {
-      if (messageInterval.current) clearInterval(messageInterval.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isMobile) return;
-    
-    carouselInterval.current = setInterval(() => {
-      setActiveSlide(prev => (prev === 0 ? 1 : 0));
-    }, 5000);
-
-    return () => {
-      if (carouselInterval.current) clearInterval(carouselInterval.current);
-    };
-  }, [isMobile]);
-
-  useEffect(() => {
-    if (containerRef.current && isMobile) {
-      const cardWidth = containerRef.current.offsetWidth;
-      containerRef.current.scrollTo({
-        left: currentCard * cardWidth,
-        behavior: 'smooth'
-      });
-    }
-  }, [currentCard, isMobile]);
 
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
-    return {
+    return { 
       isNight: currentHour >= 18 || currentHour < 7,
       isMorning: currentHour >= 7 && currentHour < 18
     };
-  };
-
-  const handleScroll = () => {
-    if (containerRef.current && isMobile) {
-      const scrollPosition = containerRef.current.scrollLeft;
-      const cardWidth = containerRef.current.offsetWidth;
-      setCurrentCard(Math.round(scrollPosition / cardWidth));
-    }
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.8, rotate: -5 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      rotate: 0,
-      transition: { type: 'spring', stiffness: 120 } 
-    },
-    exit: { opacity: 0, scale: 0.8, rotate: 5 }
   };
 
   const renderTimeIcon = () => {
@@ -291,11 +223,81 @@ export default function HomePage() {
     );
   };
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/menfess-spotify-search`,
+          { signal: controller.signal }
+        );
+        
+        if (!response.ok) throw new Error("Gagal memuat pesan");
+        
+        const data: MenfessResponse = await response.json();
+        
+        if (data?.status && Array.isArray(data.data)) {
+          const validMessages = data.data.filter(validateMenfess);
+          validMessages.sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+          setRecentlyAddedMessages(validMessages.slice(0, VISIBLE_MESSAGES * 2));
+        } else {
+          throw new Error("Format data tidak valid");
+        }
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMessages();
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    messageInterval.current = setInterval(showRandomMessage, 720000);
+    showRandomMessage();
+    return () => { if (messageInterval.current) clearInterval(messageInterval.current); };
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
+    const interval = setInterval(() => setActiveSlide(prev => prev === 0 ? 1 : 0), 5000);
+    return () => clearInterval(interval);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (!isMobile && activeSlide === 1 && recentlyAddedMessages.length > 0) 
+      const randomIndex = Math.floor(Math.random() * recentlyAddedMessages.length);
+      setRandomMessage(recentlyAddedMessages[randomIndex]);
+    }
+  }, [activeSlide, isMobile, recentlyAddedMessages]);
+
+  const handleScroll = () => {
+    if (containerRef.current && isMobile) {
+      const scrollPosition = containerRef.current.scrollLeft;
+      const cardWidth = containerRef.current.offsetWidth;
+      setCurrentCard(Math.round(scrollPosition / cardWidth));
+    }
+  };
+
   const FlyingMessage = () => (
     <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center">
       <AnimatePresence>
         {showFlyingObject && (
-          <motion.div initial={{ opacity: 0, y: 20 }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className="bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-gray-200 flex items-center gap-3"
@@ -309,11 +311,7 @@ export default function HomePage() {
                 animate={{ x: 0 }}
               />
             )}
-            
-            <span className="text-gray-800 font-medium">
-              {currentMessage}
-            </span>
-
+            <span className="text-gray-800 font-medium">{currentMessage}</span>
             {showFlyingObject === 'plane' && (
               <motion.img
                 src="/plane-flying.png"
@@ -329,55 +327,18 @@ export default function HomePage() {
     </div>
   );
 
-  const FlyingObjects = () => (
-    <>
-      <AnimatePresence>
-        {showFlyingObject === 'bird' && (
-          <motion.div
-            key="bird"
-            initial={{ x: '-100vw', y: '100vh' }}
-            animate={{ 
-              x: '100vw',
-              y: '30vh',
-              transition: { duration: 8, ease: 'linear' }
-            }}
-            className="fixed z-40 pointer-events-none"
-          >
-            <img src="/bird-flying.png" alt="Burung" className="w-24 h-24 animate-float" />
-          </motion.div>
-        )}
-
-        {showFlyingObject === 'plane' && (
-          <motion.div
-            key="plane"
-            initial={{ x: '100vw', y: '20vh' }}
-            animate={{ 
-              x: '-100vw',
-              y: '40vh',
-              transition: { duration: 6, ease: 'linear' }
-            }}
-            className="fixed z-40 pointer-events-none"
-          >
-            <img src="/plane-flying.png" alt="Pesawat" className="w-32 h-32 animate-float" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
       <Navbar />
       
-      <FlyingObjects />
       <FlyingMessage />
 
       <main className="flex-grow">
         <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32">
           <div className="absolute inset-0 z-0 h-[1000px] overflow-hidden">
             <div className="relative h-[100%] w-[100%]">
-              <div className="absolute inset-0 -left-[10%] -top-9 w-[130%] lg:-left-[15%] lg:w-[130%]">
+              <div className="absolute inset-0 -left-[10 %] -top-9 w-[130%] lg:-left-[15%] lg:w-[130%]">
                 <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
                   <BackgroundVideo />
                 </div>
@@ -386,35 +347,12 @@ export default function HomePage() {
           </div>
         
           <div className="container mx-auto px-4 text-center relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="mb-8">
-                {renderTimeIcon()}
-              </div>
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                <motion.span
-                  className={`inline-block relative ${
-                    getTimeStatus().isNight 
-                      ? 'text-white drop-shadow-glow'
-                      : 'text-gray-900'
-                  }`}
-                >
-                  Menfess warga Unand
-                  {getTimeStatus().isNight && (
-                    <motion.span
-                      className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
-                      animate={{ opacity: [0, 1, 0] }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                    />
-                  )}
-                </motion.span>
-              </h1>
-              <p className="text-lg md:text-xl text-yellow-200 max-w-3xl mx-auto mb-12">
-                Sampaikan perasaanmu dengan cara yang berkesan 
-              </p>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Menfess warga Unand
+            </h1>
+            <p className="text-lg md:text-xl text-yellow-200 max-w-3xl mx-auto mb-12">
+              Sampaikan perasaanmu dengan cara yang berkesan 
+                          </p>
             </motion.div>
 
             <motion.div
@@ -450,6 +388,7 @@ export default function HomePage() {
             </motion.div>
           </div>
         </section>
+
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -480,10 +419,10 @@ export default function HomePage() {
                   >
                     {activeSlide === 0 ? (
                       recentlyAddedMessages.slice(0, 5).map((msg) => (
-                        <CarouselCard key={msg.id} msg={msg} />
+                        <MessageCard key={msg.id} msg={msg} />
                       ))
                     ) : (
-                      randomMessage && <CarouselCard msg={randomMessage} />
+                      randomMessage && <MessageCard msg={randomMessage} />
                     )}
                   </motion.div>
                 </AnimatePresence>
@@ -493,7 +432,8 @@ export default function HomePage() {
         </section>
       </main>
 
-      <Footer />
+     <Footer />
     </div>
   );
 }
+    
