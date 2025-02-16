@@ -10,7 +10,6 @@ import { Sparkles } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
-
 interface Track {
   title?: string;
   artist?: string;
@@ -44,6 +43,18 @@ const MOTIVATION_MESSAGES = [
   "Hari ini adalah kesempatan baru untuk memulai hal baru"
 ];
 
+const BackgroundVideo = () => (
+  <video 
+    autoPlay 
+    muted 
+    loop 
+    playsInline
+    className="w-full h-full object-cover"
+  >
+    <source src="@components/BackgroundVideo"/>
+  </video>
+);
+
 export default function HomePage() {
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,40 +64,10 @@ export default function HomePage() {
   const [showFlyingObject, setShowFlyingObject] = useState<'bird' | 'plane' | null>(null);
   const [currentMessage, setCurrentMessage] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollInterval = useRef<NodeJS.Timeout>();
   const messageInterval = useRef<NodeJS.Timeout>();
 
-  const shuffleArray = (array: Menfess[]) => {
-    if (!array.length) return [];
-    const newArray = [...array];
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-    }
-    return newArray.slice(0, VISIBLE_MESSAGES * 2);
-  };
-
-  const validateMenfess = (data: any): data is Menfess => {
-    return (
-      typeof data?.id === 'number' &&
-      typeof data?.sender === 'string' &&
-      typeof data?.recipient === 'string' &&
-      typeof data?.message === 'string'
-    );
-  };
-
-  const getFormattedDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return 'Tanggal tidak valid';
-    }
-  };
-
+  // Fungsi untuk menampilkan pesan terbang
   const showRandomMessage = () => {
     const isBird = Math.random() < 0.5;
     const message = MOTIVATION_MESSAGES[Math.floor(Math.random() * MOTIVATION_MESSAGES.length)];
@@ -99,14 +80,7 @@ export default function HomePage() {
     }, 10000);
   };
 
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
+    useEffect(() => {
     const controller = new AbortController();
     const fetchMessages = async () => {
       try {
@@ -115,21 +89,20 @@ export default function HomePage() {
           { signal: controller.signal }
         );
         
-        if (!response.ok) throw new Error("Gagal memuat pesan");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
         const data: MenfessResponse = await response.json();
         
         if (data?.status && Array.isArray(data.data)) {
           const validMessages = data.data.filter(validateMenfess);
-          const shuffled = shuffleArray(validMessages);
-          setRecentlyAddedMessages(shuffled);
+          if (validMessages.length === 0) throw new Error("Tidak ada data valid");
+          setRecentlyAddedMessages(shuffleArray(validMessages));
         } else {
           throw new Error("Format data tidak valid");
         }
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-          console.error('Fetch error:', err);
         }
       } finally {
         setLoading(false);
@@ -141,8 +114,24 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    messageInterval.current = setInterval(showRandomMessage, 720000);
-    showRandomMessage();
+    if (recentlyAddedMessages.length > 1) {
+      scrollInterval.current = setInterval(() => {
+        setRecentlyAddedMessages(prev => {
+          const newArray = [...prev];
+          const first = newArray.shift();
+          return first ? [...newArray, first] : prev;
+        });
+      }, 5000);
+    }
+
+    return () => {
+      if (scrollInterval.current) clearInterval(scrollInterval.current);
+    };
+  }, [recentlyAddedMessages.length]);
+
+  useEffect(() => {
+    messageInterval.current = setInterval(showRandomMessage, 720000); // 12 menit
+    showRandomMessage(); // Tampilkan pesan pertama
 
     return () => {
       if (messageInterval.current) clearInterval(messageInterval.current);
@@ -157,24 +146,16 @@ export default function HomePage() {
     };
   };
 
-  const handleScroll = () => {
-    if (containerRef.current) {
-      const scrollPosition = containerRef.current.scrollLeft;
-      const cardWidth = containerRef.current.offsetWidth;
-      setCurrentCard(Math.round(scrollPosition / cardWidth));
-    }
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.8, rotate: -5 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      rotate: 0,
+      transition: { type: 'spring', stiffness: 120, damping: 15 } 
+    },
+    exit: { opacity: 0, scale: 0.8, rotate: 5 }
   };
-const cardVariants = {
-  hidden: { opacity: 0, scale: 0.8, rotate: -5 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    rotate: 0,
-    transition: { type: 'spring', stiffness: 120 } 
-  },
-  exit: { opacity: 0, scale: 0.8, rotate: 5 }
-};
-  
 
   const renderTimeIcon = () => {
     const { isNight } = getTimeStatus();
@@ -218,7 +199,7 @@ const cardVariants = {
           >
             {showFlyingObject === 'bird' && (
               <motion.img
-                src="/bird-flying.png"
+                src="/bird.gif"
                 alt="Burung"
                 className="h-12 w-12"
                 initial={{ x: -100 }}
@@ -232,7 +213,7 @@ const cardVariants = {
 
             {showFlyingObject === 'plane' && (
               <motion.img
-                src="/plane-flying.png"
+                src="/plane.gif"
                 alt="Pesawat"
                 className="h-12 w-12"
                 initial={{ x: 100 }}
@@ -290,17 +271,11 @@ const cardVariants = {
       <FlyingMessage />
 
       <main className="flex-grow">
-        <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32"><div className="absolute inset-0 z-0 h-[1000px] overflow-hidden">
-  <div className="relative h-[100%] w-[100%]">
-    {/* Perubahan pada div wrapper video */}
-    <div className="absolute inset-0 -left-[10%] w-[130%] lg:-left-[15%] lg:w-[130%]">
-      <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
-        <BackgroundVideo />
-      </div>
-    </div>
-  </div>
-</div>
-        
+        <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32">
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <BackgroundVideo />
+            <div className="absolute inset-0 bg-black/30" />
+          </div>
       
           <div className="container mx-auto px-4 text-center relative z-10">
             <motion.div
@@ -352,7 +327,7 @@ const cardVariants = {
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
-              <Button
+               <Button
                 asChild
                 className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg"
               >
@@ -365,8 +340,7 @@ const cardVariants = {
                 </Link>
               </Button>
             </motion.div>
-          </div>
-        </section>
+          </div>        </section>
 
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
@@ -388,28 +362,28 @@ const cardVariants = {
             ) : (
               <div className="relative">
                 <div 
-  ref={containerRef}
-  className={`flex ${
-    isMobile 
-      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
-      : 'overflow-hidden justify-center'
-  }`}
-  onScroll={handleScroll}
->
-  <AnimatePresence initial={false}>
-    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
-      <motion.div
-        key={msg.id}
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        transition={{ duration: 0.3 }}
-        className={`${
-          isMobile 
-            ? 'flex-shrink-0 w-full snap-center p-4' 
-            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-        }`}
+                  ref={containerRef}
+                  className={`flex ${
+                    isMobile 
+                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
+                      : 'overflow-hidden justify-center'
+                  }`}
+                  onScroll={handleScroll}
+                >
+                  <AnimatePresence initial={false}>
+                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
+                      <motion.div
+                        key={msg.id}
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        transition={{ duration: 0.3 }}
+                        className={`${
+                          isMobile 
+                            ? 'flex-shrink-0 w-full snap-center p-4' 
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                        }`}
                       >
                         <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
                           <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
@@ -476,6 +450,7 @@ const cardVariants = {
             )}
           </div>
         </section>
+
       </main>
 
       <Footer />
