@@ -32,10 +32,6 @@ interface MenfessResponse {
   data: Menfess[];
 }
 
-const DynamicCarousel = dynamic(() => import("@/components/carousel").then((mod) => mod.Carousel), {
-  ssr: false,
-});
-
 
 const VISIBLE_MESSAGES = 6;
 const MOTIVATION_MESSAGES = [
@@ -452,10 +448,6 @@ export default function HomePage() {
                   Ziwa - Cari Teman baru & fun space
                 </Link>
               </Button>
-                </div>
-          <div className="relative w-full max-w-7xl mx-auto overflow-hidden mb-16">
-            <DynamicCarousel />
-          </div>
             </motion.div>
           </div>
         </section>
