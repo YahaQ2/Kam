@@ -414,7 +414,7 @@ export default function HomePage() {
                   )}
                 </motion.span>
               </h1>
-              <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-12">
+              <p className="text-lg md:text-xl text-yellow-200 max-w-3xl mx-auto mb-12">
                 Sampaikan perasaanmu dengan cara yang berkesan 
               </p>
             </motion.div>
