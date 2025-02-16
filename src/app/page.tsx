@@ -157,31 +157,9 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (isMobile) {
-      carouselInterval.current = setInterval(() => {
-        setCurrentCard((prev) => (prev + 1) % VISIBLE_MESSAGES);
-      }, 5000);
-    }
-
-    return () => {
-      if (carouselInterval.current) clearInterval(carouselInterval.current);
-    };
-  }, [isMobile]);
-
-  useEffect(() => {
-    if (containerRef.current && isMobile) {
-      const cardWidth = containerRef.current.offsetWidth;
-      containerRef.current.scrollTo({
-        left: currentCard * cardWidth,
-        behavior: 'smooth'
-      });
-    }
-  }, [currentCard, isMobile]);
-
-  useEffect(() => {
     const slideInterval = setInterval(() => {
-      setCurrentSlide((prevSlide) => (prevSlide + 1) % 2);
-    }, 15000);
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % 6);
+    }, 5000);
 
     return () => clearInterval(slideInterval);
   }, []);
@@ -491,14 +469,14 @@ export default function HomePage() {
                   <AnimatePresence initial={false}>
                     {currentSlide === 0 && (
                       <>
-                        {recentlyAddedMessages.slice(0, 5).map((msg) => (
+                        {recentlyAddedMessages.slice(0, 5).map((msg, index) => (
                           <motion.div
                             key={msg.id}
                             variants={cardVariants}
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            transition={{ duration: 0.3 }}
+                            transition={{ duration: 0.5, delay: index * 0.5 }}
                             className={`${
                               isMobile
                                 ? 'flex-shrink-0 w-full snap-center p-4'
@@ -551,16 +529,16 @@ export default function HomePage() {
                         ))}
                       </>
                     )}
-                    {currentSlide === 1 && (
+                    {currentSlide > 0 && (
                       <>
-                        {recentlyAddedMessages.slice(5).map((msg) => (
+                        {recentlyAddedMessages.slice(5).map((msg, index) => (
                           <motion.div
                             key={msg.id}
                             variants={cardVariants}
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            transition={{ duration: 0.3 }}
+                            transition={{ duration: 0.5, delay: index * 0.5 }}
                             className={`${
                               isMobile
                                 ? 'flex-shrink-0 w-full snap-center p-4'
