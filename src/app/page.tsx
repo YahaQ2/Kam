@@ -143,6 +143,8 @@ export default function HomePage() {
         setLoading(false);
       }
     };
+const [activeSlide, setActiveSlide] = useState(0);
+const [randomMessage, setRandomMessage] = useState(null);
 
     fetchMessages();
     return () => controller.abort();
