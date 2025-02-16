@@ -42,7 +42,8 @@ const MOTIVATION_MESSAGES = [
   "Tetap semangat dan jaga kesehatan! 💪",
   "Jangan lupa minum air putih hari ini! 💧",
   "Ingat ya, kamu itu spesial dan unik! ✨",
-  "Hari ini adalah kesempatan baru untuk memulai hal baru"
+  "Hari ini adalah kesempatan baru untuk memulai hal baru",
+  "ingat ya harus tetap semangat, kamu sudah hebat hari ini",
 ];
 
 export default function HomePage() {
