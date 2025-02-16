@@ -39,7 +39,7 @@ const MOTIVATION_MESSAGES = [
   "Apa kabar,kamu inget ya bahagia dulu. masalahnya lupain dulu! 👋",
   "Cinta itu indah, tapi jangan lupa kuliah! 📚",
   "Tetap semangat dan jaga kesehatan! 💪",
-   "Aku percaya kamu bisa! di selamat ya udah lewatin banyak tantangan di semester ini ",
+   "Aku percaya kamu bisa! selamat ya udah lewatin banyak tantangan di semester ini ",
     "Capek ya! ututut tut..istirahat sebentar ya abis itu lanjut lagi💗",
  "Kamu keren udaah nyampe ke tahap ini tetap semangat ya! 💪",
   "Jangan lupa minum air putih hari ini! 💧",
