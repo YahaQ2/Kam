@@ -151,16 +151,12 @@ const [randomMessage, setRandomMessage] = useState(null);
     return () => controller.abort();
   }, []);
 
-  useEffect(() => {
-    messageInterval.current = setInterval(showRandomMessage, 720000);
-    showRandomMessage();
-
-    return () => {
-      if (messageInterval.current) clearInterval(messageInterval.current);
-    };
-  }, []);
 useEffect(() => {
-  if (isMobile) return;
+  if (!isMobile && activeSlide === 1 && recentlyAddedMessages.length > 0) {
+    const randomIndex = Math.floor(Math.random() * recentlyAddedMessages.length);
+    setRandomMessage(recentlyAddedMessages[randomIndex]);
+  }
+}, [activeSlide, isMobile, recentlyAddedMessages]);
   
   const interval = setInterval(() => {
     setActiveSlide(prev => (prev === 0 ? 1 : 0));
