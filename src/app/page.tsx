@@ -106,15 +106,6 @@ export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const messageInterval = useRef<NodeJS.Timeout>();
 
-  const shuffleArray = (array: Menfess[]) => {
-    const newArray = [...array];
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-    }
-    return newArray;
-  };
-
   const validateMenfess = (data: any): data is Menfess => {
     return (
       typeof data?.id === 'number' &&
@@ -130,97 +121,6 @@ export default function HomePage() {
     setCurrentMessage(message);
     setShowFlyingObject(isBird ? 'bird' : 'plane');
     setTimeout(() => setShowFlyingObject(null), 10000);
-  };
-
-  const getTimeStatus = () => {
-    const currentHour = new Date().getHours();
-    return { 
-      isNight: currentHour >= 18 || currentHour < 7,
-      isMorning: currentHour >= 7 && currentHour < 18
-    };
-  };
-
-  const renderTimeIcon = () => {
-    const { isNight } = getTimeStatus();
-    
-    return (
-      <motion.div 
-        key={isNight ? 'moon' : 'sparkles'}
-        initial={{ scale: 0 }}
-        animate={{ rotate: isNight ? [0, 10, -10, 0] : 0, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        {isNight ? (
-          <motion.div
-            className="relative inline-block"
-            animate={{ 
-              rotate: [0, 5, -5, 0],
-              scale: [1, 1.05, 1],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <motion.span
-              className="text-4xl relative z-10 block"
-              animate={{
-                filter: [
-                  'brightness(1)',
-                  'brightness(1.2)',
-                  'brightness(1)'
-                ],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-              }}
-            >
-              🌙
-            </motion.span>
-            
-            <motion.div
-              className="absolute inset-0 -z-0"
-              initial={{ opacity: 0 }}
-              animate={{
-                opacity: [0, 0.6, 0],
-                rotate: [0, 360],
-              }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-yellow-300/30 rounded-full blur-[20px]" />
-            </motion.div>
-
-            <motion.div
-              className="absolute inset-0"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.4, 0.6, 0.4],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-              }}
-            >
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-yellow-400/20 rounded-full blur-[30px]" />
-            </motion.div>
-          </motion.div>
-        ) : (
-          <motion.div
-            animate={{ rotate: [0, 20, -20, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <Sparkles className="h-16 w-16 text-yellow-400 mx-auto" />
-          </motion.div>
-        )}
-      </motion.div>
-    );
   };
 
   useEffect(() => {
@@ -278,7 +178,7 @@ export default function HomePage() {
   }, [isMobile]);
 
   useEffect(() => {
-    if (!isMobile && activeSlide === 1 && recentlyAddedMessages.length > 0) 
+    if (!isMobile && activeSlide === 1 && recentlyAddedMessages.length > 0) {
       const randomIndex = Math.floor(Math.random() * recentlyAddedMessages.length);
       setRandomMessage(recentlyAddedMessages[randomIndex]);
     }
@@ -331,14 +231,13 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
       <Navbar />
-      
       <FlyingMessage />
 
       <main className="flex-grow">
         <section className="relative min-h-screen overflow-hidden pt-24 pb-16 md:py-32">
           <div className="absolute inset-0 z-0 h-[1000px] overflow-hidden">
             <div className="relative h-[100%] w-[100%]">
-              <div className="absolute inset-0 -left-[10 %] -top-9 w-[130%] lg:-left-[15%] lg:w-[130%]">
+              <div className="absolute inset-0 -left-[10%] -top-9 w-[130%] lg:-left-[15%] lg:w-[130%]">
                 <div className="relative h-full w-full before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:via-transparent before:to-transparent before:backdrop-blur-lg before:[mask-image:linear-gradient(to_bottom,white_30%,transparent_90%)] after:absolute after:inset-0 after:bg-gradient-to-t after:from-white/30 after:via-transparent after:to-transparent after:backdrop-blur-lg after:[mask-image:linear-gradient(to_top,white_30%,transparent_90%)]">
                   <BackgroundVideo />
                 </div>
@@ -352,8 +251,7 @@ export default function HomePage() {
             </h1>
             <p className="text-lg md:text-xl text-yellow-200 max-w-3xl mx-auto mb-12">
               Sampaikan perasaanmu dengan cara yang berkesan 
-                          </p>
-            </motion.div>
+            </p>
 
             <motion.div
               initial={{ opacity: 0 }}
@@ -408,32 +306,72 @@ export default function HomePage() {
               <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
             ) : (
               <div className="relative">
-                <AnimatePresence mode='wait'>
-                  <motion.div
-                    key={activeSlide}
-                    initial={{ opacity: 0, x: 100 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -100 }}
-                    transition={{ duration: 0.5 }}
-                    className={activeSlide === 0 ? "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4" : "flex justify-center"}
+                {!isMobile ? (
+                  <div className="relative overflow-hidden">
+                    <AnimatePresence mode='wait'>
+                      {activeSlide === 0 ? (
+                        <motion.div
+                          key="latest"
+                          initial={{ opacity: 0, x: 100 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -100 }}
+                          transition={{ duration: 0.5 }}
+                          className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4"
+                        >
+                          {recentlyAddedMessages.slice(0, 5).map((msg) => (
+                            <MessageCard key={msg.id} msg={msg} />
+                          ))}
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="random"
+                          initial={{ opacity: 0, x: 100 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -100 }}
+                          transition={{ duration: 0.5 }}
+                          className="flex justify-center"
+                        >
+                          {randomMessage && <MessageCard msg={randomMessage} />}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <div 
+                    ref={containerRef}
+                    className="overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4"
+                    onScroll={handleScroll}
                   >
-                    {activeSlide === 0 ? (
-                      recentlyAddedMessages.slice(0, 5).map((msg) => (
-                        <MessageCard key={msg.id} msg={msg} />
-                      ))
-                    ) : (
-                      randomMessage && <MessageCard msg={randomMessage} />
-                    )}
-                  </motion.div>
-                </AnimatePresence>
+                    <div className="flex">
+                      {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg, index) => (
+                        <motion.div
+                          key={msg.id}
+                          className="flex-shrink-0 w-full snap-center p-4"
+                        >
+                          <MessageCard msg={msg} />
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="flex justify-center space-x-2 mt-4">
+                      {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
+                        <motion.div
+                          key={index}
+                          className={`h-2 w-2 rounded-full ${
+                            currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
+                          }`}
+                          animate={{ scale: currentCard === index ? 1.2 : 1 }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </section>
       </main>
 
-     <Footer />
+      <Footer />
     </div>
   );
 }
-    
