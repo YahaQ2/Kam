@@ -47,6 +47,9 @@ const MOTIVATION_MESSAGES = [
 ];
 
 export default function HomePage() {
+const [activeSlide, setActiveSlide] = useState(0);
+const [randomMessage, setRandomMessage] = useState(null);
+  
   const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -143,8 +146,6 @@ export default function HomePage() {
         setLoading(false);
       }
     };
-const [activeSlide, setActiveSlide] = useState(0);
-const [randomMessage, setRandomMessage] = useState(null);
 
     fetchMessages();
     return () => controller.abort();
@@ -158,18 +159,26 @@ const [randomMessage, setRandomMessage] = useState(null);
       if (messageInterval.current) clearInterval(messageInterval.current);
     };
   }, []);
+useEffect(() => {
+  if (isMobile) return;
+  
+  const interval = setInterval(() => {
+    setActiveSlide(prev => (prev === 0 ? 1 : 0));
+  }, 5000); // Ganti slide setiap 5 detik
 
-  useEffect(() => {
-    if (isMobile) {
-      carouselInterval.current = setInterval(() => {
-        setCurrentCard(prev => (prev + 1) % VISIBLE_MESSAGES);
-      }, 5000);
-    }
+  return () => clearInterval(interval);
+}, [isMobile]);
 
-    return () => {
-      if (carouselInterval.current) clearInterval(carouselInterval.current);
-    };
-  }, [isMobile]);
+useEffect(() => {
+  if (isMobile) return;
+  
+  const interval = setInterval(() => {
+    setActiveSlide(prev => (prev === 0 ? 1 : 0));
+  }, 5000); // Ganti slide setiap 5 detik
+
+  return () => clearInterval(interval);
+}, [isMobile]);
+
 
   useEffect(() => {
     if (containerRef.current && isMobile) {
