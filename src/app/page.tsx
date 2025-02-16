@@ -552,7 +552,7 @@ export default function HomePage() {
                           currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
                         }`}
                         animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: 0.5 }}
                       />
                     ))}
                   </div>
