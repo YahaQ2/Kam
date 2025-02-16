@@ -54,6 +54,7 @@ export default function HomePage() {
   const [showFlyingObject, setShowFlyingObject] = useState<'bird' | 'plane' | null>(null);
   const [currentMessage, setCurrentMessage] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const messageInterval = useRef<NodeJS.Timeout>();
   const carouselInterval = useRef<NodeJS.Timeout>();
@@ -159,7 +160,8 @@ export default function HomePage() {
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % 6);
-    }, 5000);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % 5);
+    }, 7000);
 
     return () => clearInterval(slideInterval);
   }, []);
@@ -468,128 +470,120 @@ export default function HomePage() {
                 >
                   <AnimatePresence initial={false}>
                     {currentSlide === 0 && (
-                      <>
-                        {recentlyAddedMessages.slice(0, 5).map((msg, index) => (
-                          <motion.div
-                            key={msg.id}
-                            variants={cardVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                            transition={{ duration: 0.5, delay: index * 0.5 }}
-                            className={`${
-                              isMobile
-                                ? 'flex-shrink-0 w-full snap-center p-4'
-                                : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-                            }`}
-                          >
-                            <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
-                              <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                                <div className="px-4 pt-4">
-                                  <div className="flex justify-between text-sm mb-2">
-                                    <div className="text-gray-300">
-                                      <span className="font-semibold">From:</span> {msg.sender}
-                                    </div>
-                                    <div className="text-gray-300">
-                                      <span className="font-semibold">To:</span> {msg.recipient}
-                                    </div>
-                                  </div>
+                      <motion.div
+                        key={recentlyAddedMessages[currentIndex]?.id}
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        transition={{ duration: 0.5 }}
+                        className={`${
+                          isMobile
+                            ? 'flex-shrink-0 w-full snap-center p-4'
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                        }`}
+                      >
+                        <Link href={`/message/${recentlyAddedMessages[currentIndex]?.id}`} className="block h-full w-full p-4">
+                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <div className="px-4 pt-4">
+                              <div className="flex justify-between text-sm mb-2">
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">From:</span> {recentlyAddedMessages[currentIndex]?.sender}
                                 </div>
-                                <CarouselCard
-                                  recipient={msg.recipient || '-'}
-                                  sender={msg.sender || '-'}
-                                  message={msg.message || 'Pesan tidak tersedia'}
-                                  songTitle={msg.track?.title}
-                                  artist={msg.track?.artist}
-                                  coverUrl={msg.track?.cover_img}
-                                  spotifyEmbed={
-                                    msg.spotify_id && (
-                                      <div className="px-4 pb-4">
-                                        <iframe
-                                          className="w-full rounded-lg shadow-md"
-                                          src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                          width="100%"
-                                          height="80"
-                                          frameBorder="0"
-                                          allow="encrypted-media"
-                                        />
-                                      </div>
-                                    )
-                                  }
-                                />
-                                <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                                  <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                                  <p className="text-sm text-white text-center mt-2">
-                                    {getFormattedDate(msg.created_at)}
-                                  </p>
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">To:</span> {recentlyAddedMessages[currentIndex]?.recipient}
                                 </div>
                               </div>
-                            </Link>
-                          </motion.div>
-                        ))}
-                      </>
+                            </div>
+                            <CarouselCard
+                              recipient={recentlyAddedMessages[currentIndex]?.recipient || '-'}
+                              sender={recentlyAddedMessages[currentIndex]?.sender || '-'}
+                              message={recentlyAddedMessages[currentIndex]?.message || 'Pesan tidak tersedia'}
+                              songTitle={recentlyAddedMessages[currentIndex]?.track?.title}
+                              artist={recentlyAddedMessages[currentIndex]?.track?.artist}
+                              coverUrl={recentlyAddedMessages[currentIndex]?.track?.cover_img}
+                              spotifyEmbed={
+                                recentlyAddedMessages[currentIndex]?.spotify_id && (
+                                  <div className="px-4 pb-4">
+                                    <iframe
+                                      className="w-full rounded-lg shadow-md"
+                                      src={`https://open.spotify.com/embed/track/${recentlyAddedMessages[currentIndex]?.spotify_id}`}
+                                      width="100%"
+                                      height="80"
+                                      frameBorder="0"
+                                      allow="encrypted-media"
+                                    />
+                                  </div>
+                                )
+                              }
+                            />
+                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <p className="text-sm text-white text-center mt-2">
+                                {getFormattedDate(recentlyAddedMessages[currentIndex]?.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
+                      </motion.div>
                     )}
                     {currentSlide > 0 && (
-                      <>
-                        {recentlyAddedMessages.slice(5).map((msg, index) => (
-                          <motion.div
-                            key={msg.id}
-                            variants={cardVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                            transition={{ duration: 0.5, delay: index * 0.5 }}
-                            className={`${
-                              isMobile
-                                ? 'flex-shrink-0 w-full snap-center p-4'
-                                : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-                            }`}
-                          >
-                            <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
-                              <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                                <div className="px-4 pt-4">
-                                  <div className="flex justify-between text-sm mb-2">
-                                    <div className="text-gray-300">
-                                      <span className="font-semibold">From:</span> {msg.sender}
-                                    </div>
-                                    <div className="text-gray-300">
-                                      <span className="font-semibold">To:</span> {msg.recipient}
-                                    </div>
-                                  </div>
+                      <motion.div
+                        key={recentlyAddedMessages[currentSlide + 4]?.id}
+                        variants={cardVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        transition={{ duration: 0.5 }}
+                        className={`${
+                          isMobile
+                            ? 'flex-shrink-0 w-full snap-center p-4'
+                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                        }`}
+                      >
+                        <Link href={`/message/${recentlyAddedMessages[currentSlide + 4]?.id}`} className="block h-full w-full p-4">
+                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <div className="px-4 pt-4">
+                              <div className="flex justify-between text-sm mb-2">
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">From:</span> {recentlyAddedMessages[currentSlide + 4]?.sender}
                                 </div>
-                                <CarouselCard
-                                  recipient={msg.recipient || '-'}
-                                  sender={msg.sender || '-'}
-                                  message={msg.message || 'Pesan tidak tersedia'}
-                                  songTitle={msg.track?.title}
-                                  artist={msg.track?.artist}
-                                  coverUrl={msg.track?.cover_img}
-                                  spotifyEmbed={
-                                    msg.spotify_id && (
-                                      <div className="px-4 pb-4">
-                                        <iframe
-                                          className="w-full rounded-lg shadow-md"
-                                          src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                          width="100%"
-                                          height="80"
-                                          frameBorder="0"
-                                          allow="encrypted-media"
-                                        />
-                                      </div>
-                                    )
-                                  }
-                                />
-                                <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                                  <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                                  <p className="text-sm text-white text-center mt-2">
-                                    {getFormattedDate(msg.created_at)}
-                                  </p>
+                                <div className="text-gray-300">
+                                  <span className="font-semibold">To:</span> {recentlyAddedMessages[currentSlide + 4]?.recipient}
                                 </div>
                               </div>
-                            </Link>
-                          </motion.div>
-                        ))}
-                      </>
+                            </div>
+                            <CarouselCard
+                              recipient={recentlyAddedMessages[currentSlide + 4]?.recipient || '-'}
+                              sender={recentlyAddedMessages[currentSlide + 4]?.sender || '-'}
+                              message={recentlyAddedMessages[currentSlide + 4]?.message || 'Pesan tidak tersedia'}
+                              songTitle={recentlyAddedMessages[currentSlide + 4]?.track?.title}
+                              artist={recentlyAddedMessages[currentSlide + 4]?.track?.artist}
+                              coverUrl={recentlyAddedMessages[currentSlide + 4]?.track?.cover_img}
+                              spotifyEmbed={
+                                recentlyAddedMessages[currentSlide + 4]?.spotify_id && (
+                                  <div className="px-4 pb-4">
+                                    <iframe
+                                      className="w-full rounded-lg shadow-md"
+                                      src={`https://open.spotify.com/embed/track/${recentlyAddedMessages[currentSlide + 4]?.spotify_id}`}
+                                      width="100%"
+                                      height="80"
+                                      frameBorder="0"
+                                      allow="encrypted-media"
+                                    />
+                                  </div>
+                                )
+                              }
+                            />
+                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <p className="text-sm text-white text-center mt-2">
+                                {getFormattedDate(recentlyAddedMessages[currentSlide + 4]?.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
+                      </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
