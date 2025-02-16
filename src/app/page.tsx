@@ -32,7 +32,6 @@ interface MenfessResponse {
   data: Menfess[];
 }
 
-
 const VISIBLE_MESSAGES = 6;
 const MOTIVATION_MESSAGES = [
   "Semangat untuk hari ini kamu selalu luar biasa",
@@ -54,6 +53,7 @@ export default function HomePage() {
   const [currentCard, setCurrentCard] = useState(0);
   const [showFlyingObject, setShowFlyingObject] = useState<'bird' | 'plane' | null>(null);
   const [currentMessage, setCurrentMessage] = useState("");
+  const [currentSlide, setCurrentSlide] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const messageInterval = useRef<NodeJS.Timeout>();
   const carouselInterval = useRef<NodeJS.Timeout>();
@@ -93,7 +93,7 @@ export default function HomePage() {
   const showRandomMessage = () => {
     const isBird = Math.random() < 0.5;
     const message = MOTIVATION_MESSAGES[Math.floor(Math.random() * MOTIVATION_MESSAGES.length)];
-    
+
     setCurrentMessage(message);
     setShowFlyingObject(isBird ? 'bird' : 'plane');
 
@@ -117,20 +117,19 @@ export default function HomePage() {
           `https://unand.vercel.app/v1/api/menfess-spotify-search`,
           { signal: controller.signal }
         );
-        
+
         if (!response.ok) throw new Error("Gagal memuat pesan");
-        
+
         const data: MenfessResponse = await response.json();
-        
+
         if (data?.status && Array.isArray(data.data)) {
           const validMessages = data.data.filter(validateMenfess);
-          validMessages.sort((a, b) => 
+          validMessages.sort((a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
-          const latestMessage = validMessages[0];
-          const remainingMessages = shuffleArray(validMessages.slice(1));
-          const finalMessages = [latestMessage, ...remainingMessages].slice(0, VISIBLE_MESSAGES * 2);
-          setRecentlyAddedMessages(finalMessages);
+          const latestMessages = validMessages.slice(0, 5);
+          const randomMessages = shuffleArray(validMessages.slice(5));
+          setRecentlyAddedMessages([...latestMessages, ...randomMessages]);
         } else {
           throw new Error("Format data tidak valid");
         }
@@ -160,7 +159,7 @@ export default function HomePage() {
   useEffect(() => {
     if (isMobile) {
       carouselInterval.current = setInterval(() => {
-        setCurrentCard(prev => (prev + 1) % VISIBLE_MESSAGES);
+        setCurrentCard((prev) => (prev + 1) % VISIBLE_MESSAGES);
       }, 5000);
     }
 
@@ -178,6 +177,14 @@ export default function HomePage() {
       });
     }
   }, [currentCard, isMobile]);
+
+  useEffect(() => {
+    const slideInterval = setInterval(() => {
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % 2);
+    }, 15000);
+
+    return () => clearInterval(slideInterval);
+  }, []);
 
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
@@ -197,20 +204,20 @@ export default function HomePage() {
 
   const cardVariants = {
     hidden: { opacity: 0, scale: 0.8, rotate: -5 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
+    visible: {
+      opacity: 1,
+      scale: 1,
       rotate: 0,
-      transition: { type: 'spring', stiffness: 120 } 
+      transition: { type: 'spring', stiffness: 120 }
     },
     exit: { opacity: 0, scale: 0.8, rotate: 5 }
   };
 
   const renderTimeIcon = () => {
     const { isNight } = getTimeStatus();
-    
+
     return (
-      <motion.div 
+      <motion.div
         key={isNight ? 'moon' : 'sparkles'}
         initial={{ scale: 0 }}
         animate={{ rotate: isNight ? [0, 10, -10, 0] : 0, scale: 1 }}
@@ -219,7 +226,7 @@ export default function HomePage() {
         {isNight ? (
           <motion.div
             className="relative inline-block"
-            animate={{ 
+            animate={{
               rotate: [0, 5, -5, 0],
               scale: [1, 1.05, 1],
             }}
@@ -246,7 +253,7 @@ export default function HomePage() {
             >
               🌙
             </motion.span>
-            
+
             {/* Moon Shine Effect */}
             <motion.div
               className="absolute inset-0 -z-0"
@@ -311,7 +318,7 @@ export default function HomePage() {
                 animate={{ x: 0 }}
               />
             )}
-            
+
             <span className="text-gray-800 font-medium">
               {currentMessage}
             </span>
@@ -338,7 +345,7 @@ export default function HomePage() {
           <motion.div
             key="bird"
             initial={{ x: '-100vw', y: '100vh' }}
-            animate={{ 
+            animate={{
               x: '100vw',
               y: '30vh',
               transition: { duration: 8, ease: 'linear' }
@@ -353,7 +360,7 @@ export default function HomePage() {
           <motion.div
             key="plane"
             initial={{ x: '100vw', y: '20vh' }}
-            animate={{ 
+            animate={{
               x: '-100vw',
               y: '40vh',
               transition: { duration: 6, ease: 'linear' }
@@ -371,7 +378,7 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
       <Navbar />
-      
+
       <FlyingObjects />
       <FlyingMessage />
 
@@ -386,7 +393,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        
+
           <div className="container mx-auto px-4 text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -399,7 +406,7 @@ export default function HomePage() {
               <h1 className="text-4xl md:text-6xl font-bold mb-6">
                 <motion.span
                   className={`inline-block relative ${
-                    getTimeStatus().isNight 
+                    getTimeStatus().isNight
                       ? 'text-white drop-shadow-glow'
                       : 'text-gray-900'
                   }`}
@@ -415,7 +422,7 @@ export default function HomePage() {
                 </motion.span>
               </h1>
               <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-12">
-                Sampaikan perasaanmu dengan cara yang berkesan 
+                Sampaikan perasaanmu dengan cara yang berkesan
               </p>
             </motion.div>
 
@@ -441,7 +448,7 @@ export default function HomePage() {
                 asChild
                 className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg"
               >
-                <Link 
+                <Link
                   href="https://ziwa-351410.web.app"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -472,74 +479,140 @@ export default function HomePage() {
               <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
             ) : (
               <div className="relative">
-                <div 
+                <div
                   ref={containerRef}
                   className={`flex ${
-                    isMobile 
-                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4' 
+                    isMobile
+                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4'
                       : 'overflow-hidden justify-center'
                   }`}
                   onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((msg) => (
-                      <motion.div
-                        key={msg.id}
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        transition={{ duration: 0.3 }}
-                        className={`${
-                          isMobile 
-                            ? 'flex-shrink-0 w-full snap-center p-4' 
-                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-                        }`}
-                      >
-                        <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
-                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                            <div className="px-4 pt-4">
-                              <div className="flex justify-between text-sm mb-2">
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">From:</span> {msg.sender}
+                    {currentSlide === 0 && (
+                      <>
+                        {recentlyAddedMessages.slice(0, 5).map((msg) => (
+                          <motion.div
+                            key={msg.id}
+                            variants={cardVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            transition={{ duration: 0.3 }}
+                            className={`${
+                              isMobile
+                                ? 'flex-shrink-0 w-full snap-center p-4'
+                                : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                            }`}
+                          >
+                            <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
+                              <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                                <div className="px-4 pt-4">
+                                  <div className="flex justify-between text-sm mb-2">
+                                    <div className="text-gray-300">
+                                      <span className="font-semibold">From:</span> {msg.sender}
+                                    </div>
+                                    <div className="text-gray-300">
+                                      <span className="font-semibold">To:</span> {msg.recipient}
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">To:</span> {msg.recipient}
+                                <CarouselCard
+                                  recipient={msg.recipient || '-'}
+                                  sender={msg.sender || '-'}
+                                  message={msg.message || 'Pesan tidak tersedia'}
+                                  songTitle={msg.track?.title}
+                                  artist={msg.track?.artist}
+                                  coverUrl={msg.track?.cover_img}
+                                  spotifyEmbed={
+                                    msg.spotify_id && (
+                                      <div className="px-4 pb-4">
+                                        <iframe
+                                          className="w-full rounded-lg shadow-md"
+                                          src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                          width="100%"
+                                          height="80"
+                                          frameBorder="0"
+                                          allow="encrypted-media"
+                                        />
+                                      </div>
+                                    )
+                                  }
+                                />
+                                <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                                  <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                                  <p className="text-sm text-white text-center mt-2">
+                                    {getFormattedDate(msg.created_at)}
+                                  </p>
                                 </div>
                               </div>
-                            </div>
-                            <CarouselCard
-                              recipient={msg.recipient || '-'}
-                              sender={msg.sender || '-'}
-                              message={msg.message || 'Pesan tidak tersedia'}
-                              songTitle={msg.track?.title}
-                              artist={msg.track?.artist}
-                              coverUrl={msg.track?.cover_img}
-                              spotifyEmbed={
-                                msg.spotify_id && (
-                                  <div className="px-4 pb-4">
-                                    <iframe
-                                      className="w-full rounded-lg shadow-md"
-                                      src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
-                                      width="100%"
-                                      height="80"
-                                      frameBorder="0"
-                                      allow="encrypted-media"
-                                    />
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
+                    {currentSlide === 1 && (
+                      <>
+                        {recentlyAddedMessages.slice(5).map((msg) => (
+                          <motion.div
+                            key={msg.id}
+                            variants={cardVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            transition={{ duration: 0.3 }}
+                            className={`${
+                              isMobile
+                                ? 'flex-shrink-0 w-full snap-center p-4'
+                                : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
+                            }`}
+                          >
+                            <Link href={`/message/${msg.id}`} className="block h-full w-full p-4">
+                              <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                                <div className="px-4 pt-4">
+                                  <div className="flex justify-between text-sm mb-2">
+                                    <div className="text-gray-300">
+                                      <span className="font-semibold">From:</span> {msg.sender}
+                                    </div>
+                                    <div className="text-gray-300">
+                                      <span className="font-semibold">To:</span> {msg.recipient}
+                                    </div>
                                   </div>
-                                )
-                              }
-                            />
-                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text-white text-center mt-2">
-                                {getFormattedDate(msg.created_at)}
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
-                      </motion.div>
-                    ))}
+                                </div>
+                                <CarouselCard
+                                  recipient={msg.recipient || '-'}
+                                  sender={msg.sender || '-'}
+                                  message={msg.message || 'Pesan tidak tersedia'}
+                                  songTitle={msg.track?.title}
+                                  artist={msg.track?.artist}
+                                  coverUrl={msg.track?.cover_img}
+                                  spotifyEmbed={
+                                    msg.spotify_id && (
+                                      <div className="px-4 pb-4">
+                                        <iframe
+                                          className="w-full rounded-lg shadow-md"
+                                          src={`https://open.spotify.com/embed/track/${msg.spotify_id}`}
+                                          width="100%"
+                                          height="80"
+                                          frameBorder="0"
+                                          allow="encrypted-media"
+                                        />
+                                      </div>
+                                    )
+                                  }
+                                />
+                                <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                                  <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                                  <p className="text-sm text-white text-center mt-2">
+                                    {getFormattedDate(msg.created_at)}
+                                  </p>
+                                </div>
+                              </div>
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </>
+                    )}
                   </AnimatePresence>
                 </div>
 
