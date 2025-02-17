@@ -167,13 +167,7 @@ export default function MessagePage() {
                 Share on Twitter
               </a>
               <a
-                href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-700 hover:underline"
-              >
-                Share on LinkedIn
-              </a>
+          
               <button
                 onClick={shareOnInstagram}
                 className="text-pink-500 hover:underline"
