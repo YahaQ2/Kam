@@ -53,10 +53,12 @@ export default function MessagePage() {
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMessage = async () => {
       setIsLoading(true);
+      setError(null);
       try {
         const response = await fetch(
           `https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`
@@ -76,6 +78,7 @@ export default function MessagePage() {
         setMessage(messageData);
       } catch (error) {
         console.error("Error fetching message:", error);
+        setError(error.message);
         setMessage(null);
       } finally {
         setIsLoading(false);
@@ -93,6 +96,14 @@ export default function MessagePage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl font-semibold text-red-600">{error}</p>
+      </div>
+    );
+  }
+
   if (!message) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -106,7 +117,7 @@ export default function MessagePage() {
     .tz("Asia/Jakarta")
     .format("DD MMM YYYY, HH:mm");
 
-  const shareUrl = window.location.href;
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const shareText = `Check out this message: ${message.message}`;
 
   const handleShare = async () => {
