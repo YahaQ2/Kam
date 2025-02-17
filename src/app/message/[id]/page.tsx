@@ -166,7 +166,6 @@ export default function MessagePage() {
               >
                 Share on Twitter
               </a>
-              <a
           
               <button
                 onClick={shareOnInstagram}
