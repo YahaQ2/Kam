@@ -57,7 +57,6 @@ export default function HomePage() {
   const [showFlyingObject, setShowFlyingObject] = useState<'bird' | 'plane' | null>(null);
   const [currentMessage, setCurrentMessage] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const messageInterval = useRef<NodeJS.Timeout>();
   const carouselInterval = useRef<NodeJS.Timeout>();
@@ -131,8 +130,8 @@ export default function HomePage() {
           validMessages.sort((a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
-          const latestMessages = validMessages.slice(0, 5);
-          const randomMessages = shuffleArray(validMessages.slice(5));
+          const latestMessages = validMessages.slice(0, 1);
+          const randomMessages = shuffleArray(validMessages.slice(1));
           setRecentlyAddedMessages([...latestMessages, ...randomMessages]);
         } else {
           throw new Error("Format data tidak valid");
@@ -162,12 +161,11 @@ export default function HomePage() {
 
   useEffect(() => {
     const slideInterval = setInterval(() => {
-      setCurrentSlide((prevSlide) => (prevSlide + 1) % 6);
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % 5);
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % recentlyAddedMessages.length);
     }, 7000);
 
     return () => clearInterval(slideInterval);
-  }, []);
+  }, [recentlyAddedMessages.length]);
 
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
@@ -438,16 +436,14 @@ export default function HomePage() {
                 >
                   Ziwa - Cari Teman baru & fun space
                 </Link>
-              </Button
-              
-                       <Link
-            href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
-            className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
-          >
-            <span>saran/masukan/fitur baru</span>
-            <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-          </Link>
-              
+              </Button>
+
+              <Link
+                href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
+                className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
+              >
+                <span>saran/masukan/fitur baru</span>
+              </Link>
             </motion.div>
           </div>
         </section>
@@ -481,9 +477,9 @@ export default function HomePage() {
                   onScroll={handleScroll}
                 >
                   <AnimatePresence initial={false}>
-                    {currentSlide === 0 && (
+                    {recentlyAddedMessages.map((message, index) => (
                       <motion.div
-                        key={recentlyAddedMessages[currentIndex]?.id}
+                        key={message.id}
                         variants={cardVariants}
                         initial="hidden"
                         animate="visible"
@@ -495,31 +491,31 @@ export default function HomePage() {
                             : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
                         }`}
                       >
-                        <Link href={`/message/${recentlyAddedMessages[currentIndex]?.id}`} className="block h-full w-full p-4">
+                        <Link href={`/message/${message.id}`} className="block h-full w-full p-4">
                           <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
                             <div className="px-4 pt-4">
                               <div className="flex justify-between text-sm mb-2">
                                 <div className="text-gray-300">
-                                  <span className="font-semibold">From:</span> {recentlyAddedMessages[currentIndex]?.sender}
+                                  <span className="font-semibold">From:</span> {message.sender}
                                 </div>
                                 <div className="text-gray-300">
-                                  <span className="font-semibold">To:</span> {recentlyAddedMessages[currentIndex]?.recipient}
+                                  <span className="font-semibold">To:</span> {message.recipient}
                                 </div>
                               </div>
                             </div>
                             <CarouselCard
-                              recipient={recentlyAddedMessages[currentIndex]?.recipient || '-'}
-                              sender={recentlyAddedMessages[currentIndex]?.sender || '-'}
-                              message={recentlyAddedMessages[currentIndex]?.message || 'Pesan tidak tersedia'}
-                              songTitle={recentlyAddedMessages[currentIndex]?.track?.title}
-                              artist={recentlyAddedMessages[currentIndex]?.track?.artist}
-                              coverUrl={recentlyAddedMessages[currentIndex]?.track?.cover_img}
+                              recipient={message.recipient || '-'}
+                              sender={message.sender || '-'}
+                              message={message.message || 'Pesan tidak tersedia'}
+                              songTitle={message.track?.title}
+                              artist={message.track?.artist}
+                              coverUrl={message.track?.cover_img}
                               spotifyEmbed={
-                                recentlyAddedMessages[currentIndex]?.spotify_id && (
+                                message.spotify_id && (
                                   <div className="px-4 pb-4">
                                     <iframe
                                       className="w-full rounded-lg shadow-md"
-                                      src={`https://open.spotify.com/embed/track/${recentlyAddedMessages[currentIndex]?.spotify_id}`}
+                                      src={`https://open.spotify.com/embed/track/${message.spotify_id}`}
                                       width="100%"
                                       height="80"
                                       frameBorder="0"
@@ -532,71 +528,13 @@ export default function HomePage() {
                             <div className="p-4 bg-gray-700 rounded-b-2xl relative">
                               <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
                               <p className="text-sm text-white text-center mt-2">
-                                {getFormattedDate(recentlyAddedMessages[currentIndex]?.created_at)}
+                                {getFormattedDate(message.created_at)}
                               </p>
                             </div>
                           </div>
                         </Link>
                       </motion.div>
-                    )}
-                    {currentSlide > 0 && (
-                      <motion.div
-                        key={recentlyAddedMessages[currentSlide + 4]?.id}
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        transition={{ duration: 0.5 }}
-                        className={`${
-                          isMobile
-                            ? 'flex-shrink-0 w-full snap-center p-4'
-                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-                        }`}
-                      >
-                        <Link href={`/message/${recentlyAddedMessages[currentSlide + 4]?.id}`} className="block h-full w-full p-4">
-                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                            <div className="px-4 pt-4">
-                              <div className="flex justify-between text-sm mb-2">
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">From:</span> {recentlyAddedMessages[currentSlide + 4]?.sender}
-                                </div>
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">To:</span> {recentlyAddedMessages[currentSlide + 4]?.recipient}
-                                </div>
-                              </div>
-                            </div>
-                            <CarouselCard
-                              recipient={recentlyAddedMessages[currentSlide + 4]?.recipient || '-'}
-                              sender={recentlyAddedMessages[currentSlide + 4]?.sender || '-'}
-                              message={recentlyAddedMessages[currentSlide + 4]?.message || 'Pesan tidak tersedia'}
-                              songTitle={recentlyAddedMessages[currentSlide + 4]?.track?.title}
-                              artist={recentlyAddedMessages[currentSlide + 4]?.track?.artist}
-                              coverUrl={recentlyAddedMessages[currentSlide + 4]?.track?.cover_img}
-                              spotifyEmbed={
-                                recentlyAddedMessages[currentSlide + 4]?.spotify_id && (
-                                  <div className="px-4 pb-4">
-                                    <iframe
-                                      className="w-full rounded-lg shadow-md"
-                                      src={`https://open.spotify.com/embed/track/${recentlyAddedMessages[currentSlide + 4]?.spotify_id}`}
-                                      width="100%"
-                                      height="80"
-                                      frameBorder="0"
-                                      allow="encrypted-media"
-                                    />
-                                  </div>
-                                )
-                              }
-                            />
-                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text-white text-center mt-2">
-                                {getFormattedDate(recentlyAddedMessages[currentSlide + 4]?.created_at)}
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
-                      </motion.div>
-                    )}
+                    ))}
                   </AnimatePresence>
                 </div>
 
