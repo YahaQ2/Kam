@@ -439,13 +439,6 @@ export default function HomePage() {
                   Ziwa - Cari Teman baru & fun space
                 </Link>
               </Button>
-                       <Link
-            href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
-            className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
-          >
-            <span>saran/masukan/fitur baru</span>
-            <ArrowUpRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
-          </Link>
             </motion.div>
           </div>
         </section>
