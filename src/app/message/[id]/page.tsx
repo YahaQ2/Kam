@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useParams } from "next/router";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
