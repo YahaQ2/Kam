@@ -423,7 +423,7 @@ export default function HomePage() {
               </Button>
               <Button
                 asChild
-                className="border-2 border-gray-100 bg-transparent text-gray-100 hover:bg-gray-100/10 px-6 md:px-8 py-2.5 md:py-3 rounded-full transition-colors shadow-lg"
+                className="border-2 border-gray-100 bg-transparent text-gray-900 hover:bg-gray-100/10 px-6 md:px-8 py-2.5 md:py-3 rounded-full transition-colors shadow-lg"
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
