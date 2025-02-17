@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/router";
@@ -166,7 +168,7 @@ export default function MessagePage() {
               >
                 Share on Twitter
               </a>
-          
+
               <button
                 onClick={shareOnInstagram}
                 className="text-pink-500 hover:underline"
