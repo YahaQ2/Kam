@@ -1,12 +1,9 @@
-
-"use client";
-
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
-import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -99,6 +96,16 @@ export default function MessagePage() {
     .tz("Asia/Jakarta")
     .format("DD MMM YYYY, HH:mm");
 
+  const shareUrl = `https://yourwebsite.com/message/${id}`;
+  const shareMessage = encodeURIComponent(`Check out this message: ${message.message}`);
+
+  const shareOnInstagram = () => {
+    const imageUrl = message.gif_url; // Gambar yang akan dibagikan
+    const instagramUrl = `instagram://story?backgroundImageUrl=${encodeURIComponent(imageUrl)}`;
+
+    window.location.href = instagramUrl;
+  };
+
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
@@ -140,6 +147,38 @@ export default function MessagePage() {
             </div>
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
+            </div>
+            <div className="mt-6 flex justify-center space-x-4">
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                Share on Facebook
+              </a>
+              <a
+                href={`https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareMessage}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline"
+              >
+                Share on Twitter
+              </a>
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-700 hover:underline"
+              >
+                Share on LinkedIn
+              </a>
+              <button
+                onClick={shareOnInstagram}
+                className="text-pink-500 hover:underline"
+              >
+                Share on Instagram
+              </button>
             </div>
           </div>
         </div>
