@@ -39,9 +39,9 @@ const MOTIVATION_MESSAGES = [
   "Apa kabar,kamu inget ya bahagia dulu. masalahnya lupain dulu! 👋",
   "Cinta itu indah, tapi jangan lupa kuliah! 📚",
   "Tetap semangat dan jaga kesehatan! 💪",
-   "Aku percaya kamu bisa! selamat ya udah lewatin banyak tantangan di semester ini ",
-    "Capek ya! ututut tut..istirahat sebentar ya abis itu lanjut lagi💗",
- "Kamu keren udaah nyampe ke tahap ini tetap semangat ya! 💪",
+  "Aku percaya kamu bisa! selamat ya udah lewatin banyak tantangan di semester ini ",
+  "Capek ya! ututut tut..istirahat sebentar ya abis itu lanjut lagi💗",
+  "Kamu keren udaah nyampe ke tahap ini tetap semangat ya! 💪",
   "Jangan lupa minum air putih hari ini! 💧",
   "Ingat ya, kamu itu spesial dan hebat! ✨",
   "Hari ini adalah kesempatan baru untuk memulai hal baru",
@@ -194,6 +194,23 @@ export default function HomePage() {
     exit: { opacity: 0, scale: 0.8, rotate: 5 }
   };
 
+  const carouselVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 1000 : -1000,
+      opacity: 0
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? 1000 : -1000,
+      opacity: 0
+    })
+  };
+
   const renderTimeIcon = () => {
     const { isNight } = getTimeStatus();
 
@@ -217,25 +234,9 @@ export default function HomePage() {
               ease: "easeInOut"
             }}
           >
-            {/* Moon Core */}
-            <motion.span
-              className="text-4xl relative z-10 block"
-              animate={{
-                filter: [
-                  'brightness(1)',
-                  'brightness(1.2)',
-                  'brightness(1)'
-                ],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-              }}
-            >
+            <motion.span className="text-4xl relative z-10 block">
               🌙
             </motion.span>
-
-            {/* Moon Shine Effect */}
             <motion.div
               className="absolute inset-0 -z-0"
               initial={{ opacity: 0 }}
@@ -251,8 +252,6 @@ export default function HomePage() {
             >
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-yellow-300/30 rounded-full blur-[20px]" />
             </motion.div>
-
-            {/* Glow Effect */}
             <motion.div
               className="absolute inset-0"
               initial={{ scale: 0.8, opacity: 0 }}
@@ -281,7 +280,8 @@ export default function HomePage() {
   };
 
   const FlyingMessage = () => (
-    <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center">
+    <div className="fixed bottom typescript
+    -8 left-0 right-0 z-50 flex justify-center">
       <AnimatePresence>
         {showFlyingObject && (
           <motion.div
@@ -395,7 +395,7 @@ export default function HomePage() {
                   Menfess warga Unand
                   {getTimeStatus().isNight && (
                     <motion.span
-                      className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
+                      className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 bg- clip-text text-transparent"
                       animate={{ opacity: [0, 1, 0] }}
                       transition={{ repeat: Infinity, duration: 2 }}
                     />
@@ -472,37 +472,18 @@ export default function HomePage() {
                   className={`flex ${
                     isMobile
                       ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4'
-                      : 'overflow-hidden justify-center'
+                      : 'overflow-hidden justify-center h-[500px]'
                   }`}
                   onScroll={handleScroll}
                 >
-                  <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.map((message, index) => (
+                  {isMobile ? (
+                    recentlyAddedMessages.map((message) => (
                       <motion.div
                         key={message.id}
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        transition={{ duration: 0.5 }}
-                        className={`${
-                          isMobile
-                            ? 'flex-shrink-0 w-full snap-center p-4'
-                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-                        }`}
+                        className="flex-shrink-0 w-full snap-center p-4"
                       >
                         <Link href={`/message/${message.id}`} className="block h-full w-full p-4">
                           <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                            <div className="px-4 pt-4">
-                              <div className="flex justify-between text-sm mb-2">
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">From:</span> {message.sender}
-                                </div>
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">To:</span> {message.recipient}
-                                </div>
-                              </div>
-                            </div>
                             <CarouselCard
                               recipient={message.recipient || '-'}
                               sender={message.sender || '-'}
@@ -515,7 +496,7 @@ export default function HomePage() {
                                   <div className="px-4 pb-4">
                                     <iframe
                                       className="w-full rounded-lg shadow-md"
-                                      src={`https://open.spotify.com/embed/track/${message.spotify_id}`}
+                                      src={` https://open.spotify.com/embed/track/${message.spotify_id}`}
                                       width="100%"
                                       height="80"
                                       frameBorder="0"
@@ -534,8 +515,57 @@ export default function HomePage() {
                           </div>
                         </Link>
                       </motion.div>
-                    ))}
-                  </AnimatePresence>
+                    ))
+                  ) : (
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.div
+                        key={currentSlide}
+                        custom={1}
+                        variants={carouselVariants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        transition={{ duration: 0.8 }}
+                        className="flex-shrink-0 w-full md:w-[400px]"
+                      >
+                        <Link 
+                          href={`/message/${recentlyAddedMessages[currentSlide]?.id}`} 
+                          className="block h-full w-full p-4"
+                        >
+                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <CarouselCard
+                              recipient={recentlyAddedMessages[currentSlide].recipient || '-'}
+                              sender={recentlyAddedMessages[currentSlide].sender || '-'}
+                              message={recentlyAddedMessages[currentSlide].message || 'Pesan tidak tersedia'}
+                              songTitle={recentlyAddedMessages[currentSlide].track?.title}
+                              artist={recentlyAddedMessages[currentSlide].track?.artist}
+                              coverUrl={recentlyAddedMessages[currentSlide].track?.cover_img}
+                              spotifyEmbed={
+                                recentlyAddedMessages[currentSlide].spotify_id && (
+                                  <div className="px-4 pb-4">
+                                    <iframe
+                                      className="w-full rounded-lg shadow-md"
+                                      src={`https://open.spotify.com/embed/track/${recentlyAddedMessages[currentSlide].spotify_id}`}
+                                      width="100%"
+                                      height="80"
+                                      frameBorder="0"
+                                      allow="encrypted-media"
+                                    />
+                                  </div>
+                                )
+                              }
+                            />
+                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
+                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+                              <p className="text-sm text-white text-center mt-2">
+                                {getFormattedDate(recentlyAddedMessages[currentSlide].created_at)}
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
+                      </motion.div>
+                    </AnimatePresence>
+                  )}
                 </div>
 
                 {isMobile && (
