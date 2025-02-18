@@ -1,5 +1,6 @@
 "use client";
 
+import { Helmet } from 'react-helmet-async';
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { Loader2 } from "lucide-react";
+import { Loader2, Twitter, Facebook, Link2, MessageCircle, Instagram } from "lucide-react";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -37,31 +38,6 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
       loading="lazy"
     />
   );
-};
-
-// Fungsi untuk membagikan pesan
-const shareMessage = (platform: string, message: string) => {
-  const encodedMessage = encodeURIComponent(message);
-  let url;
-
-  switch (platform) {
-    case 'whatsapp':
-      url = `https://api.whatsapp.com/send?text=${encodedMessage}`;
-      break;
-    case 'facebook':
-      url = `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}&quote=${encodedMessage}`;
-      break;
-    case 'twitter':
-      url = `https://twitter.com/intent/tweet?text=${encodedMessage}&url=${window.location.href}`;
-      break;
-    case 'instagram':
-      alert("Silakan salin pesan ini untuk dibagikan di Instagram: " + message);
-      return;
-    default:
-      return;
-  }
-
-  window.open(url, '_blank');
 };
 
 export default function MessagePage() {
@@ -102,6 +78,31 @@ export default function MessagePage() {
     fetchMessage();
   }, [id]);
 
+  const handleShare = (platform: string) => {
+    const shareUrl = `https://unand.vercel.app/message/${id}`;
+    const shareText = `Check out this message I received: ${message?.message}`;
+    const imageUrl = `https://unand.vercel.app/api/og-image/${id}`;
+
+    switch (platform) {
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+        break;
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
+        break;
+      case 'whatsapp':
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+        break;
+      case 'instagram':
+        window.open(imageUrl, '_blank');
+        break;
+      case 'copy':
+        navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+        break;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -125,6 +126,15 @@ export default function MessagePage() {
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
+      <Helmet>
+        <title>Message for {message.recipient}</title>
+        <meta property="og:title" content={`Message for ${message.recipient}`} />
+        <meta property="og:description" content={message.message} />
+        <meta property="og:image" content={`https://unand.vercel.app/api/og-image/${id}`} />
+        <meta property="og:url" content={`https://unand.vercel.app/message/${id}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+      
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
         <Button
@@ -133,15 +143,6 @@ export default function MessagePage() {
         >
           Back
         </Button>
-
-        {/* Tombol Share */}
-        <div className="flex space-x-4 mb-8">
-          <Button onClick={() => shareMessage('whatsapp', message.message)} className="bg-green-500 text-white">Share to WhatsApp</Button>
-          <Button onClick={() => shareMessage('facebook', message.message)} className="bg-blue-600 text-white">Share to Facebook</Button>
-          <Button onClick={() => shareMessage('twitter', message.message)} className="bg-blue-400 text-white">Share to Twitter</Button>
-          <Button onClick={() => shareMessage('instagram', message.message)} className="bg-pink-500 text-white">Share to Instagram</Button>
-        </div>
-
         <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
             <div className="mb-6">
@@ -170,6 +171,45 @@ export default function MessagePage() {
                 </div>
               )}
               {message.spotify_id && <SpotifyEmbed trackId={message.spotify_id} />}
+            </div>
+            <div className="mt-6 flex items-center justify-between">
+              <div className="flex space-x-4">
+                <Button
+                  onClick={() => handleShare('whatsapp')}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  WhatsApp
+                </Button>
+                <Button
+                  onClick={() => handleShare('facebook')}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Facebook className="w-4 h-4 mr-2" />
+                  Facebook
+                </Button>
+                <Button
+                  onClick={() => handleShare('twitter')}
+                  className="bg-blue-400 hover:bg-blue-500"
+                >
+                  <Twitter className="w-4 h-4 mr-2" />
+                  Twitter
+                </Button>
+                <Button
+                  onClick={() => handleShare('instagram')}
+                  className="bg-pink-600 hover:bg-pink-700"
+                >
+                  <Instagram className="w-4 h-4 mr-2" />
+                  Instagram
+                </Button>
+                <Button
+                  onClick={() => handleShare('copy')}
+                  variant="outline"
+                >
+                  <Link2 className="w-4 h-4 mr-2" />
+                  Copy Link
+                </Button>
+              </div>
             </div>
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
