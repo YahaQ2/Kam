@@ -36,4 +36,19 @@ export async function GET(request: Request, { params }: { params: { id: string }
               <img
                 src={`https://i.scdn.co/image/${message.spotify_id}`}
                 alt="Spotify Track"
-                width
+                width={300}
+                height={300}
+              />
+            </div>
+          )}
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+      }
+    );
+  } catch (error) {
+    return new Response(`Failed to generate image: ${error}`, { status: 500 });
+  }
+}
