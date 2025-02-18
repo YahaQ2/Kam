@@ -32,7 +32,7 @@ type MessageType = {
   created_at: string;
 };
 
-const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
+const SpotifyEmbed = ({ trackId }: { trackId?: string }) => {
   if (!trackId) return null;
 
   return (
@@ -49,7 +49,8 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
 
 export default function MessagePage() {
   const router = useRouter();
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id as string;
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
@@ -59,26 +60,37 @@ export default function MessagePage() {
     const fetchMessage = async () => {
       setIsLoading(true);
       setError(null);
+      
+      if (!id) {
+        setError("Invalid message ID");
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch(
           `https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`
         );
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`Failed to fetch: ${response.status}`);
         }
 
         const data = await response.json();
 
         if (!data?.status || !data?.data?.[0]) {
-          throw new Error("Invalid data format");
+          throw new Error("Invalid data format from server");
         }
 
-        const messageData = data.data[0];
+        const messageData = data.data[0] as MessageType;
         setMessage(messageData);
-      } catch (error) {
-        console.error("Error fetching message:", error);
-        setError(error.message);
+      } catch (err) {
+        console.error("Error fetching message:", err);
+        setError(
+          err instanceof Error 
+            ? err.message 
+            : "Failed to fetch message"
+        );
         setMessage(null);
       } finally {
         setIsLoading(false);
@@ -121,20 +133,22 @@ export default function MessagePage() {
   const shareText = `Check out this message: ${message.message}`;
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
+    try {
+      if (navigator.share) {
         await navigator.share({
           title: "Shared Message",
           text: shareText,
           url: shareUrl,
         });
-      } catch (error) {
-        console.error("Error sharing:", error);
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Link copied to clipboard!");
+      } else {
+        throw new Error("Sharing not supported");
       }
-    } else {
-      // Fallback for copying link to clipboard
-      await navigator.clipboard.writeText(shareUrl);
-      alert("Link copied to clipboard!");
+    } catch (err) {
+      console.error("Sharing failed:", err);
+      alert("Failed to share message");
     }
   };
 
@@ -190,7 +204,10 @@ export default function MessagePage() {
               <WhatsappShareButton url={shareUrl} title={shareText}>
                 <WhatsappIcon size={32} round />
               </WhatsappShareButton>
-              <Button onClick={handleShare} className="bg-gray-800 text-white hover:bg-gray-900">
+              <Button 
+                onClick={handleShare} 
+                className="bg-gray-800 text-white hover:bg-gray-900"
+              >
                 Share
               </Button>
             </div>
