@@ -10,14 +10,6 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { Loader2 } from "lucide-react";
-import {
-  FacebookShareButton,
-  TwitterShareButton,
-  WhatsappShareButton,
-  FacebookIcon,
-  TwitterIcon,
-  WhatsappIcon,
-} from "react-share";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -32,7 +24,7 @@ type MessageType = {
   created_at: string;
 };
 
-const SpotifyEmbed = ({ trackId }: { trackId?: string }) => {
+const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
   if (!trackId) return null;
 
   return (
@@ -47,50 +39,60 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string }) => {
   );
 };
 
+// Fungsi untuk membagikan pesan
+const shareMessage = (platform: string, message: string) => {
+  const encodedMessage = encodeURIComponent(message);
+  let url;
+
+  switch (platform) {
+    case 'whatsapp':
+      url = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+      break;
+    case 'facebook':
+      url = `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}&quote=${encodedMessage}`;
+      break;
+    case 'twitter':
+      url = `https://twitter.com/intent/tweet?text=${encodedMessage}&url=${window.location.href}`;
+      break;
+    case 'instagram':
+      alert("Silakan salin pesan ini untuk dibagikan di Instagram: " + message);
+      return;
+    default:
+      return;
+  }
+
+  window.open(url, '_blank');
+};
+
 export default function MessagePage() {
   const router = useRouter();
-  const params = useParams();
-  const id = params?.id as string;
+  const { id } = useParams();
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMessage = async () => {
       setIsLoading(true);
-      setError(null);
-      
-      if (!id) {
-        setError("Invalid message ID");
-        setIsLoading(false);
-        return;
-      }
-
       try {
         const response = await fetch(
           `https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`
         );
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch: ${response.status}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
 
         if (!data?.status || !data?.data?.[0]) {
-          throw new Error("Invalid data format from server");
+          throw new Error("Invalid data format");
         }
 
-        const messageData = data.data[0] as MessageType;
+        const messageData = data.data[0];
         setMessage(messageData);
-      } catch (err) {
-        console.error("Error fetching message:", err);
-        setError(
-          err instanceof Error 
-            ? err.message 
-            : "Failed to fetch message"
-        );
+      } catch (error) {
+        console.error("Error fetching message:", error);
         setMessage(null);
       } finally {
         setIsLoading(false);
@@ -108,14 +110,6 @@ export default function MessagePage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl font-semibold text-red-600">{error}</p>
-      </div>
-    );
-  }
-
   if (!message) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -129,29 +123,6 @@ export default function MessagePage() {
     .tz("Asia/Jakarta")
     .format("DD MMM YYYY, HH:mm");
 
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const shareText = `Check out this message: ${message.message}`;
-
-  const handleShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: "Shared Message",
-          text: shareText,
-          url: shareUrl,
-        });
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(shareUrl);
-        alert("Link copied to clipboard!");
-      } else {
-        throw new Error("Sharing not supported");
-      }
-    } catch (err) {
-      console.error("Sharing failed:", err);
-      alert("Failed to share message");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
@@ -162,6 +133,15 @@ export default function MessagePage() {
         >
           Back
         </Button>
+
+        {/* Tombol Share */}
+        <div className="flex space-x-4 mb-8">
+          <Button onClick={() => shareMessage('whatsapp', message.message)} className="bg-green-500 text-white">Share to WhatsApp</Button>
+          <Button onClick={() => shareMessage('facebook', message.message)} className="bg-blue-600 text-white">Share to Facebook</Button>
+          <Button onClick={() => shareMessage('twitter', message.message)} className="bg-blue-400 text-white">Share to Twitter</Button>
+          <Button onClick={() => shareMessage('instagram', message.message)} className="bg-pink-500 text-white">Share to Instagram</Button>
+        </div>
+
         <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
             <div className="mb-6">
@@ -193,23 +173,6 @@ export default function MessagePage() {
             </div>
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
-            </div>
-            <div className="mt-6 flex justify-center space-x-4">
-              <FacebookShareButton url={shareUrl} quote={shareText}>
-                <FacebookIcon size={32} round />
-              </FacebookShareButton>
-              <TwitterShareButton url={shareUrl} title={shareText}>
-                <TwitterIcon size={32} round />
-              </TwitterShareButton>
-              <WhatsappShareButton url={shareUrl} title={shareText}>
-                <WhatsappIcon size={32} round />
-              </WhatsappShareButton>
-              <Button 
-                onClick={handleShare} 
-                className="bg-gray-800 text-white hover:bg-gray-900"
-              >
-                Share
-              </Button>
             </div>
           </div>
         </div>
