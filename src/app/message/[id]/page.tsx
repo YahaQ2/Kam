@@ -1,3 +1,5 @@
+"use client"; // Tambahkan directive ini di bagian atas file
+
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
