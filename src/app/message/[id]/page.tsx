@@ -5,22 +5,21 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { Loader2 } from "lucide-react";
+import { Loader2, Download, Copy, Share2 } from "lucide-react";
 import {
   FacebookShareButton,
   TwitterShareButton,
   WhatsappShareButton,
-  InstagramShareButton,
   FacebookIcon,
   TwitterIcon,
   WhatsappIcon,
-  InstagramIcon,
 } from "react-share";
 import { FaInstagram } from "react-icons/fa";
+import html2canvas from "html2canvas";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -57,6 +56,9 @@ export default function MessagePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isImageGenerated, setIsImageGenerated] = useState(false);
+  const [shareImageUrl, setShareImageUrl] = useState<string | null>(null);
+  const messageCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchMessage = async () => {
@@ -80,21 +82,23 @@ export default function MessagePage() {
         setMessage(messageData);
 
         // Update meta tags for social sharing
-        const metaTags = [
-          { property: 'og:title', content: `Pesan untuk ${messageData.recipient}` },
-          { property: 'og:description', content: messageData.message },
-          { property: 'og:image', content: messageData.gif_url },
-          { property: 'og:url', content: window.location.href },
-          { name: 'twitter:card', content: 'summary_large_image' },
-        ];
+        if (typeof window !== 'undefined') {
+          const metaTags = [
+            { property: 'og:title', content: `Pesan untuk ${messageData.recipient}` },
+            { property: 'og:description', content: messageData.message },
+            { property: 'og:image', content: messageData.gif_url },
+            { property: 'og:url', content: window.location.href },
+            { name: 'twitter:card', content: 'summary_large_image' },
+          ];
 
-        metaTags.forEach(tag => {
-          const element = document.querySelector(`meta[property="${tag.property}"]`) || 
-                         document.querySelector(`meta[name="${tag.property}"]`);
-          if (element) {
-            element.setAttribute('content', tag.content);
-          }
-        });
+          metaTags.forEach(tag => {
+            const element = document.querySelector(`meta[property="${tag.property}"]`) || 
+                          document.querySelector(`meta[name="${tag.property}"]`);
+            if (element) {
+              element.setAttribute('content', tag.content);
+            }
+          });
+        }
         
       } catch (error) {
         console.error("Error fetching message:", error);
@@ -111,6 +115,87 @@ export default function MessagePage() {
     navigator.clipboard.writeText(window.location.href);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const generateShareImage = async () => {
+    if (!messageCardRef.current) return;
+    
+    setIsLoading(true);
+    try {
+      // First, create a clone of the message card to modify for the image
+      const cardClone = messageCardRef.current.cloneNode(true) as HTMLDivElement;
+      
+      // Add styles specifically for the image version
+      cardClone.style.width = "600px";
+      cardClone.style.padding = "40px";
+      cardClone.style.backgroundColor = "#ffffff";
+      cardClone.style.borderRadius = "16px";
+      cardClone.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.1)";
+      
+      // Add a watermark/branding to the clone
+      const brandingDiv = document.createElement("div");
+      brandingDiv.style.textAlign = "center";
+      brandingDiv.style.marginTop = "20px";
+      brandingDiv.style.padding = "10px";
+      brandingDiv.style.fontFamily = "Arial, sans-serif";
+      brandingDiv.style.fontSize = "14px";
+      brandingDiv.style.color = "#888";
+      brandingDiv.textContent = "Dibagikan melalui unand.vercel.app";
+      cardClone.appendChild(brandingDiv);
+      
+      // Append clone to body temporarily (needed for html2canvas), but hide it
+      cardClone.style.position = "absolute";
+      cardClone.style.left = "-9999px";
+      document.body.appendChild(cardClone);
+      
+      // Use html2canvas to create an image
+      const canvas = await html2canvas(cardClone, {
+        scale: 2, // Higher resolution
+        useCORS: true, // Enable cross-origin image loading
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+      
+      // Remove the clone from the document
+      document.body.removeChild(cardClone);
+      
+      // Convert canvas to data URL
+      const dataUrl = canvas.toDataURL('image/png');
+      setShareImageUrl(dataUrl);
+      setIsImageGenerated(true);
+      
+    } catch (error) {
+      console.error("Error generating image:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const downloadShareImage = () => {
+    if (!shareImageUrl) return;
+    
+    const a = document.createElement('a');
+    a.href = shareImageUrl;
+    a.download = `pesan-untuk-${message?.recipient.replace(/\s+/g, '-')}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const shareToInstagram = () => {
+    if (!shareImageUrl) {
+      generateShareImage();
+      return;
+    }
+    
+    // For mobile devices
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      downloadShareImage();
+      alert("Gambar telah diunduh. Silakan bagikan ke Instagram secara manual.");
+    } else {
+      downloadShareImage();
+      alert("Gambar telah diunduh. Silakan bagikan ke Instagram secara manual.");
+    }
   };
 
   if (isLoading) {
@@ -147,7 +232,12 @@ export default function MessagePage() {
         >
           Kembali
         </Button>
-        <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        
+        {/* Message Card - This is what gets captured for sharing */}
+        <div 
+          ref={messageCardRef}
+          className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden"
+        >
           <div className="p-8">
             <div className="mb-6">
               <p className="text-sm text-gray-500">Untuk: {message.recipient}</p>
@@ -179,30 +269,92 @@ export default function MessagePage() {
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Dikirim pada: {formattedDate}</p>
             </div>
-            <div className="mt-6 flex justify-center space-x-4 items-center">
-              <FacebookShareButton url={shareUrl} quote={shareText}>
-                <FacebookIcon size={32} round />
-              </FacebookShareButton>
-              <TwitterShareButton url={shareUrl} title={shareText}>
-                <TwitterIcon size={32} round />
-              </TwitterShareButton>
-              <WhatsappShareButton url={shareUrl} title={shareText}>
-                <WhatsappIcon size={32} round />
-              </WhatsappShareButton>
-              
-              {/* Instagram Share Button */}
-<InstagramShareButton url={shareUrl} title={shareText}>
-                <InstagramIcon size={32} round />
-              </InstagramShareButton>
-              
-              {isCopied && (
-                <div className="absolute top-20 right-4 bg-green-100 text-green-800 px-4 py-2 rounded-md">
-                  Link berhasil disalin! 🎉
-                </div>
-              )}
+          </div>
+        </div>
+        
+        {/* Sharing Options */}
+        <div className="max-w-2xl mx-auto mt-8">
+          <h3 className="text-lg font-medium mb-4">Bagikan Pesan</h3>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {/* Regular Social Sharing */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3">Bagikan Link</h4>
+              <div className="flex space-x-3 mb-3">
+                <FacebookShareButton url={shareUrl} quote={shareText}>
+                  <FacebookIcon size={40} round />
+                </FacebookShareButton>
+                <TwitterShareButton url={shareUrl} title={shareText}>
+                  <TwitterIcon size={40} round />
+                </TwitterShareButton>
+                <WhatsappShareButton url={shareUrl} title={shareText}>
+                  <WhatsappIcon size={40} round />
+                </WhatsappShareButton>
+                <Button 
+                  onClick={handleCopyLink} 
+                  variant="outline" 
+                  size="icon"
+                >
+                  <Copy className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+            
+            {/* Instagram Image Sharing */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium mb-3">Bagikan ke Instagram</h4>
+              <div className="flex flex-col space-y-3">
+                {!isImageGenerated ? (
+                  <Button 
+                    onClick={generateShareImage} 
+                    className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <FaInstagram className="mr-2 h-4 w-4" />
+                    )}
+                    Buat Gambar untuk Instagram
+                  </Button>
+                ) : (
+                  <div className="flex flex-col space-y-3">
+                    <div className="border rounded-lg p-2 bg-white">
+                      <img 
+                        src={shareImageUrl || ''} 
+                        alt="Preview" 
+                        className="w-full h-auto rounded" 
+                      />
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={downloadShareImage}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Unduh Gambar
+                      </Button>
+                      <Button 
+                        onClick={shareToInstagram}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
+                      >
+                        <FaInstagram className="mr-2 h-4 w-4" />
+                        Bagikan ke Instagram
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
+        
+        {isCopied && (
+          <div className="fixed bottom-4 right-4 bg-green-100 text-green-800 px-4 py-2 rounded-md shadow-md">
+            Link berhasil disalin! 🎉
+          </div>
+        )}
       </main>
       <Footer />
     </div>
