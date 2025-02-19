@@ -14,9 +14,11 @@ import {
   FacebookShareButton,
   TwitterShareButton,
   WhatsappShareButton,
+  InstagramShareButton,
   FacebookIcon,
   TwitterIcon,
   WhatsappIcon,
+  InstagramIcon,
 } from "react-share";
 import { FaInstagram } from "react-icons/fa";
 
@@ -189,13 +191,9 @@ export default function MessagePage() {
               </WhatsappShareButton>
               
               {/* Instagram Share Button */}
-              <button
-                onClick={handleCopyLink}
-                className="cursor-pointer hover:opacity-75 transition-opacity"
-                title="Salin link untuk Instagram"
-              >
-                <FaInstagram size={32} className="text-pink-600 rounded-full" />
-              </button>
+<InstagramShareButton url={shareUrl} title={shareText}>
+                <InstagramIcon size={32} round />
+              </InstagramShareButton>
               
               {isCopied && (
                 <div className="absolute top-20 right-4 bg-green-100 text-green-800 px-4 py-2 rounded-md">
