@@ -33,6 +33,7 @@ interface MenfessResponse {
 }
 
 const VISIBLE_MESSAGES = 6;
+const CAROUSEL_DISPLAY_TIME = 7000; // 7 seconds per slide
 const MOTIVATION_MESSAGES = [
   "Semangat untuk hari ini kamu selalu luar biasa",
   "Kamu harus jaga kesehatan mu, tidurnya di jaga ya! 😊",
@@ -49,17 +50,26 @@ const MOTIVATION_MESSAGES = [
 ];
 
 export default function HomePage() {
-  const [recentlyAddedMessages, setRecentlyAddedMessages] = useState<Menfess[]>([]);
+  const [latestMessages, setLatestMessages] = useState<Menfess[]>([]);
+  const [randomMessages, setRandomMessages] = useState<Menfess[]>([]);
+  const [activeSlide, setActiveSlide] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentCard, setCurrentCard] = useState(0);
   const [showFlyingObject, setShowFlyingObject] = useState<'bird' | 'plane' | null>(null);
   const [currentMessage, setCurrentMessage] = useState("");
-  const [currentSlide, setCurrentSlide] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const messageInterval = useRef<NodeJS.Timeout>();
   const carouselInterval = useRef<NodeJS.Timeout>();
+  const allMessagesCache = useRef<Menfess[]>([]);
+
+  // Function to get a random message that isn't already in current displays
+  const getRandomUniqueMessage = (existingIds: Set<number>): Menfess | null => {
+    const availableMessages = allMessagesCache.current.filter(msg => !existingIds.has(msg.id));
+    if (availableMessages.length === 0) return null;
+    return availableMessages[Math.floor(Math.random() * availableMessages.length)];
+  };
 
   const shuffleArray = (array: Menfess[]) => {
     if (!array.length) return [];
@@ -127,12 +137,30 @@ export default function HomePage() {
 
         if (data?.status && Array.isArray(data.data)) {
           const validMessages = data.data.filter(validateMenfess);
+          
+          // Store all valid messages for later random selection
+          allMessagesCache.current = validMessages;
+          
+          // Sort to get latest messages
           validMessages.sort((a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
-          const latestMessages = validMessages.slice(0, 5);
-          const randomMessages = shuffleArray(validMessages.slice(5));
-          setRecentlyAddedMessages([...latestMessages, ...randomMessages]);
+          
+          // Get the 5 latest messages for first slide
+          const latest = validMessages.slice(0, 5);
+          setLatestMessages(latest);
+          
+          // Prepare 5 unique random messages for slides 2-6 (one per slide)
+          const latestIds = new Set(latest.map(msg => msg.id));
+          const randomMsgs: Menfess[] = [];
+          
+          for (let i = 0; i < 5; i++) {
+            const currentIds = new Set([...latestIds, ...randomMsgs.map(msg => msg.id)]);
+            const randomMsg = getRandomUniqueMessage(currentIds);
+            if (randomMsg) randomMsgs.push(randomMsg);
+          }
+          
+          setRandomMessages(randomMsgs);
         } else {
           throw new Error("Format data tidak valid");
         }
@@ -159,28 +187,39 @@ export default function HomePage() {
     };
   }, []);
 
+  // Setup carousel rotation
   useEffect(() => {
-    const slideInterval = setInterval(() => {
-      setCurrentSlide((prevSlide) => (prevSlide + 1) % VISIBLE_MESSAGES);
-    }, 7000);
-
-    return () => clearInterval(slideInterval);
-  }, [recentlyAddedMessages.length]);
-
+    if (loading || latestMessages.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % VISIBLE_MESSAGES);
+    }, CAROUSEL_DISPLAY_TIME);
+    
+    return () => clearInterval(interval);
+  }, [loading, latestMessages.length]);
+  
+  // Update random messages when we complete a full cycle
   useEffect(() => {
-    if (currentSlide === 0) {
-      setRecentlyAddedMessages((prevMessages) => {
-        const latestMessages = prevMessages.slice(0, 5);
-        const randomMessages = shuffleArray(prevMessages.slice(5));
-        return [...latestMessages, ...randomMessages];
-      });
-    } else {
-      setRecentlyAddedMessages((prevMessages) => {
-        const randomMessages = shuffleArray(prevMessages.slice(5));
-        return [...prevMessages.slice(0, 5), ...randomMessages];
-      });
+    if (activeSlide === 0 && allMessagesCache.current.length > 5) {
+      // If we've come back to the first slide, refresh our random messages
+      const latestIds = new Set(latestMessages.map(msg => msg.id));
+      const newRandomMsgs: Menfess[] = [];
+      
+      for (let i = 0; i < 5; i++) {
+        const currentIds = new Set([
+          ...latestIds, 
+          ...newRandomMsgs.map(msg => msg.id)
+        ]);
+        const randomMsg = getRandomUniqueMessage(currentIds);
+        if (randomMsg) newRandomMsgs.push(randomMsg);
+      }
+      
+      // Only update if we actually got new messages
+      if (newRandomMsgs.length > 0) {
+        setRandomMessages(newRandomMsgs);
+      }
     }
-  }, [currentSlide]);
+  }, [activeSlide, latestMessages]);
 
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
@@ -198,15 +237,44 @@ export default function HomePage() {
     }
   };
 
+  // Get the current message to display based on active slide
+  const getCurrentDisplayMessage = (): Menfess | null => {
+    if (activeSlide === 0) {
+      // Show all latest messages on slide 0
+      return null;
+    } else {
+      // Show individual random message on slides 1-5
+      const randomIndex = activeSlide - 1;
+      return randomIndex < randomMessages.length ? randomMessages[randomIndex] : null;
+    }
+  };
+
+  // Animation variants
   const cardVariants = {
-    hidden: { opacity: 0, scale: 0.8, rotate: -5 },
+    hidden: { opacity: 0, scale: 0.8, y: 20 },
     visible: {
       opacity: 1,
       scale: 1,
-      rotate: 0,
-      transition: { type: 'spring', stiffness: 120 }
+      y: 0,
+      transition: { type: 'spring', stiffness: 100, damping: 12 }
     },
-    exit: { opacity: 0, scale: 0.8, rotate: 5 }
+    exit: { 
+      opacity: 0, 
+      scale: 0.9, 
+      y: -20,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.1
+      }
+    }
   };
 
   const renderTimeIcon = () => {
@@ -370,6 +438,110 @@ export default function HomePage() {
     </>
   );
 
+  // Renders the appropriate cards based on the active slide
+  const renderCarouselContent = () => {
+    if (activeSlide === 0) {
+      // First slide shows 5 latest messages
+      return (
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          key="latest-messages"
+        >
+          {latestMessages.map((message, index) => (
+            <motion.div
+              key={`latest-${message.id}`}
+              variants={cardVariants}
+              className={`${index === 0 ? 'md:col-span-3' : 'md:col-span-1'}`}
+            >
+              <MessageCard message={message} />
+            </motion.div>
+          ))}
+        </motion.div>
+      );
+    } else {
+      // Other slides show 1 random message each
+      const randomIndex = activeSlide - 1;
+      const message = randomIndex < randomMessages.length ? randomMessages[randomIndex] : null;
+      
+      if (!message) return <div className="text-gray-300">No message available</div>;
+      
+      return (
+        <motion.div
+          key={`random-${message.id}`}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="mx-auto max-w-md"
+        >
+          <MessageCard message={message} featured={true} />
+        </motion.div>
+      );
+    }
+  };
+
+  // Component for individual message cards
+  const MessageCard = ({ message, featured = false }: { message: Menfess, featured?: boolean }) => (
+    <Link href={`/message/${message.id}`} className="block h-full">
+      <motion.div 
+        className={`h-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden ${
+          featured ? 'scale-105' : ''
+        }`}
+        whileHover={{ scale: featured ? 1.08 : 1.05 }}
+        transition={{ type: "spring", stiffness: 300 }}
+      >
+        <div className="px-4 pt-4">
+          <div className="flex justify-between text-sm mb-2">
+            <div className="text-gray-300">
+              <span className="font-semibold">From:</span> {message.sender}
+            </div>
+            <div className="text-gray-300">
+              <span className="font-semibold">To:</span> {message.recipient}
+            </div>
+          </div>
+        </div>
+        
+        <CarouselCard
+          recipient={message.recipient || '-'}
+          sender={message.sender || '-'}
+          message={message.message || 'Pesan tidak tersedia'}
+          songTitle={message.track?.title}
+          artist={message.track?.artist}
+          coverUrl={message.track?.cover_img}
+          spotifyEmbed={
+            message.spotify_id && (
+              <div className="px-4 pb-4">
+                <iframe
+                  className="w-full rounded-lg shadow-md"
+                  src={`https://open.spotify.com/embed/track/${message.spotify_id}`}
+                  width="100%"
+                  height="80"
+                  frameBorder="0"
+                  allow="encrypted-media"
+                />
+              </div>
+            )
+          }
+        />
+        
+        <motion.div 
+          className="p-4 bg-gray-700 rounded-b-2xl relative"
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
+          <p className="text-sm text-white text-center mt-2">
+            {getFormattedDate(message.created_at)}
+          </p>
+        </motion.div>
+      </motion.div>
+    </Link>
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
       <InitialAnimation />
@@ -475,98 +647,44 @@ export default function HomePage() {
             </div>
 
             {loading ? (
-              <div className="h-40 flex items-center justify-center text-gray-300">Memuat...</div>
+              <div className="h-40 flex items-center justify-center text-gray-300">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full"
+                />
+              </div>
             ) : error ? (
               <p className="text-red-500 text-center">{error}</p>
-            ) : recentlyAddedMessages.length === 0 ? (
+            ) : latestMessages.length === 0 ? (
               <p className="text-gray-300 text-center">Tidak ada pesan terbaru</p>
             ) : (
-              <div className="relative">
-                <div
-                  ref={containerRef}
-                  className={`flex ${
-                    isMobile
-                      ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4'
-                      : 'overflow-hidden justify-center'
-                  }`}
-                  onScroll={handleScroll}
-                >
-                  <AnimatePresence initial={false}>
-                    {recentlyAddedMessages.map((message, index) => (
-                      <motion.div
-                        key={message.id}
-                        variants={cardVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        transition={{ duration: 0.5 }}
-                        className={`${
-                          isMobile
-                            ? 'flex-shrink-0 w-full snap-center p-4'
-                            : 'flex-shrink-0 w-full md:w-[400px] transition-transform duration-300'
-                        }`}
-                      >
-                        <Link href={`/message/${message.id}`} className="block h-full w-full p-4">
-                          <div className="h-full w-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                            <div className="px-4 pt-4">
-                              <div className="flex justify-between text-sm mb-2">
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">From:</span> {message.sender}
-                                </div>
-                                <div className="text-gray-300">
-                                  <span className="font-semibold">To:</span> {message.recipient}
-                                </div>
-                              </div>
-                            </div>
-                            <CarouselCard
-                              recipient={message.recipient || '-'}
-                              sender={message.sender || '-'}
-                              message={message.message || 'Pesan tidak tersedia'}
-                              songTitle={message.track?.title}
-                              artist={message.track?.artist}
-                              coverUrl={message.track?.cover_img}
-                              spotifyEmbed={
-                                message.spotify_id && (
-                                  <div className="px-4 pb-4">
-                                    <iframe
-                                      className="w-full rounded-lg shadow-md"
-                                      src={`https://open.spotify.com/embed/track/${message.spotify_id}`}
-                                      width="100%"
-                                      height="80"
-                                      frameBorder="0"
-                                      allow="encrypted-media"
-                                    />
-                                  </div>
-                                )
-                              }
-                            />
-                            <div className="p-4 bg-gray-700 rounded-b-2xl relative">
-                              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-                              <p className="text-sm text-white text-center mt-2">
-                                {getFormattedDate(message.created_at)}
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-
-                {isMobile && (
-                  <div className="flex justify-center space-x-2 mt-4">
-                    {recentlyAddedMessages.slice(0, VISIBLE_MESSAGES).map((_, index) => (
-                      <motion.div
-                        key={index}
-                        className={`h-2 w-2 rounded-full ${
-                          currentCard === index ? 'bg-gray-300' : 'bg-gray-600'
-                        }`}
-                        animate={{ scale: currentCard === index ? 1.2 : 1 }}
-                        transition={{ duration: 0.2 }}
-                      />
-                    ))}
+              <div className="relative max-w-6xl mx-auto px-4">
+                <AnimatePresence mode="wait">
+                  <div className="relative min-h-[400px]" key={`slide-${activeSlide}`}>
+                    {renderCarouselContent()}
                   </div>
-                )}
+                </AnimatePresence>
+                
+                {/* Pagination indicators */}
+                <div className="flex justify-center space-x-3 mt-12">
+                  {Array.from({ length: VISIBLE_MESSAGES }).map((_, index) => (
+                    <motion.button
+                      key={`indicator-${index}`}
+                      className={`h-3 rounded-full ${activeSlide === index ? 'w-8 bg-blue-500' : 'w-3 bg-gray-600'}`}
+                      onClick={() => setActiveSlide(index)}
+                      whileHover={{ scale: 1.2 }}
+                      animate={{ 
+                        scale: activeSlide === index ? [1, 1.1, 1] : 1,
+                        transition: { 
+                          duration: 1,
+                          repeat: activeSlide === index ? Infinity : 0,
+                          repeatType: "reverse"
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
