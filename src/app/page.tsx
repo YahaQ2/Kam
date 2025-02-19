@@ -39,9 +39,9 @@ const MOTIVATION_MESSAGES = [
   "Apa kabar,kamu inget ya bahagia dulu. masalahnya lupain dulu! 👋",
   "Cinta itu indah, tapi jangan lupa kuliah! 📚",
   "Tetap semangat dan jaga kesehatan! 💪",
-   "Aku percaya kamu bisa! selamat ya udah lewatin banyak tantangan di semester ini ",
-    "Capek ya! ututut tut..istirahat sebentar ya abis itu lanjut lagi💗",
- "Kamu keren udaah nyampe ke tahap ini tetap semangat ya! 💪",
+  "Aku percaya kamu bisa! selamat ya udah lewatin banyak tantangan di semester ini ",
+  "Capek ya! ututut tut..istirahat sebentar ya abis itu lanjut lagi💗",
+  "Kamu keren udaah nyampe ke tahap ini tetap semangat ya! 💪",
   "Jangan lupa minum air putih hari ini! 💧",
   "Ingat ya, kamu itu spesial dan hebat! ✨",
   "Hari ini adalah kesempatan baru untuk memulai hal baru",
@@ -130,8 +130,8 @@ export default function HomePage() {
           validMessages.sort((a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
-          const latestMessages = validMessages.slice(0, 1);
-          const randomMessages = shuffleArray(validMessages.slice(1));
+          const latestMessages = validMessages.slice(0, 5);
+          const randomMessages = shuffleArray(validMessages.slice(5));
           setRecentlyAddedMessages([...latestMessages, ...randomMessages]);
         } else {
           throw new Error("Format data tidak valid");
@@ -161,11 +161,26 @@ export default function HomePage() {
 
   useEffect(() => {
     const slideInterval = setInterval(() => {
-      setCurrentSlide((prevSlide) => (prevSlide + 1) % recentlyAddedMessages.length);
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % VISIBLE_MESSAGES);
     }, 7000);
 
     return () => clearInterval(slideInterval);
   }, [recentlyAddedMessages.length]);
+
+  useEffect(() => {
+    if (currentSlide === 0) {
+      setRecentlyAddedMessages((prevMessages) => {
+        const latestMessages = prevMessages.slice(0, 5);
+        const randomMessages = shuffleArray(prevMessages.slice(5));
+        return [...latestMessages, ...randomMessages];
+      });
+    } else {
+      setRecentlyAddedMessages((prevMessages) => {
+        const randomMessages = shuffleArray(prevMessages.slice(5));
+        return [...prevMessages.slice(0, 5), ...randomMessages];
+      });
+    }
+  }, [currentSlide]);
 
   const getTimeStatus = () => {
     const currentHour = new Date().getHours();
