@@ -2,7 +2,6 @@
 
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
@@ -19,6 +18,7 @@ import {
   TwitterIcon,
   WhatsappIcon,
 } from "react-share";
+import { FaInstagram } from "react-icons/fa";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -54,6 +54,7 @@ export default function MessagePage() {
   const [message, setMessage] = useState<MessageType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     const fetchMessage = async () => {
@@ -75,6 +76,24 @@ export default function MessagePage() {
 
         const messageData = data.data[0];
         setMessage(messageData);
+
+        // Update meta tags for social sharing
+        const metaTags = [
+          { property: 'og:title', content: `Pesan untuk ${messageData.recipient}` },
+          { property: 'og:description', content: messageData.message },
+          { property: 'og:image', content: messageData.gif_url },
+          { property: 'og:url', content: window.location.href },
+          { name: 'twitter:card', content: 'summary_large_image' },
+        ];
+
+        metaTags.forEach(tag => {
+          const element = document.querySelector(`meta[property="${tag.property}"]`) || 
+                         document.querySelector(`meta[name="${tag.property}"]`);
+          if (element) {
+            element.setAttribute('content', tag.content);
+          }
+        });
+        
       } catch (error) {
         console.error("Error fetching message:", error);
         setMessage(null);
@@ -85,6 +104,12 @@ export default function MessagePage() {
 
     fetchMessage();
   }, [id]);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
 
   if (isLoading) {
     return (
@@ -109,17 +134,9 @@ export default function MessagePage() {
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const shareText = `Lihat pesan ini: ${message.message}`;
-  const previewImageUrl = `https://your-image-generation-service.com/generate?message=${encodeURIComponent(message.message)}`;
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
-      <Head>
-        <title>{`Pesan dari ${message.sender}`}</title>
-        <meta property="og:title" content={`Pesan dari ${message.sender}`} />
-        <meta property="og:description" content={shareText} />
-        <meta property="og:image" content={previewImageUrl} />
-        <meta property="og:url" content={shareUrl} />
-      </Head>
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
         <Button
@@ -160,7 +177,7 @@ export default function MessagePage() {
             <div className="mt-4 text-right">
               <p className="text-sm text-gray-500">Dikirim pada: {formattedDate}</p>
             </div>
-            <div className="mt-6 flex justify-center space-x-4">
+            <div className="mt-6 flex justify-center space-x-4 items-center">
               <FacebookShareButton url={shareUrl} quote={shareText}>
                 <FacebookIcon size={32} round />
               </FacebookShareButton>
@@ -170,6 +187,21 @@ export default function MessagePage() {
               <WhatsappShareButton url={shareUrl} title={shareText}>
                 <WhatsappIcon size={32} round />
               </WhatsappShareButton>
+              
+              {/* Instagram Share Button */}
+              <button
+                onClick={handleCopyLink}
+                className="cursor-pointer hover:opacity-75 transition-opacity"
+                title="Salin link untuk Instagram"
+              >
+                <FaInstagram size={32} className="text-pink-600 rounded-full" />
+              </button>
+              
+              {isCopied && (
+                <div className="absolute top-20 right-4 bg-green-100 text-green-800 px-4 py-2 rounded-md">
+                  Link berhasil disalin! 🎉
+                </div>
+              )}
             </div>
           </div>
         </div>
