@@ -1,7 +1,8 @@
-"use client"; // Tambahkan directive ini di bagian atas file
+"use client";
 
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
+import Head from "next/head";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
@@ -108,9 +109,17 @@ export default function MessagePage() {
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const shareText = `Lihat pesan ini: ${message.message}`;
+  const previewImageUrl = `https://your-image-generation-service.com/generate?message=${encodeURIComponent(message.message)}`;
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
+      <Head>
+        <title>{`Pesan dari ${message.sender}`}</title>
+        <meta property="og:title" content={`Pesan dari ${message.sender}`} />
+        <meta property="og:description" content={shareText} />
+        <meta property="og:image" content={previewImageUrl} />
+        <meta property="og:url" content={shareUrl} />
+      </Head>
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
         <Button
