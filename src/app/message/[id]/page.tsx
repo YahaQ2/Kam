@@ -5,21 +5,12 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/ui/navbar"
 import { Footer } from "@/components/ui/footer"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone"
-import { Loader2, Download, Copy } from "lucide-react"
-import {
-  FacebookShareButton,
-  TwitterShareButton,
-  WhatsappShareButton,
-  FacebookIcon,
-  TwitterIcon,
-  WhatsappIcon,
-} from "react-share"
-import { FaInstagram } from "react-icons/fa"
-import html2canvas from "html2canvas"
+import { Loader2, Twitter, Facebook, Link2, MessageCircle, Instagram } from "lucide-react"
+import { Helmet } from "react-helmet-async"
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -55,10 +46,6 @@ export default function MessagePage() {
   const [message, setMessage] = useState<MessageType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
-  const [isImageGenerated, setIsImageGenerated] = useState(false)
-  const [shareImageUrl, setShareImageUrl] = useState<string | null>(null)
-  const messageCardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const fetchMessage = async () => {
@@ -78,29 +65,6 @@ export default function MessagePage() {
 
         const messageData = data.data[0]
         setMessage(messageData)
-
-        // Update meta tags for social sharing
-        if (typeof window !== "undefined") {
-          const metaTags = [
-            { property: "og:title", content: `Pesan untuk ${messageData.recipient}` },
-            { property: "og:description", content: messageData.message },
-            { property: "og:image", content: messageData.gif_url },
-            { property: "og:url", content: window.location.href },
-            { name: "twitter:card", content: "summary_large_image" },
-          ]
-
-          metaTags.forEach((tag) => {
-            let element =
-              document.querySelector(`meta[property="${tag.property}"]`) ||
-              document.querySelector(`meta[name="${tag.name}"]`)
-            if (!element) {
-              element = document.createElement("meta")
-              element.setAttribute(tag.property ? "property" : "name", tag.property || tag.name)
-              document.head.appendChild(element)
-            }
-            element.setAttribute("content", tag.content)
-          })
-        }
       } catch (error) {
         console.error("Error fetching message:", error)
         setMessage(null)
@@ -112,77 +76,32 @@ export default function MessagePage() {
     fetchMessage()
   }, [id])
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href)
-    setIsCopied(true)
-    setTimeout(() => setIsCopied(false), 2000)
-  }
+  const handleShare = (platform: string) => {
+    const shareUrl = `https://unand.vercel.app/message/${id}`
+    const shareText = `Check out this message I received: ${message?.message}`
+    const imageUrl = `https://unand.vercel.app/api/og-image/${id}`
 
-  const generateShareImage = async () => {
-    if (!messageCardRef.current) return
-
-    setIsLoading(true)
-    try {
-      const cardClone = messageCardRef.current.cloneNode(true) as HTMLDivElement
-
-      cardClone.style.width = "600px"
-      cardClone.style.padding = "40px"
-      cardClone.style.backgroundColor = "#ffffff"
-      cardClone.style.borderRadius = "16px"
-      cardClone.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.1)"
-
-      const brandingDiv = document.createElement("div")
-      brandingDiv.style.textAlign = "center"
-      brandingDiv.style.marginTop = "20px"
-      brandingDiv.style.padding = "10px"
-      brandingDiv.style.fontFamily = "Arial, sans-serif"
-      brandingDiv.style.fontSize = "14px"
-      brandingDiv.style.color = "#888"
-      brandingDiv.textContent = "Dibagikan melalui unand.vercel.app"
-      cardClone.appendChild(brandingDiv)
-
-      cardClone.style.position = "absolute"
-      cardClone.style.left = "-9999px"
-      document.body.appendChild(cardClone)
-
-      const canvas = await html2canvas(cardClone, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-      })
-
-      document.body.removeChild(cardClone)
-
-      const dataUrl = canvas.toDataURL("image/png")
-      setShareImageUrl(dataUrl)
-      setIsImageGenerated(true)
-    } catch (error) {
-      console.error("Error generating image:", error)
-    } finally {
-      setIsLoading(false)
+    switch (platform) {
+      case "twitter":
+        window.open(
+          `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+          "_blank",
+        )
+        break
+      case "facebook":
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, "_blank")
+        break
+      case "whatsapp":
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`, "_blank")
+        break
+      case "instagram":
+        window.open(imageUrl, "_blank")
+        break
+      case "copy":
+        navigator.clipboard.writeText(shareUrl)
+        alert("Link copied to clipboard!")
+        break
     }
-  }
-
-  const downloadShareImage = () => {
-    if (!shareImageUrl) return
-
-    const a = document.createElement("a")
-    a.href = shareImageUrl
-    a.download = `pesan-untuk-${message?.recipient.replace(/\s+/g, "-")}.png`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-  }
-
-  const shareToInstagram = () => {
-    if (!shareImageUrl) {
-      generateShareImage()
-      return
-    }
-
-    downloadShareImage()
-    alert("Gambar telah diunduh. Silakan bagikan ke Instagram secara manual.")
   }
 
   if (isLoading) {
@@ -196,29 +115,34 @@ export default function MessagePage() {
   if (!message) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl font-semibold text-gray-600">Pesan tidak ditemukan</p>
+        <p className="text-xl font-semibold text-gray-600">Message not found</p>
       </div>
     )
   }
 
   const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm")
 
-  const shareUrl = typeof window !== "undefined" ? window.location.href : ""
-  const shareText = `Lihat pesan ini: ${message.message}`
-
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
+      <Helmet>
+        <title>Message for {message.recipient}</title>
+        <meta property="og:title" content={`Message for ${message.recipient}`} />
+        <meta property="og:description" content={message.message} />
+        <meta property="og:image" content={`https://unand.vercel.app/api/og-image/${id}`} />
+        <meta property="og:url" content={`https://unand.vercel.app/message/${id}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
         <Button onClick={() => router.back()} className="mb-8 bg-gray-800 text-white hover:bg-gray-900">
-          Kembali
+          Back
         </Button>
-
-        <div ref={messageCardRef} className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
             <div className="mb-6">
-              <p className="text-sm text-gray-500">Untuk: {message.recipient}</p>
-              <p className="text-sm text-gray-500">Dari: {message.sender}</p>
+              <p className="text-sm text-gray-500">To: {message.recipient}</p>
+              <p className="text-sm text-gray-500">From: {message.sender}</p>
             </div>
             <div className="border-t border-b border-gray-200 py-6">
               <p className="text-sm text-gray-500 italic">
@@ -229,7 +153,7 @@ export default function MessagePage() {
                 <div className="w-[240px] h-[240px] mx-auto my-6 relative">
                   <Image
                     src={message.gif_url || "/placeholder.svg"}
-                    alt="Hadiah dari pengirim"
+                    alt="Gift from sender"
                     fill
                     className="rounded-lg object-cover"
                     onError={() => setImageError(true)}
@@ -239,80 +163,35 @@ export default function MessagePage() {
               )}
               {message.spotify_id && <SpotifyEmbed trackId={message.spotify_id} />}
             </div>
-            <div className="mt-4 text-right">
-              <p className="text-sm text-gray-500">Dikirim pada: {formattedDate}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-2xl mx-auto mt-8">
-          <h3 className="text-lg font-medium mb-4">Bagikan Pesan</h3>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium mb-3">Bagikan Link</h4>
-              <div className="flex space-x-3 mb-3">
-                <FacebookShareButton url={shareUrl} quote={shareText}>
-                  <FacebookIcon size={40} round />
-                </FacebookShareButton>
-                <TwitterShareButton url={shareUrl} title={shareText}>
-                  <TwitterIcon size={40} round />
-                </TwitterShareButton>
-                <WhatsappShareButton url={shareUrl} title={shareText}>
-                  <WhatsappIcon size={40} round />
-                </WhatsappShareButton>
-                <Button onClick={handleCopyLink} variant="outline" size="icon">
-                  <Copy className="h-5 w-5" />
+            <div className="mt-6 flex items-center justify-between">
+              <div className="flex space-x-4">
+                <Button onClick={() => handleShare("whatsapp")} className="bg-green-600 hover:bg-green-700">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  WhatsApp
+                </Button>
+                <Button onClick={() => handleShare("facebook")} className="bg-blue-600 hover:bg-blue-700">
+                  <Facebook className="w-4 h-4 mr-2" />
+                  Facebook
+                </Button>
+                <Button onClick={() => handleShare("twitter")} className="bg-blue-400 hover:bg-blue-500">
+                  <Twitter className="w-4 h-4 mr-2" />
+                  Twitter
+                </Button>
+                <Button onClick={() => handleShare("instagram")} className="bg-pink-600 hover:bg-pink-700">
+                  <Instagram className="w-4 h-4 mr-2" />
+                  Instagram
+                </Button>
+                <Button onClick={() => handleShare("copy")} variant="outline">
+                  <Link2 className="w-4 h-4 mr-2" />
+                  Copy Link
                 </Button>
               </div>
             </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium mb-3">Bagikan ke Instagram</h4>
-              <div className="flex flex-col space-y-3">
-                {!isImageGenerated ? (
-                  <Button
-                    onClick={generateShareImage}
-                    className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <FaInstagram className="mr-2 h-4 w-4" />
-                    )}
-                    Buat Gambar untuk Instagram
-                  </Button>
-                ) : (
-                  <div className="flex flex-col space-y-3">
-                    <div className="border rounded-lg p-2 bg-white">
-                      <img src={shareImageUrl || ""} alt="Preview" className="w-full h-auto rounded" />
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button onClick={downloadShareImage} variant="outline" className="flex-1">
-                        <Download className="mr-2 h-4 w-4" />
-                        Unduh Gambar
-                      </Button>
-                      <Button
-                        onClick={shareToInstagram}
-                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
-                      >
-                        <FaInstagram className="mr-2 h-4 w-4" />
-                        Bagikan ke Instagram
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
+            <div className="mt-4 text-right">
+              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
             </div>
           </div>
         </div>
-
-        {isCopied && (
-          <div className="fixed bottom-4 right-4 bg-green-100 text-green-800 px-4 py-2 rounded-md shadow-md">
-            Link berhasil disalin! 🎉
-          </div>
-        )}
       </main>
       <Footer />
     </div>
