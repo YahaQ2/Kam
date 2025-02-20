@@ -1,3 +1,6 @@
+// Then, create a new file: src/app/message/[id]/client.tsx
+// This will contain all the client-side logic
+
 "use client"
 
 import { useRouter } from "next/navigation"
@@ -10,7 +13,6 @@ import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone"
 import { Loader2, Twitter, Facebook, Link2, MessageCircle, Instagram, Share2 } from "lucide-react"
-import { Metadata } from 'next'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -49,20 +51,6 @@ const detectUnandWords = (message: string): boolean => {
 const detectLoveMessage = (message: string): boolean => {
   const loveWordsRegex = /love|cinta|sayang|crush/i
   return !detectInappropriateWords(message) && loveWordsRegex.test(message)
-}
-
-export const generateMetadata = async ({ params }: { params: { id: string } }): Promise<Metadata> => {
-  return {
-    title: 'Message Details',
-    openGraph: {
-      title: 'Message Details',
-      description: 'View your message',
-      images: [`https://unand.vercel.app/api/og-image/${params.id}`],
-    },
-    twitter: {
-      card: 'summary_large_image',
-    },
-  }
 }
 
 const ShareMenu = ({ message, id, onShare }: ShareMenuProps) => {
@@ -109,7 +97,7 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
   )
 }
 
-export default function MessagePage({ params }: { params: { id: string } }) {
+export default function MessageClient({ params }: { params: { id: string } }) {
   const router = useRouter()
   const { id } = params
   const [message, setMessage] = useState<MessageType | null>(null)
