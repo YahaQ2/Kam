@@ -46,7 +46,7 @@ const detectUnandWords = (message: string): boolean => {
 }
 
 const detectLoveMessage = (message: string): boolean => {
-  const loveWordsRegex = /love|cinta|sayang|crush/i
+  const loveWordsRegex = /love|cinta|sayang|suka|crush/i
   return !detectInappropriateWords(message) && loveWordsRegex.test(message)
 }
 
