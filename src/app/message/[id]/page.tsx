@@ -75,7 +75,7 @@ const ShareMenu = ({ message, id, onShare }: ShareMenuProps) => {
       </Button>
       
       {isOpen && (
-        <div className="absolute left-0 mt-2 bg-white rounded-lg shadow-xl p-2 space-y-2 min-w-[200px] z-50 border border-gray-200">
+        <div className="absolute right-0 mt-2 bg-white rounded-lg shadow-xl p-2 space-y-2 min-w-[200px] z-50 border border-gray-200">
           <Button
             onClick={() => { onShare("whatsapp"); setIsOpen(false) }}
             variant="ghost"
@@ -241,9 +241,13 @@ export default function MessageClient({ params }: { params: { id: string } }) {
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
-        <Button onClick={() => router.back()} className="mb-8 bg-gray-800 text-white hover:bg-gray-900">
-          Back
-        </Button>
+        <div className="flex justify-between items-center mb-8">
+          <Button onClick={() => router.back()} className="bg-gray-800 text-white hover:bg-gray-900">
+            Back
+          </Button>
+          <ShareMenu message={message.message} id={id} onShare={handleShare} />
+        </div>
+
         <div className={`max-w-2xl mx-auto shadow-lg rounded-lg overflow-hidden ${getBackgroundColor()} relative`}>
           {isLoveMessage && (
             <div 
@@ -285,11 +289,6 @@ export default function MessageClient({ params }: { params: { id: string } }) {
               )}
 
               {message.spotify_id && <SpotifyEmbed trackId={message.spotify_id} />}
-
-              {/* Share Menu ditempatkan di sini setelah konten pesan */}
-              <div className="mt-8">
-                <ShareMenu message={message.message} id={id} onShare={handleShare} />
-              </div>
             </div>
 
             <div className="mt-4 text-right">
