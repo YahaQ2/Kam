@@ -1,6 +1,3 @@
-// Then, create a new file: src/app/message/[id]/client.tsx
-// This will contain all the client-side logic
-
 "use client"
 
 import { useRouter } from "next/navigation"
@@ -56,28 +53,75 @@ const detectLoveMessage = (message: string): boolean => {
 const ShareMenu = ({ message, id, onShare }: ShareMenuProps) => {
   const [isOpen, setIsOpen] = useState(false)
 
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('.share-menu-container')) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [isOpen])
+
   return (
-    <div className="flex space-x-4">
-      <Button onClick={() => onShare("whatsapp")} className="bg-green-600 hover:bg-green-700">
-        <MessageCircle className="w-4 h-4 mr-2" />
-        WhatsApp
+    <div className="relative share-menu-container">
+      <Button onClick={() => setIsOpen(!isOpen)}>
+        <Share2 className="w-4 h-4 mr-2" />
+        Share
       </Button>
-      <Button onClick={() => onShare("facebook")} className="bg-blue-600 hover:bg-blue-700">
-        <Facebook className="w-4 h-4 mr-2" />
-        Facebook
-      </Button>
-      <Button onClick={() => onShare("twitter")} className="bg-blue-400 hover:bg-blue-500">
-        <Twitter className="w-4 h-4 mr-2" />
-        Twitter
-      </Button>
-      <Button onClick={() => onShare("instagram")} className="bg-pink-600 hover:bg-pink-700">
-        <Instagram className="w-4 h-4 mr-2" />
-        Instagram
-      </Button>
-      <Button onClick={() => onShare("copy")} variant="outline">
-        <Link2 className="w-4 h-4 mr-2" />
-        Copy Link
-      </Button>
+      
+      {isOpen && (
+        <div className="absolute left-0 mt-2 bg-white rounded-lg shadow-xl p-2 space-y-2 min-w-[200px] z-50 border border-gray-200">
+          <Button
+            onClick={() => { onShare("whatsapp"); setIsOpen(false) }}
+            variant="ghost"
+            className="w-full justify-start text-gray-700 hover:bg-gray-50"
+          >
+            <MessageCircle className="w-4 h-4 mr-2 text-green-600" />
+            WhatsApp
+          </Button>
+          
+          <Button
+            onClick={() => { onShare("facebook"); setIsOpen(false) }}
+            variant="ghost"
+            className="w-full justify-start text-gray-700 hover:bg-gray-50"
+          >
+            <Facebook className="w-4 h-4 mr-2 text-blue-600" />
+            Facebook
+          </Button>
+          
+          <Button
+            onClick={() => { onShare("twitter"); setIsOpen(false) }}
+            variant="ghost"
+            className="w-full justify-start text-gray-700 hover:bg-gray-50"
+          >
+            <Twitter className="w-4 h-4 mr-2 text-blue-400" />
+            Twitter
+          </Button>
+          
+          <Button
+            onClick={() => { onShare("instagram"); setIsOpen(false) }}
+            variant="ghost"
+            className="w-full justify-start text-gray-700 hover:bg-gray-50"
+          >
+            <Instagram className="w-4 h-4 mr-2 text-pink-600" />
+            Instagram
+          </Button>
+          
+          <Button
+            onClick={() => { onShare("copy"); setIsOpen(false) }}
+            variant="ghost"
+            className="w-full justify-start text-gray-700 hover:bg-gray-50"
+          >
+            <Link2 className="w-4 h-4 mr-2 text-gray-600" />
+            Copy Link
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
@@ -243,9 +287,9 @@ export default function MessageClient({ params }: { params: { id: string } }) {
               {message.spotify_id && <SpotifyEmbed trackId={message.spotify_id} />}
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 flex justify-between items-center">
               <ShareMenu message={message.message} id={id} onShare={handleShare} />
-              <div className="mt-4 text-right">
+              <div className="text-right">
                 <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
               </div>
             </div>
