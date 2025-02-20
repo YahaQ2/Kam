@@ -1,4 +1,5 @@
-import { ImageResponse } from 'next/server'
+// Perubahan import - gunakan next/og, bukan next/server
+import { ImageResponse } from 'next/og'
 
 // Correctly export runtime as a string constant
 export const runtime = 'edge'
