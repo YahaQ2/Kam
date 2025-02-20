@@ -46,7 +46,7 @@ const detectUnandWords = (message: string): boolean => {
 }
 
 const detectLoveMessage = (message: string): boolean => {
-  const loveWordsRegex = /love|cinta|sayang|suka|crush/i
+  const loveWordsRegex = /love|cinta|sayang|crush/i
   return !detectInappropriateWords(message) && loveWordsRegex.test(message)
 }
 
@@ -285,13 +285,15 @@ export default function MessageClient({ params }: { params: { id: string } }) {
               )}
 
               {message.spotify_id && <SpotifyEmbed trackId={message.spotify_id} />}
+
+              {/* Share Menu ditempatkan di sini setelah konten pesan */}
+              <div className="mt-8">
+                <ShareMenu message={message.message} id={id} onShare={handleShare} />
+              </div>
             </div>
 
-            <div className="mt-6 flex justify-between items-center">
-              <ShareMenu message={message.message} id={id} onShare={handleShare} />
-              <div className="text-right">
-                <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
-              </div>
+            <div className="mt-4 text-right">
+              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
             </div>
           </div>
         </div>
