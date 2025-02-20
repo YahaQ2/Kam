@@ -1,4 +1,4 @@
-// Import necessary dependencies
+"use client"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
