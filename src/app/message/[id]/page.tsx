@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter, useParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/ui/navbar"
@@ -10,7 +10,7 @@ import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone"
 import { Loader2, Twitter, Facebook, Link2, MessageCircle, Instagram } from "lucide-react"
-import { Helmet } from "react-helmet-async"
+import Head from "next/head"
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -40,9 +40,9 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
   )
 }
 
-export default function MessagePage() {
+export default function MessagePage({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const { id } = useParams<{ id: string }>()
+  const { id } = params
   const [message, setMessage] = useState<MessageType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
@@ -77,7 +77,7 @@ export default function MessagePage() {
   }, [id])
 
   const handleShare = (platform: string) => {
-    const shareUrl = `https://unand.vercel.app/message/${id}`
+    const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/message/${id}` : ""
     const shareText = `Check out this message I received: ${message?.message}`
     const imageUrl = `https://unand.vercel.app/api/og-image/${id}`
 
@@ -98,8 +98,18 @@ export default function MessagePage() {
         window.open(imageUrl, "_blank")
         break
       case "copy":
-        navigator.clipboard.writeText(shareUrl)
-        alert("Link copied to clipboard!")
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+          navigator.clipboard
+            .writeText(shareUrl)
+            .then(() => {
+              alert("Link copied to clipboard!")
+            })
+            .catch((err) => {
+              console.error("Failed to copy: ", err)
+            })
+        } else {
+          console.error("Clipboard API not available")
+        }
         break
     }
   }
@@ -124,14 +134,14 @@ export default function MessagePage() {
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
-      <Helmet>
+      <Head>
         <title>Message for {message.recipient}</title>
         <meta property="og:title" content={`Message for ${message.recipient}`} />
         <meta property="og:description" content={message.message} />
         <meta property="og:image" content={`https://unand.vercel.app/api/og-image/${id}`} />
-        <meta property="og:url" content={`https://unand.vercel.app/message/${id}`} />
+        <meta property="og:url" content={typeof window !== "undefined" ? window.location.href : ""} />
         <meta name="twitter:card" content="summary_large_image" />
-      </Helmet>
+      </Head>
 
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
