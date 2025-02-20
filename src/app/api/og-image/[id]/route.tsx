@@ -1,4 +1,3 @@
-"use client"
 
 import { ImageResponse } from 'next/server'
 import { fetchMessage } from '@/lib/api'
