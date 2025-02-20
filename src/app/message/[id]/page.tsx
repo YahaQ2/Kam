@@ -5,11 +5,11 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/ui/navbar"
 import { Footer } from "@/components/ui/footer"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone"
-import { Loader2, Twitter, Facebook, Link2, MessageCircle, Instagram, Share2 } from "lucide-react"
+import { Loader2, Twitter, Facebook, Link2, MessageCircle, Instagram, Share2, Play, Pause, Volume2 } from "lucide-react"
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -21,6 +21,7 @@ type MessageType = {
   message: string
   gif_url: string
   spotify_id?: string
+  voice_note_url?: string
   created_at: string
 }
 
@@ -138,6 +139,102 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
       loading="lazy"
     />
+  )
+}
+
+const VoiceNotePlayer = ({ url }: { url: string }) => {
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [duration, setDuration] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const progressRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const audio = new Audio(url)
+    audioRef.current = audio
+    
+    audio.addEventListener('loadedmetadata', () => {
+      setDuration(audio.duration)
+    })
+    
+    audio.addEventListener('timeupdate', () => {
+      setCurrentTime(audio.currentTime)
+    })
+    
+    audio.addEventListener('ended', () => {
+      setIsPlaying(false)
+      setCurrentTime(0)
+    })
+    
+    return () => {
+      audio.pause()
+      audio.src = ''
+      audio.removeEventListener('loadedmetadata', () => {})
+      audio.removeEventListener('timeupdate', () => {})
+      audio.removeEventListener('ended', () => {})
+    }
+  }, [url])
+  
+  const togglePlayPause = () => {
+    if (!audioRef.current) return
+    
+    if (isPlaying) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play()
+    }
+    setIsPlaying(!isPlaying)
+  }
+  
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !progressRef.current) return
+    
+    const rect = progressRef.current.getBoundingClientRect()
+    const pos = (e.clientX - rect.left) / rect.width
+    
+    audioRef.current.currentTime = pos * duration
+    setCurrentTime(pos * duration)
+  }
+  
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+  
+  return (
+    <div className="my-6 bg-gray-100 rounded-lg p-4">
+      <div className="flex items-center mb-3">
+        <Volume2 className="w-5 h-5 mr-2 text-gray-600" />
+        <span className="text-sm font-medium text-gray-700">Voice Message</span>
+      </div>
+      
+      <div className="flex items-center space-x-3">
+        <Button 
+          onClick={togglePlayPause} 
+          size="sm"
+          variant="ghost" 
+          className="rounded-full w-10 h-10 p-0 flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-800"
+        >
+          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+        </Button>
+        
+        <div className="flex-1 flex items-center space-x-2">
+          <span className="text-xs text-gray-500 w-8">{formatTime(currentTime)}</span>
+          <div 
+            ref={progressRef}
+            className="flex-1 h-2 bg-gray-300 rounded-full cursor-pointer relative"
+            onClick={handleProgressClick}
+          >
+            <div 
+              className="absolute top-0 left-0 h-full bg-gray-600 rounded-full"
+              style={{ width: `${(currentTime / duration) * 100}%` }}
+            ></div>
+          </div>
+          <span className="text-xs text-gray-500 w-8">{formatTime(duration)}</span>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -274,6 +371,10 @@ export default function MessageClient({ params }: { params: { id: string } }) {
                 Seseorang mengirimkan lagu dan pesan untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
               </p>
               <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">{message.message}</p>
+              
+              {message.voice_note_url && (
+                <VoiceNotePlayer url={message.voice_note_url} />
+              )}
               
               {message.gif_url && !imageError && (
                 <div className="w-[240px] h-[240px] mx-auto my-6 relative">
