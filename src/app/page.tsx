@@ -593,6 +593,27 @@ export default function HomePage() {
               >
                 <Link href="/search-message">Explore Menfess</Link>
               </Button>
+               <Button
+                asChild
+                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg"
+              >
+                <Link href="https://ziwa-351410.web.app" target="_blank" rel="noopener noreferrer">
+                  Ziwa - Cari Teman baru & fun space
+                </Link>
+              </Button>
+              <Link
+                href="https://v0-kopih-rhlgiz.vercel.app/"
+                className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-black-600 hover:text-black-800 transition-colors border border-blue-300 rounded-full hover:border-blue-400"
+              >
+                <span>kuisyuned(upload kuisioner)</span>
+              </Link>
+
+              <Link
+                href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
+                className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
+              >
+                <span>saran/masukan/fitur baru</span>
+              </Link>
             </motion.div>
           </div>
         </section>
