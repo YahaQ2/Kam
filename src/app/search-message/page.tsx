@@ -51,7 +51,7 @@ export default function SearchMessagesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
-  const limit = 10
+  const limit = 8 // Changed to 8 messages per page
 
   const fetchMessages = useCallback(async (page: number) => {
     setIsLoading(true)
@@ -112,35 +112,92 @@ export default function SearchMessagesPage() {
     fetchMessages(newPage)
   }
 
-  const Pagination = () => (
-    <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between w-full">
-      <div className="text-sm text-gray-600">
-        Halaman {currentPage} dari {totalPages} ({totalItems} menfess)
-      </div>
-      
-      <div className="flex gap-2">
-        <Button
-          variant="default"
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="gap-1"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Sebelumnya
-        </Button>
+  // Enhanced pagination component with page numbers
+  const Pagination = () => {
+    // Calculate page range to display (show up to 5 page numbers)
+    let startPage = Math.max(1, currentPage - 2)
+    let endPage = Math.min(totalPages, startPage + 4)
+    
+    if (endPage - startPage < 4 && totalPages > 5) {
+      startPage = Math.max(1, endPage - 4)
+    }
+    
+    const pageNumbers = Array.from(
+      { length: endPage - startPage + 1 },
+      (_, i) => startPage + i
+    )
+
+    return (
+      <div className="mt-8 flex flex-col items-center gap-4 w-full">
+        <div className="text-sm text-gray-600">
+          Halaman {currentPage} dari {totalPages} ({totalItems} menfess)
+        </div>
         
-        <Button
-          variant="default"
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="gap-1"
-        >
-          Selanjutnya
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        <div className="flex flex-wrap gap-2 justify-center">
+          <Button
+            variant="outline"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="gap-1"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Sebelumnya</span>
+          </Button>
+          
+          {totalPages > 1 && (
+            <div className="flex gap-1 items-center">
+              {startPage > 1 && (
+                <>
+                  <Button
+                    variant={currentPage === 1 ? "default" : "outline"}
+                    onClick={() => handlePageChange(1)}
+                    className="h-9 w-9 p-0"
+                  >
+                    1
+                  </Button>
+                  {startPage > 2 && <span className="px-1">...</span>}
+                </>
+              )}
+              
+              {pageNumbers.map(number => (
+                <Button
+                  key={number}
+                  variant={currentPage === number ? "default" : "outline"}
+                  onClick={() => handlePageChange(number)}
+                  className="h-9 w-9 p-0"
+                >
+                  {number}
+                </Button>
+              ))}
+              
+              {endPage < totalPages && (
+                <>
+                  {endPage < totalPages - 1 && <span className="px-1">...</span>}
+                  <Button
+                    variant={currentPage === totalPages ? "default" : "outline"}
+                    onClick={() => handlePageChange(totalPages)}
+                    className="h-9 w-9 p-0"
+                  >
+                    {totalPages}
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+          
+          <Button
+            variant="outline"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="gap-1"
+          >
+            <span className="hidden sm:inline">Selanjutnya</span>
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
@@ -149,7 +206,7 @@ export default function SearchMessagesPage() {
         <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">Cari Menfess</h1>
         <div className="flex justify-center mb-4 sm:mb-6">
           <Link
-            href="https://www.instagram.com/stories/thepdfway/3511672612546304368?utm_source=ig_story_item_share&igsh=dHZ6MWtpdDV5MTVw"
+            href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
             className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
           >
             <span>saran/masukan/fitur baru</span>
