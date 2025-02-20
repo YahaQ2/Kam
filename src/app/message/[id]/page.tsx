@@ -15,7 +15,6 @@ import { Metadata } from 'next'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-// Define types
 type MessageType = {
   id: number
   sender: string
@@ -29,15 +28,14 @@ type MessageType = {
 interface ShareMenuProps {
   message: string
   id: string
+  onShare: (platform: string) => void
 }
 
-// Utility function for getting share URL
 const getShareUrl = (id: string): string => {
   if (typeof window === 'undefined') return ''
   return new URL(`/message/${id}`, window.location.origin).toString()
 }
 
-// Content detection utility functions
 const detectInappropriateWords = (message: string): boolean => {
   const inappropriateWordsRegex = /fuck|kontol|pantek|pntk|fck|kntl|kampang|jablay|lonte|bangsat|memek/i
   return inappropriateWordsRegex.test(message)
@@ -53,7 +51,6 @@ const detectLoveMessage = (message: string): boolean => {
   return !detectInappropriateWords(message) && loveWordsRegex.test(message)
 }
 
-// Metadata generator
 export const generateMetadata = async ({ params }: { params: { id: string } }): Promise<Metadata> => {
   return {
     title: 'Message Details',
@@ -68,85 +65,31 @@ export const generateMetadata = async ({ params }: { params: { id: string } }): 
   }
 }
 
-const ShareMenu = ({ message, id }: ShareMenuProps) => {
+const ShareMenu = ({ message, id, onShare }: ShareMenuProps) => {
   const [isOpen, setIsOpen] = useState(false)
-  
-  const handleShare = (platform: string) => {
-    const shareUrl = getShareUrl(id)
-    const shareText = `Check out this message I received: ${message}`
-    const imageUrl = `https://unand.vercel.app/api/og-image/${id}`
-
-    switch (platform) {
-      case "twitter":
-        window.open(
-          `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-          "_blank"
-        )
-        break
-      case "facebook":
-        window.open(
-          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-          "_blank"
-        )
-        break
-      case "whatsapp":
-        window.open(
-          `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`,
-          "_blank"
-        )
-        break
-      case "instagram":
-        window.open(imageUrl, "_blank")
-        break
-      case "copy":
-        if (navigator?.clipboard) {
-          navigator.clipboard
-            .writeText(shareUrl)
-            .then(() => {
-              alert("Link copied to clipboard!")
-              setIsOpen(false)
-            })
-            .catch(console.error)
-        }
-        break
-    }
-  }
 
   return (
-    <div className="relative">
-      <Button
-        onClick={() => setIsOpen(!isOpen)}
-        className="bg-gray-800 hover:bg-gray-900 text-white"
-      >
-        <Share2 className="w-4 h-4 mr-2" />
-        Share
+    <div className="flex space-x-4">
+      <Button onClick={() => onShare("whatsapp")} className="bg-green-600 hover:bg-green-700">
+        <MessageCircle className="w-4 h-4 mr-2" />
+        WhatsApp
       </Button>
-
-      {isOpen && (
-        <>
-          <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-            <div className="py-1">
-              {[
-                { platform: "whatsapp", icon: MessageCircle, color: "text-green-600", label: "WhatsApp" },
-                { platform: "facebook", icon: Facebook, color: "text-blue-600", label: "Facebook" },
-                { platform: "twitter", icon: Twitter, color: "text-blue-400", label: "Twitter" },
-                { platform: "instagram", icon: Instagram, color: "text-pink-600", label: "Instagram" },
-                { platform: "copy", icon: Link2, color: "text-gray-600", label: "Copy Link" }
-              ].map(({ platform, icon: Icon, color, label }) => (
-                <button
-                  key={platform}
-                  onClick={() => handleShare(platform)}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  <Icon className={`w-4 h-4 mr-2 ${color}`} />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-        </>
-      )}
+      <Button onClick={() => onShare("facebook")} className="bg-blue-600 hover:bg-blue-700">
+        <Facebook className="w-4 h-4 mr-2" />
+        Facebook
+      </Button>
+      <Button onClick={() => onShare("twitter")} className="bg-blue-400 hover:bg-blue-500">
+        <Twitter className="w-4 h-4 mr-2" />
+        Twitter
+      </Button>
+      <Button onClick={() => onShare("instagram")} className="bg-pink-600 hover:bg-pink-700">
+        <Instagram className="w-4 h-4 mr-2" />
+        Instagram
+      </Button>
+      <Button onClick={() => onShare("copy")} variant="outline">
+        <Link2 className="w-4 h-4 mr-2" />
+        Copy Link
+      </Button>
     </div>
   )
 }
@@ -194,6 +137,46 @@ export default function MessagePage({ params }: { params: { id: string } }) {
 
     fetchMessage()
   }, [id])
+
+  const handleShare = (platform: string) => {
+    const shareUrl = getShareUrl(id)
+    const shareText = `Check out this message I received: ${message?.message}`
+    const imageUrl = `https://unand.vercel.app/api/og-image/${id}`
+
+    switch (platform) {
+      case "twitter":
+        window.open(
+          `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+          "_blank"
+        )
+        break
+      case "facebook":
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+          "_blank"
+        )
+        break
+      case "whatsapp":
+        window.open(
+          `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`,
+          "_blank"
+        )
+        break
+      case "instagram":
+        window.open(imageUrl, "_blank")
+        break
+      case "copy":
+        if (navigator?.clipboard) {
+          navigator.clipboard
+            .writeText(shareUrl)
+            .then(() => {
+              alert("Link copied to clipboard!")
+            })
+            .catch(console.error)
+        }
+        break
+    }
+  }
 
   if (isLoading) {
     return (
@@ -272,9 +255,11 @@ export default function MessagePage({ params }: { params: { id: string } }) {
               {message.spotify_id && <SpotifyEmbed trackId={message.spotify_id} />}
             </div>
 
-            <div className="mt-6 flex items-center justify-between">
-              <ShareMenu message={message.message} id={id} />
-              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
+            <div className="mt-6">
+              <ShareMenu message={message.message} id={id} onShare={handleShare} />
+              <div className="mt-4 text-right">
+                <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
+              </div>
             </div>
           </div>
         </div>
