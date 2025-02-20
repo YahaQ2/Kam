@@ -6,7 +6,7 @@ import { Footer } from "@/components/ui/footer";
 import { InitialAnimation } from "@/components/initial-animation";
 import { Navbar } from "@/components/ui/navbar";
 import Link from "next/link";
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Send, Search, Users, MessageSquare, HelpCircle } from 'lucide-react';
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
@@ -575,44 +575,62 @@ export default function HomePage() {
               </p>
             </motion.div>
 
+            {/* Enhanced Professional Button Group */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row justify-center gap-6 mb-16"
+              className="flex flex-wrap justify-center gap-4 mb-16 max-w-4xl mx-auto"
             >
+              {/* Primary Action Button */}
               <Button
                 asChild
-                className="bg-gray-100 text-gray-900 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-gray-200 transition-colors shadow-lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg shadow-md flex items-center gap-2 transition-all duration-300 transform hover:-translate-y-1"
               >
-                <Link href="/message">Kirim Menfess</Link>
-              </Button>
-              <Button
-                asChild
-                className="border-2 border-gray-100 bg-transparent text-yellow-600 hover:bg-gray-100/10 px-6 md:px-8 py-2.5 md:py-3 rounded-full transition-colors shadow-lg"
-              >
-                <Link href="/search-message">Explore Menfess</Link>
-              </Button>
-               <Button
-                asChild
-                className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg"
-              >
-                <Link href="https://ziwa-351410.web.app" target="_blank" rel="noopener noreferrer">
-                  Ziwa - Cari Teman baru & fun space
+                <Link href="/message">
+                  <Send className="h-4 w-4" />
+                  <span>Kirim Menfess</span>
                 </Link>
               </Button>
+              
+              {/* Secondary Action Button */}
+              <Button
+                asChild
+                className="bg-gray-800 hover:bg-gray-900 text-white font-medium px-6 py-3 rounded-lg shadow-md flex items-center gap-2 transition-all duration-300 transform hover:-translate-y-1"
+              >
+                <Link href="/search-message">
+                  <Search className="h-4 w-4" />
+                  <span>Explore Menfess</span>
+                </Link>
+              </Button>
+              
+              {/* Featured External Link Button */}
+              <Button
+                asChild
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg shadow-md flex items-center gap-2 transition-all duration-300 transform hover:-translate-y-1"
+              >
+                <Link href="https://ziwa-351410.web.app" target="_blank" rel="noopener noreferrer">
+                  <Users className="h-4 w-4" />
+                  <span>Ziwa - Cari Teman Baru</span>
+                </Link>
+              </Button>
+              
+              {/* Utility Link Button */}
               <Link
                 href="https://v0-kopih-rhlgiz.vercel.app/"
-                className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-blue-600 hover:text-blue-800 transition-colors border border-blue-300 rounded-full hover:border-blue-400"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-all duration-300 shadow-sm transform hover:-translate-y-1"
               >
-                <span>kuisyuned(upload kuisioner)</span>
+                <MessageSquare className="h-4 w-4" />
+                <span>Kuisyuned (Upload Kuisioner)</span>
               </Link>
 
+              {/* Feedback Link Button */}
               <Link
                 href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
-                className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 hover:text-gray-800 transition-all duration-300 shadow-sm transform hover:-translate-y-1"
               >
-                <span>saran/masukan/fitur baru</span>
+                <HelpCircle className="h-4 w-4" />
+                <span>Saran & Masukan</span>
               </Link>
             </motion.div>
           </div>
