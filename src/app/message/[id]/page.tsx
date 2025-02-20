@@ -1,4 +1,5 @@
 "use client"
+
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -9,13 +10,12 @@ import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone"
 import { Loader2, Twitter, Facebook, Link2, MessageCircle, Instagram, Share2 } from "lucide-react"
-import Head from "next/head"
+import { Metadata } from 'next'
 
-// Configure dayjs for timezone handling
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-// Define the message type interface for better type safety
+// Define types
 type MessageType = {
   id: number
   sender: string
@@ -24,6 +24,17 @@ type MessageType = {
   gif_url: string
   spotify_id?: string
   created_at: string
+}
+
+interface ShareMenuProps {
+  message: string
+  id: string
+}
+
+// Utility function for getting share URL
+const getShareUrl = (id: string): string => {
+  if (typeof window === 'undefined') return ''
+  return new URL(`/message/${id}`, window.location.origin).toString()
 }
 
 // Content detection utility functions
@@ -42,13 +53,26 @@ const detectLoveMessage = (message: string): boolean => {
   return !detectInappropriateWords(message) && loveWordsRegex.test(message)
 }
 
-// ShareMenu component for handling social sharing functionality
-const ShareMenu = ({ message, id }: { message: string; id: string }) => {
+// Metadata generator
+export const generateMetadata = async ({ params }: { params: { id: string } }): Promise<Metadata> => {
+  return {
+    title: 'Message Details',
+    openGraph: {
+      title: 'Message Details',
+      description: 'View your message',
+      images: [`https://unand.vercel.app/api/og-image/${params.id}`],
+    },
+    twitter: {
+      card: 'summary_large_image',
+    },
+  }
+}
+
+const ShareMenu = ({ message, id }: ShareMenuProps) => {
   const [isOpen, setIsOpen] = useState(false)
   
   const handleShare = (platform: string) => {
-    // Get the current URL for sharing
-    const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/message/${id}` : ""
+    const shareUrl = getShareUrl(id)
     const shareText = `Check out this message I received: ${message}`
     const imageUrl = `https://unand.vercel.app/api/og-image/${id}`
 
@@ -75,16 +99,14 @@ const ShareMenu = ({ message, id }: { message: string; id: string }) => {
         window.open(imageUrl, "_blank")
         break
       case "copy":
-        if (typeof navigator !== "undefined" && navigator.clipboard) {
+        if (navigator?.clipboard) {
           navigator.clipboard
             .writeText(shareUrl)
             .then(() => {
               alert("Link copied to clipboard!")
               setIsOpen(false)
             })
-            .catch((err) => {
-              console.error("Failed to copy: ", err)
-            })
+            .catch(console.error)
         }
         break
     }
@@ -92,7 +114,6 @@ const ShareMenu = ({ message, id }: { message: string; id: string }) => {
 
   return (
     <div className="relative">
-      {/* Main share button */}
       <Button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-gray-800 hover:bg-gray-900 text-white"
@@ -101,61 +122,35 @@ const ShareMenu = ({ message, id }: { message: string; id: string }) => {
         Share
       </Button>
 
-      {/* Share options dropdown menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-          <div className="py-1">
-            <button
-              onClick={() => handleShare("whatsapp")}
-              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              <MessageCircle className="w-4 h-4 mr-2 text-green-600" />
-              WhatsApp
-            </button>
-            <button
-              onClick={() => handleShare("facebook")}
-              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              <Facebook className="w-4 h-4 mr-2 text-blue-600" />
-              Facebook
-            </button>
-            <button
-              onClick={() => handleShare("twitter")}
-              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              <Twitter className="w-4 h-4 mr-2 text-blue-400" />
-              Twitter
-            </button>
-            <button
-              onClick={() => handleShare("instagram")}
-              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              <Instagram className="w-4 h-4 mr-2 text-pink-600" />
-              Instagram
-            </button>
-            <button
-              onClick={() => handleShare("copy")}
-              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              <Link2 className="w-4 h-4 mr-2 text-gray-600" />
-              Copy Link
-            </button>
+        <>
+          <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+            <div className="py-1">
+              {[
+                { platform: "whatsapp", icon: MessageCircle, color: "text-green-600", label: "WhatsApp" },
+                { platform: "facebook", icon: Facebook, color: "text-blue-600", label: "Facebook" },
+                { platform: "twitter", icon: Twitter, color: "text-blue-400", label: "Twitter" },
+                { platform: "instagram", icon: Instagram, color: "text-pink-600", label: "Instagram" },
+                { platform: "copy", icon: Link2, color: "text-gray-600", label: "Copy Link" }
+              ].map(({ platform, icon: Icon, color, label }) => (
+                <button
+                  key={platform}
+                  onClick={() => handleShare(platform)}
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <Icon className={`w-4 h-4 mr-2 ${color}`} />
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Overlay to close menu when clicking outside */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+        </>
       )}
     </div>
   )
 }
 
-// Spotify embed component for displaying music tracks
 const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
   if (!trackId) return null
 
@@ -171,7 +166,6 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
   )
 }
 
-// Main MessagePage component
 export default function MessagePage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const { id } = params
@@ -179,25 +173,17 @@ export default function MessagePage({ params }: { params: { id: string } }) {
   const [isLoading, setIsLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
 
-  // Fetch message data when component mounts
   useEffect(() => {
     const fetchMessage = async () => {
       setIsLoading(true)
       try {
         const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`)
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+        
         const data = await response.json()
-
-        if (!data?.status || !data?.data?.[0]) {
-          throw new Error("Invalid data format")
-        }
-
-        const messageData = data.data[0]
-        setMessage(messageData)
+        if (!data?.status || !data?.data?.[0]) throw new Error("Invalid data format")
+        
+        setMessage(data.data[0])
       } catch (error) {
         console.error("Error fetching message:", error)
         setMessage(null)
@@ -209,7 +195,6 @@ export default function MessagePage({ params }: { params: { id: string } }) {
     fetchMessage()
   }, [id])
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -218,7 +203,6 @@ export default function MessagePage({ params }: { params: { id: string } }) {
     )
   }
 
-  // Error state
   if (!message) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -228,13 +212,10 @@ export default function MessagePage({ params }: { params: { id: string } }) {
   }
 
   const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm")
-  
-  // Detect message characteristics
   const hasInappropriateWords = detectInappropriateWords(message.message)
   const hasUnandWords = detectUnandWords(message.message)
   const isLoveMessage = detectLoveMessage(message.message)
 
-  // Determine background color based on message content
   const getBackgroundColor = () => {
     if (hasInappropriateWords) return "bg-red-50"
     if (isLoveMessage) return "bg-pink-50"
@@ -243,22 +224,12 @@ export default function MessagePage({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
-      <Head>
-        <title>Message for {message.recipient}</title>
-        <meta property="og:title" content={`Message for ${message.recipient}`} />
-        <meta property="og:description" content={message.message} />
-        <meta property="og:image" content={`https://unand.vercel.app/api/og-image/${id}`} />
-        <meta property="og:url" content={typeof window !== "undefined" ? window.location.href : ""} />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Head>
-
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-32">
         <Button onClick={() => router.back()} className="mb-8 bg-gray-800 text-white hover:bg-gray-900">
           Back
         </Button>
         <div className={`max-w-2xl mx-auto shadow-lg rounded-lg overflow-hidden ${getBackgroundColor()} relative`}>
-          {/* Background decorations for special messages */}
           {isLoveMessage && (
             <div 
               className="absolute inset-0 bg-cover bg-center opacity-10" 
@@ -274,24 +245,21 @@ export default function MessagePage({ params }: { params: { id: string } }) {
           )}
 
           <div className="p-8 relative z-10">
-            {/* Message header */}
             <div className="mb-6">
               <p className="text-sm text-gray-500">To: {message.recipient}</p>
               <p className="text-sm text-gray-500">From: {message.sender}</p>
             </div>
 
-            {/* Message content */}
             <div className="border-t border-b border-gray-200 py-6">
               <p className="text-sm text-gray-500 italic">
                 Seseorang mengirimkan lagu dan pesan untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
               </p>
               <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">{message.message}</p>
               
-              {/* GIF display */}
               {message.gif_url && !imageError && (
                 <div className="w-[240px] h-[240px] mx-auto my-6 relative">
                   <Image
-                    src={message.gif_url || "/placeholder.svg"}
+                    src={message.gif_url}
                     alt="Gift from sender"
                     fill
                     className="rounded-lg object-cover"
@@ -301,11 +269,9 @@ export default function MessagePage({ params }: { params: { id: string } }) {
                 </div>
               )}
 
-              {/* Spotify player */}
               {message.spotify_id && <SpotifyEmbed trackId={message.spotify_id} />}
             </div>
 
-            {/* Share button and timestamp */}
             <div className="mt-6 flex items-center justify-between">
               <ShareMenu message={message.message} id={id} />
               <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
