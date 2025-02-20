@@ -1,7 +1,6 @@
-
 import { ImageResponse } from 'next/server'
-import { fetchMessage } from '@/lib/api'
 
+// Correctly export runtime as a string constant
 export const runtime = 'edge'
 
 export async function GET(request: Request) {
