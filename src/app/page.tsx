@@ -603,7 +603,7 @@ export default function HomePage() {
               </Button>
               <Link
                 href="https://v0-kopih-rhlgiz.vercel.app/"
-                className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-black-600 hover:text-black-800 transition-colors border border-blue-300 rounded-full hover:border-blue-400"
+                className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-blue-600 hover:text-blue-800 transition-colors border border-blue-300 rounded-full hover:border-blue-400"
               >
                 <span>kuisyuned(upload kuisioner)</span>
               </Link>
