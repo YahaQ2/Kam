@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
 import { SuccessModal } from "@/components/success-modal";
+import { Mic, Square, Loader2 } from "lucide-react";
 
 interface SpotifyTrack {
   id: string;
@@ -27,6 +28,7 @@ interface FormState {
   gifUrl: string;
   spotifyId: string;
   selectedTrack: SpotifyTrack | null;
+  voiceNoteUrl: string;
 }
 
 const isValidFormState = (state: unknown): state is FormState => {
@@ -40,12 +42,14 @@ const isValidFormState = (state: unknown): state is FormState => {
     "gifUrl" in state &&
     "spotifyId" in state &&
     "selectedTrack" in state &&
+    "voiceNoteUrl" in state &&
     typeof (state as FormState).from === "string" &&
     typeof (state as FormState).to === "string" &&
     typeof (state as FormState).message === "string" &&
     typeof (state as FormState).song === "string" &&
     typeof (state as FormState).gifUrl === "string" &&
     typeof (state as FormState).spotifyId === "string" &&
+    typeof (state as FormState).voiceNoteUrl === "string" &&
     (
       (state as FormState).selectedTrack === null ||
       (
@@ -75,6 +79,7 @@ export default function MulaiBerceritaPage() {
     gifUrl: "",
     spotifyId: "",
     selectedTrack: null,
+    voiceNoteUrl: "",
   });
 
   const [tracks, setTracks] = useState<SpotifyTrack[]>([]);
@@ -82,6 +87,15 @@ export default function MulaiBerceritaPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Voice recording states
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const savedState = localStorage.getItem("menfessFormState");
@@ -135,6 +149,90 @@ export default function MulaiBerceritaPage() {
     return () => clearTimeout(timeoutId);
   }, [formState.song, formState.selectedTrack]);
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = handleRecordingStop;
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingDuration(0);
+      
+      // Start timer
+      timerRef.current = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+      setError("Gagal mengakses mikrofon. Pastikan mikrofon diizinkan dan coba lagi.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+      // Stop all tracks in the stream
+      mediaRecorderRef.current?.stream?.getTracks().forEach(track => track.stop());
+    }
+    
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    
+    setIsRecording(false);
+  };
+
+  const handleRecordingStop = async () => {
+    if (chunksRef.current.length === 0) return;
+    
+    const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+    await uploadVoiceNote(audioBlob);
+  };
+
+  const uploadVoiceNote = async (audioBlob: Blob) => {
+    setIsUploading(true);
+    try {
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'voice-note.webm');
+      
+      const response = await fetch('https://unand.vercel.app/v1/api/upload-voice-note', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Gagal mengunggah voice note');
+      }
+      
+      const result = await response.json();
+      if (result.success && result.url) {
+        setFormState(prev => ({
+          ...prev,
+          voiceNoteUrl: result.url
+        }));
+      } else {
+        throw new Error(result.message || 'Gagal mengunggah voice note');
+      }
+    } catch (err) {
+      console.error('Error uploading voice note:', err);
+      setError('Gagal mengunggah voice note. Silakan coba lagi nanti.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSelectTrack = (track: SpotifyTrack) => {
     setFormState(prev => ({
       ...prev,
@@ -152,6 +250,24 @@ export default function MulaiBerceritaPage() {
       song: "",
       selectedTrack: null
     }));
+  };
+
+  const handleRemoveVoiceNote = () => {
+    setFormState(prev => ({
+      ...prev,
+      voiceNoteUrl: ""
+    }));
+    
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -182,7 +298,8 @@ export default function MulaiBerceritaPage() {
           recipient: formState.to,
           message: formState.message,
           spotify_id: formState.spotifyId,
-          gif_url: formState.gifUrl, // Key diubah ke camelCase
+          gif_url: formState.gifUrl,
+          voice_note_url: formState.voiceNoteUrl,
         }),
       });
 
@@ -200,6 +317,7 @@ export default function MulaiBerceritaPage() {
         gifUrl: "",
         spotifyId: "",
         selectedTrack: null,
+        voiceNoteUrl: "",
       });
       localStorage.removeItem("menfessFormState");
     } catch (error) {
@@ -262,6 +380,72 @@ export default function MulaiBerceritaPage() {
               placeholder="Tulis pesanmu disini..."
               disabled={isLoading}
             />
+          </div>
+
+          {/* Voice Note Section */}
+          <div className="mb-6">
+            <Label>Voice Note (opsional)</Label>
+            <div className="mt-2 border rounded-lg p-4 bg-gray-50">
+              {!formState.voiceNoteUrl && !isRecording && !isUploading && (
+                <Button 
+                  type="button"
+                  onClick={startRecording}
+                  className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white"
+                  disabled={isLoading}
+                >
+                  <Mic size={18} />
+                  <span>Rekam Voice Note</span>
+                </Button>
+              )}
+
+              {isRecording && (
+                <div className="flex items-center space-x-4">
+                  <div className="flex-1">
+                    <div className="text-red-500 font-semibold flex items-center">
+                      <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-2 animate-pulse"></span>
+                      Merekam... {formatDuration(recordingDuration)}
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                      <div className="bg-red-500 h-1.5 rounded-full" style={{ width: `${Math.min(recordingDuration / 60 * 100, 100)}%` }}></div>
+                    </div>
+                  </div>
+                  <Button 
+                    type="button"
+                    onClick={stopRecording}
+                    className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-800 text-white"
+                  >
+                    <Square size={16} />
+                    <span>Berhenti</span>
+                  </Button>
+                </div>
+              )}
+
+              {isUploading && (
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <Loader2 className="animate-spin" size={18} />
+                  <span>Mengunggah rekaman...</span>
+                </div>
+              )}
+
+              {formState.voiceNoteUrl && (
+                <div className="flex flex-col space-y-2">
+                  <audio 
+                    ref={audioRef}
+                    src={formState.voiceNoteUrl} 
+                    controls 
+                    className="w-full"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleRemoveVoiceNote}
+                    variant="outline"
+                    className="self-start text-red-500 hover:text-red-700"
+                  >
+                    Hapus Voice Note
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="mb-6">
