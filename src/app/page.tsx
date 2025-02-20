@@ -1,39 +1,39 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Footer } from "@/components/ui/footer"
-import { InitialAnimation } from "@/components/initial-animation"
-import { Navbar } from "@/components/ui/navbar"
-import Link from "next/link"
-import { Sparkles } from "lucide-react"
-import { CarouselCard } from "@/components/carousel-card"
-import { motion, AnimatePresence } from "framer-motion"
-import { BackgroundVideo } from "@/components/background-video"
+import { useEffect, useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Footer } from "@/components/ui/footer";
+import { InitialAnimation } from "@/components/initial-animation";
+import { Navbar } from "@/components/ui/navbar";
+import Link from "next/link";
+import { Sparkles } from 'lucide-react';
+import { CarouselCard } from "@/components/carousel-card";
+import { motion, AnimatePresence } from "framer-motion";
+import { BackgroundVideo } from "@/components/background-video";
 
 interface Track {
-  title?: string
-  artist?: string
-  cover_img?: string
+  title?: string;
+  artist?: string;
+  cover_img?: string;
 }
 
 interface Menfess {
-  id: number
-  sender: string
-  recipient: string
-  message: string
-  spotify_id?: string
-  track?: Track
-  created_at: string
+  id: number;
+  sender: string;
+  recipient: string;
+  message: string;
+  spotify_id?: string;
+  track?: Track;
+  created_at: string;
 }
 
 interface MenfessResponse {
-  status: boolean
-  data: Menfess[]
+  status: boolean;
+  data: Menfess[];
 }
 
-const VISIBLE_MESSAGES = 6
-const CAROUSEL_DISPLAY_TIME = 7000 // 7 seconds per slide
+const VISIBLE_MESSAGES = 6;
+const CAROUSEL_DISPLAY_TIME = 7000; // 7 seconds per slide
 const MOTIVATION_MESSAGES = [
   "Semangat untuk hari ini kamu selalu luar biasa",
   "Kamu harus jaga kesehatan mu, tidurnya di jaga ya! 😊",
@@ -47,205 +47,207 @@ const MOTIVATION_MESSAGES = [
   "Ingat ya, kamu itu spesial dan hebat! ✨",
   "Hari ini adalah kesempatan baru untuk memulai hal baru",
   "ingat ya harus tetap semangat, kamu sudah hebat hari ini",
-]
+];
 
 export default function HomePage() {
-  const [latestMessages, setLatestMessages] = useState<Menfess[]>([])
-  const [randomMessages, setRandomMessages] = useState<Menfess[]>([])
-  const [activeSlide, setActiveSlide] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isMobile, setIsMobile] = useState(false)
-  const [currentCard, setCurrentCard] = useState(0)
-  const [showFlyingObject, setShowFlyingObject] = useState<"bird" | "plane" | null>(null)
-  const [currentMessage, setCurrentMessage] = useState("")
-  const containerRef = useRef<HTMLDivElement>(null)
-  const messageInterval = useRef<NodeJS.Timeout>()
-  const carouselInterval = useRef<NodeJS.Timeout>()
-  const allMessagesCache = useRef<Menfess[]>([])
+  const [latestMessages, setLatestMessages] = useState<Menfess[]>([]);
+  const [randomMessages, setRandomMessages] = useState<Menfess[]>([]);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [currentCard, setCurrentCard] = useState(0);
+  const [showFlyingObject, setShowFlyingObject] = useState<'bird' | 'plane' | null>(null);
+  const [currentMessage, setCurrentMessage] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const messageInterval = useRef<NodeJS.Timeout>();
+  const carouselInterval = useRef<NodeJS.Timeout>();
+  const allMessagesCache = useRef<Menfess[]>([]);
 
   // Function to get a random message that isn't already in current displays
   const getRandomUniqueMessage = (existingIds: Set<number>): Menfess | null => {
-    const availableMessages = allMessagesCache.current.filter((msg) => !existingIds.has(msg.id))
-    if (availableMessages.length === 0) return null
-    return availableMessages[Math.floor(Math.random() * availableMessages.length)]
-  }
+    const availableMessages = allMessagesCache.current.filter(msg => !existingIds.has(msg.id));
+    if (availableMessages.length === 0) return null;
+    return availableMessages[Math.floor(Math.random() * availableMessages.length)];
+  };
 
   const shuffleArray = (array: Menfess[]) => {
-    if (!array.length) return []
-    const newArray = [...array]
+    if (!array.length) return [];
+    const newArray = [...array];
     for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-    return newArray
-  }
+    return newArray;
+  };
 
   const validateMenfess = (data: any): data is Menfess => {
     return (
-      typeof data?.id === "number" &&
-      typeof data?.sender === "string" &&
-      typeof data?.recipient === "string" &&
-      typeof data?.message === "string"
-    )
-  }
+      typeof data?.id === 'number' &&
+      typeof data?.sender === 'string' &&
+      typeof data?.recipient === 'string' &&
+      typeof data?.message === 'string'
+    );
+  };
 
   const getFormattedDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString("id-ID", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+      return new Date(dateString).toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
     } catch {
-      return "Tanggal tidak valid"
+      return 'Tanggal tidak valid';
     }
-  }
+  };
 
   const showRandomMessage = () => {
-    const isBird = Math.random() < 0.5
-    const message = MOTIVATION_MESSAGES[Math.floor(Math.random() * MOTIVATION_MESSAGES.length)]
+    const isBird = Math.random() < 0.5;
+    const message = MOTIVATION_MESSAGES[Math.floor(Math.random() * MOTIVATION_MESSAGES.length)];
 
-    setCurrentMessage(message)
-    setShowFlyingObject(isBird ? "bird" : "plane")
+    setCurrentMessage(message);
+    setShowFlyingObject(isBird ? 'bird' : 'plane');
 
     setTimeout(() => {
-      setShowFlyingObject(null)
-    }, 10000)
-  }
+      setShowFlyingObject(null);
+    }, 10000);
+  };
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640)
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
-    const controller = new AbortController()
+    const controller = new AbortController();
     const fetchMessages = async () => {
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search`, {
-          signal: controller.signal,
-        })
+        const response = await fetch(
+          `https://unand.vercel.app/v1/api/menfess-spotify-search`,
+          { signal: controller.signal }
+        );
 
-        if (!response.ok) throw new Error("Gagal memuat pesan")
+        if (!response.ok) throw new Error("Gagal memuat pesan");
 
-        const data: MenfessResponse = await response.json()
+        const data: MenfessResponse = await response.json();
 
         if (data?.status && Array.isArray(data.data)) {
-          const validMessages = data.data.filter(validateMenfess)
-
+          const validMessages = data.data.filter(validateMenfess);
+          
           // Store all valid messages for later random selection
-          allMessagesCache.current = validMessages
-
+          allMessagesCache.current = validMessages;
+          
           // Sort to get latest messages
-          validMessages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-
+          validMessages.sort((a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+          
           // Get the 5 latest messages for first slide
-          const latest = validMessages.slice(0, 5)
-          setLatestMessages(latest)
-
+          const latest = validMessages.slice(0, 5);
+          setLatestMessages(latest);
+          
           // Prepare 5 unique random messages for slides 2-6 (one per slide)
-          const latestIds = new Set(latest.map((msg) => msg.id))
-          const randomMsgs: Menfess[] = []
-
+          const latestIds = new Set(latest.map(msg => msg.id));
+          const randomMsgs: Menfess[] = [];
+          
           for (let i = 0; i < 5; i++) {
-            const currentIds = new Set([...latestIds, ...randomMsgs.map((msg) => msg.id)])
-            const randomMsg = getRandomUniqueMessage(currentIds)
-            if (randomMsg) randomMsgs.push(randomMsg)
+            const currentIds = new Set([...latestIds, ...randomMsgs.map(msg => msg.id)]);
+            const randomMsg = getRandomUniqueMessage(currentIds);
+            if (randomMsg) randomMsgs.push(randomMsg);
           }
-
-          setRandomMessages(randomMsgs)
+          
+          setRandomMessages(randomMsgs);
         } else {
-          throw new Error("Format data tidak valid")
+          throw new Error("Format data tidak valid");
         }
       } catch (err: any) {
-        if (err.name !== "AbortError") {
-          setError(err instanceof Error ? err.message : "Terjadi kesalahan")
-          console.error("Fetch error:", err)
+        if (err.name !== 'AbortError') {
+          setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+          console.error('Fetch error:', err);
         }
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchMessages()
-    return () => controller.abort()
-  }, [])
+    fetchMessages();
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
-    messageInterval.current = setInterval(showRandomMessage, 720000)
-    showRandomMessage()
+    messageInterval.current = setInterval(showRandomMessage, 720000);
+    showRandomMessage();
 
     return () => {
-      if (messageInterval.current) clearInterval(messageInterval.current)
-    }
-  }, [])
+      if (messageInterval.current) clearInterval(messageInterval.current);
+    };
+  }, []);
 
   // Setup carousel rotation
   useEffect(() => {
-    if (loading || latestMessages.length === 0) return
-
+    if (loading || latestMessages.length === 0) return;
+    
     const interval = setInterval(() => {
-      if (activeSlide === 0) {
-        setCurrentCard((prev) => (prev + 1) % latestMessages.length)
-      } else {
-        setActiveSlide((prev) => (prev + 1) % VISIBLE_MESSAGES)
-      }
-    }, CAROUSEL_DISPLAY_TIME)
-
-    return () => clearInterval(interval)
-  }, [loading, latestMessages.length, activeSlide])
-
+      setActiveSlide(prev => (prev + 1) % VISIBLE_MESSAGES);
+    }, CAROUSEL_DISPLAY_TIME);
+    
+    return () => clearInterval(interval);
+  }, [loading, latestMessages.length]);
+  
   // Update random messages when we complete a full cycle
   useEffect(() => {
     if (activeSlide === 0 && allMessagesCache.current.length > 5) {
       // If we've come back to the first slide, refresh our random messages
-      const latestIds = new Set(latestMessages.map((msg) => msg.id))
-      const newRandomMsgs: Menfess[] = []
-
+      const latestIds = new Set(latestMessages.map(msg => msg.id));
+      const newRandomMsgs: Menfess[] = [];
+      
       for (let i = 0; i < 5; i++) {
-        const currentIds = new Set([...latestIds, ...newRandomMsgs.map((msg) => msg.id)])
-        const randomMsg = getRandomUniqueMessage(currentIds)
-        if (randomMsg) newRandomMsgs.push(randomMsg)
+        const currentIds = new Set([
+          ...latestIds, 
+          ...newRandomMsgs.map(msg => msg.id)
+        ]);
+        const randomMsg = getRandomUniqueMessage(currentIds);
+        if (randomMsg) newRandomMsgs.push(randomMsg);
       }
-
+      
       // Only update if we actually got new messages
       if (newRandomMsgs.length > 0) {
-        setRandomMessages(newRandomMsgs)
+        setRandomMessages(newRandomMsgs);
       }
     }
-  }, [activeSlide, latestMessages])
+  }, [activeSlide, latestMessages]);
 
   const getTimeStatus = () => {
-    const currentHour = new Date().getHours()
+    const currentHour = new Date().getHours();
     return {
       isNight: currentHour >= 18 || currentHour < 7,
-      isMorning: currentHour >= 7 && currentHour < 18,
-    }
-  }
+      isMorning: currentHour >= 7 && currentHour < 18
+    };
+  };
 
   const handleScroll = () => {
     if (containerRef.current && isMobile) {
-      const scrollPosition = containerRef.current.scrollLeft
-      const cardWidth = containerRef.current.offsetWidth
-      setCurrentCard(Math.round(scrollPosition / cardWidth))
+      const scrollPosition = containerRef.current.scrollLeft;
+      const cardWidth = containerRef.current.offsetWidth;
+      setCurrentCard(Math.round(scrollPosition / cardWidth));
     }
-  }
+  };
 
   // Get the current message to display based on active slide
   const getCurrentDisplayMessage = (): Menfess | null => {
     if (activeSlide === 0) {
       // Show all latest messages on slide 0
-      return null
+      return null;
     } else {
       // Show individual random message on slides 1-5
-      const randomIndex = activeSlide - 1
-      return randomIndex < randomMessages.length ? randomMessages[randomIndex] : null
+      const randomIndex = activeSlide - 1;
+      return randomIndex < randomMessages.length ? randomMessages[randomIndex] : null;
     }
-  }
+  };
 
   // Animation variants
   const cardVariants = {
@@ -254,33 +256,33 @@ export default function HomePage() {
       opacity: 1,
       scale: 1,
       y: 0,
-      transition: { type: "spring", stiffness: 100, damping: 12 },
+      transition: { type: 'spring', stiffness: 100, damping: 12 }
     },
-    exit: {
-      opacity: 0,
-      scale: 0.9,
+    exit: { 
+      opacity: 0, 
+      scale: 0.9, 
       y: -20,
-      transition: { duration: 0.3 },
-    },
-  }
+      transition: { duration: 0.3 }
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
+    visible: { 
       opacity: 1,
-      transition: {
+      transition: { 
         staggerChildren: 0.1,
-        delayChildren: 0.1,
-      },
-    },
-  }
+        delayChildren: 0.1
+      }
+    }
+  };
 
   const renderTimeIcon = () => {
-    const { isNight } = getTimeStatus()
+    const { isNight } = getTimeStatus();
 
     return (
       <motion.div
-        key={isNight ? "moon" : "sparkles"}
+        key={isNight ? 'moon' : 'sparkles'}
         initial={{ scale: 0 }}
         animate={{ rotate: isNight ? [0, 10, -10, 0] : 0, scale: 1 }}
         transition={{ duration: 0.5 }}
@@ -294,19 +296,23 @@ export default function HomePage() {
             }}
             transition={{
               duration: 8,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
+              repeat: Infinity,
+              ease: "easeInOut"
             }}
           >
             {/* Moon Core */}
             <motion.span
               className="text-4xl relative z-10 block"
               animate={{
-                filter: ["brightness(1)", "brightness(1.2)", "brightness(1)"],
+                filter: [
+                  'brightness(1)',
+                  'brightness(1.2)',
+                  'brightness(1)'
+                ],
               }}
               transition={{
                 duration: 4,
-                repeat: Number.POSITIVE_INFINITY,
+                repeat: Infinity,
               }}
             >
               🌙
@@ -322,8 +328,8 @@ export default function HomePage() {
               }}
               transition={{
                 duration: 8,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
+                repeat: Infinity,
+                ease: "easeInOut"
               }}
             >
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-yellow-300/30 rounded-full blur-[20px]" />
@@ -339,7 +345,7 @@ export default function HomePage() {
               }}
               transition={{
                 duration: 4,
-                repeat: Number.POSITIVE_INFINITY,
+                repeat: Infinity,
               }}
             >
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-yellow-400/20 rounded-full blur-[30px]" />
@@ -348,14 +354,14 @@ export default function HomePage() {
         ) : (
           <motion.div
             animate={{ rotate: [0, 20, -20, 0] }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+            transition={{ duration: 2, repeat: Infinity }}
           >
             <Sparkles className="h-16 w-16 text-yellow-400 mx-auto" />
           </motion.div>
         )}
       </motion.div>
-    )
-  }
+    );
+  };
 
   const FlyingMessage = () => (
     <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center">
@@ -367,7 +373,7 @@ export default function HomePage() {
             exit={{ opacity: 0, y: -20 }}
             className="bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-gray-200 flex items-center gap-3"
           >
-            {showFlyingObject === "bird" && (
+            {showFlyingObject === 'bird' && (
               <motion.img
                 src="/bird-flying.png"
                 alt="Burung"
@@ -377,9 +383,11 @@ export default function HomePage() {
               />
             )}
 
-            <span className="text-gray-800 font-medium">{currentMessage}</span>
+            <span className="text-gray-800 font-medium">
+              {currentMessage}
+            </span>
 
-            {showFlyingObject === "plane" && (
+            {showFlyingObject === 'plane' && (
               <motion.img
                 src="/plane-flying.png"
                 alt="Pesawat"
@@ -392,19 +400,19 @@ export default function HomePage() {
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 
   const FlyingObjects = () => (
     <>
       <AnimatePresence>
-        {showFlyingObject === "bird" && (
+        {showFlyingObject === 'bird' && (
           <motion.div
             key="bird"
-            initial={{ x: "-100vw", y: "100vh" }}
+            initial={{ x: '-100vw', y: '100vh' }}
             animate={{
-              x: "100vw",
-              y: "30vh",
-              transition: { duration: 8, ease: "linear" },
+              x: '100vw',
+              y: '30vh',
+              transition: { duration: 8, ease: 'linear' }
             }}
             className="fixed z-40 pointer-events-none"
           >
@@ -412,14 +420,14 @@ export default function HomePage() {
           </motion.div>
         )}
 
-        {showFlyingObject === "plane" && (
+        {showFlyingObject === 'plane' && (
           <motion.div
             key="plane"
-            initial={{ x: "100vw", y: "20vh" }}
+            initial={{ x: '100vw', y: '20vh' }}
             animate={{
-              x: "-100vw",
-              y: "40vh",
-              transition: { duration: 6, ease: "linear" },
+              x: '-100vw',
+              y: '40vh',
+              transition: { duration: 6, ease: 'linear' }
             }}
             className="fixed z-40 pointer-events-none"
           >
@@ -428,36 +436,38 @@ export default function HomePage() {
         )}
       </AnimatePresence>
     </>
-  )
+  );
 
   // Renders the appropriate cards based on the active slide
   const renderCarouselContent = () => {
     if (activeSlide === 0) {
-      // First slide shows only one latest message at a time
-      const currentMessageIndex = currentCard % latestMessages.length
-      const message = latestMessages[currentMessageIndex]
-
-      if (!message) return <div className="text-gray-300">No message available</div>
-
+      // First slide shows 5 latest messages
       return (
-        <motion.div
-          key={`latest-${message.id}`}
-          variants={cardVariants}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          variants={containerVariants}
           initial="hidden"
           animate="visible"
-          exit="exit"
-          className="mx-auto max-w-md"
+          key="latest-messages"
         >
-          <MessageCard message={message} featured={true} />
+          {latestMessages.map((message, index) => (
+            <motion.div
+              key={`latest-${message.id}`}
+              variants={cardVariants}
+              className={`${index === 0 ? 'md:col-span-3' : 'md:col-span-1'}`}
+            >
+              <MessageCard message={message} />
+            </motion.div>
+          ))}
         </motion.div>
-      )
+      );
     } else {
-      // Other slides show 1 random message each (unchanged)
-      const randomIndex = activeSlide - 1
-      const message = randomIndex < randomMessages.length ? randomMessages[randomIndex] : null
-
-      if (!message) return <div className="text-gray-300">No message available</div>
-
+      // Other slides show 1 random message each
+      const randomIndex = activeSlide - 1;
+      const message = randomIndex < randomMessages.length ? randomMessages[randomIndex] : null;
+      
+      if (!message) return <div className="text-gray-300">No message available</div>;
+      
       return (
         <motion.div
           key={`random-${message.id}`}
@@ -469,16 +479,16 @@ export default function HomePage() {
         >
           <MessageCard message={message} featured={true} />
         </motion.div>
-      )
+      );
     }
-  }
+  };
 
   // Component for individual message cards
-  const MessageCard = ({ message, featured = false }: { message: Menfess; featured?: boolean }) => (
+  const MessageCard = ({ message, featured = false }: { message: Menfess, featured?: boolean }) => (
     <Link href={`/message/${message.id}`} className="block h-full">
-      <motion.div
+      <motion.div 
         className={`h-full bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden ${
-          featured ? "scale-105" : ""
+          featured ? 'scale-105' : ''
         }`}
         whileHover={{ scale: featured ? 1.08 : 1.05 }}
         transition={{ type: "spring", stiffness: 300 }}
@@ -493,17 +503,17 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-
+        
         <CarouselCard
-          recipient={message.recipient || "-"}
-          sender={message.sender || "-"}
-          message={message.message || "Pesan tidak tersedia"}
+          recipient={message.recipient || '-'}
+          sender={message.sender || '-'}
+          message={message.message || 'Pesan tidak tersedia'}
           songTitle={message.track?.title}
           artist={message.track?.artist}
           coverUrl={message.track?.cover_img}
           spotifyEmbed={
             message.spotify_id && (
-              <div className="px-4 pb-4 max-w-full">
+              <div className="px-4 pb-4">
                 <iframe
                   className="w-full rounded-lg shadow-md"
                   src={`https://open.spotify.com/embed/track/${message.spotify_id}`}
@@ -516,19 +526,21 @@ export default function HomePage() {
             )
           }
         />
-
-        <motion.div
+        
+        <motion.div 
           className="p-4 bg-gray-700 rounded-b-2xl relative"
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
           <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-500 rounded-full" />
-          <p className="text-sm text-white text-center mt-2">{getFormattedDate(message.created_at)}</p>
+          <p className="text-sm text-white text-center mt-2">
+            {getFormattedDate(message.created_at)}
+          </p>
         </motion.div>
       </motion.div>
     </Link>
-  )
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-800">
@@ -551,12 +563,20 @@ export default function HomePage() {
           </div>
 
           <div className="container mx-auto px-4 text-center relative z-10">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <div className="mb-8">{renderTimeIcon()}</div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="mb-8">
+                {renderTimeIcon()}
+              </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6">
                 <motion.span
                   className={`inline-block relative ${
-                    getTimeStatus().isNight ? "text-white drop-shadow-glow" : "text-gray-900"
+                    getTimeStatus().isNight
+                      ? 'text-white drop-shadow-glow'
+                      : 'text-gray-900'
                   }`}
                 >
                   Menfess warga Unand
@@ -564,7 +584,7 @@ export default function HomePage() {
                     <motion.span
                       className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
                       animate={{ opacity: [0, 1, 0] }}
-                      transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
+                      transition={{ repeat: Infinity, duration: 2 }}
                     />
                   )}
                 </motion.span>
@@ -596,7 +616,11 @@ export default function HomePage() {
                 asChild
                 className="border-2 border-blue-600 bg-blue-50 text-blue-600 px-6 md:px-8 py-2.5 md:py-3 rounded-full hover:bg-blue-100 transition-colors shadow-lg"
               >
-                <Link href="https://ziwa-351410.web.app" target="_blank" rel="noopener noreferrer">
+                <Link
+                  href="https://ziwa-351410.web.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Ziwa - Cari Teman baru & fun space
                 </Link>
               </Button>
@@ -607,8 +631,8 @@ export default function HomePage() {
               >
                 <span>kuisyuned(upload kuisioner)</span>
               </Link>
-
-              <Link
+              
+                            <Link
                 href="https://forms.zohopublic.com/notnoting12gm1/form/Saran/formperma/8hcRs5pwX77B9AprPeIsvWElcwC1s3JJZlReOgJ3vdc"
                 className="inline-flex items-center justify-center px-4 py-2 mb-8 text-sm md:text-base font-medium text-gray-600 hover:text-gray-800 transition-colors border border-gray-300 rounded-full hover:border-gray-400"
               >
@@ -621,15 +645,19 @@ export default function HomePage() {
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">MENFESS TERBARU</h2>
-              <p className="text-gray-400 max-w-xl mx-auto">Trending menfess</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-300 mb-4">
+                MENFESS TERBARU
+              </h2>
+              <p className="text-gray-400 max-w-xl mx-auto">
+                Trending menfess
+              </p>
             </div>
 
             {loading ? (
               <div className="h-40 flex items-center justify-center text-gray-300">
                 <motion.div
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full"
                 />
               </div>
@@ -644,22 +672,22 @@ export default function HomePage() {
                     {renderCarouselContent()}
                   </div>
                 </AnimatePresence>
-
+                
                 {/* Pagination indicators */}
                 <div className="flex justify-center space-x-3 mt-12">
                   {Array.from({ length: VISIBLE_MESSAGES }).map((_, index) => (
                     <motion.button
                       key={`indicator-${index}`}
-                      className={`h-3 rounded-full ${activeSlide === index ? "w-8 bg-blue-500" : "w-3 bg-gray-600"}`}
+                      className={`h-3 rounded-full ${activeSlide === index ? 'w-8 bg-blue-500' : 'w-3 bg-gray-600'}`}
                       onClick={() => setActiveSlide(index)}
                       whileHover={{ scale: 1.2 }}
-                      animate={{
+                      animate={{ 
                         scale: activeSlide === index ? [1, 1.1, 1] : 1,
-                        transition: {
+                        transition: { 
                           duration: 1,
-                          repeat: activeSlide === index ? Number.POSITIVE_INFINITY : 0,
-                          repeatType: "reverse",
-                        },
+                          repeat: activeSlide === index ? Infinity : 0,
+                          repeatType: "reverse"
+                        }
                       }}
                     />
                   ))}
@@ -672,6 +700,5 @@ export default function HomePage() {
 
       <Footer />
     </div>
-  )
+  );
 }
-
