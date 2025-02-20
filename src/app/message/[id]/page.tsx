@@ -51,7 +51,7 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
 
 export default function MessagePage() {
   const router = useRouter()
-  const { id } = useParams()
+  const { id } = useParams<{ id: string }>()
   const [message, setMessage] = useState<MessageType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
@@ -90,12 +90,15 @@ export default function MessagePage() {
           ]
 
           metaTags.forEach((tag) => {
-            const element =
+            let element =
               document.querySelector(`meta[property="${tag.property}"]`) ||
-              document.querySelector(`meta[name="${tag.property}"]`)
-            if (element) {
-              element.setAttribute("content", tag.content)
+              document.querySelector(`meta[name="${tag.name}"]`)
+            if (!element) {
+              element = document.createElement("meta")
+              element.setAttribute(tag.property ? "property" : "name", tag.property || tag.name)
+              document.head.appendChild(element)
             }
+            element.setAttribute("content", tag.content)
           })
         }
       } catch (error) {
@@ -120,17 +123,14 @@ export default function MessagePage() {
 
     setIsLoading(true)
     try {
-      // First, create a clone of the message card to modify for the image
       const cardClone = messageCardRef.current.cloneNode(true) as HTMLDivElement
 
-      // Add styles specifically for the image version
       cardClone.style.width = "600px"
       cardClone.style.padding = "40px"
       cardClone.style.backgroundColor = "#ffffff"
       cardClone.style.borderRadius = "16px"
       cardClone.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.1)"
 
-      // Add a watermark/branding to the clone
       const brandingDiv = document.createElement("div")
       brandingDiv.style.textAlign = "center"
       brandingDiv.style.marginTop = "20px"
@@ -141,23 +141,19 @@ export default function MessagePage() {
       brandingDiv.textContent = "Dibagikan melalui unand.vercel.app"
       cardClone.appendChild(brandingDiv)
 
-      // Append clone to body temporarily (needed for html2canvas), but hide it
       cardClone.style.position = "absolute"
       cardClone.style.left = "-9999px"
       document.body.appendChild(cardClone)
 
-      // Use html2canvas to create an image
       const canvas = await html2canvas(cardClone, {
-        scale: 2, // Higher resolution
-        useCORS: true, // Enable cross-origin image loading
+        scale: 2,
+        useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
       })
 
-      // Remove the clone from the document
       document.body.removeChild(cardClone)
 
-      // Convert canvas to data URL
       const dataUrl = canvas.toDataURL("image/png")
       setShareImageUrl(dataUrl)
       setIsImageGenerated(true)
@@ -185,14 +181,8 @@ export default function MessagePage() {
       return
     }
 
-    // For mobile devices
-    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      downloadShareImage()
-      alert("Gambar telah diunduh. Silakan bagikan ke Instagram secara manual.")
-    } else {
-      downloadShareImage()
-      alert("Gambar telah diunduh. Silakan bagikan ke Instagram secara manual.")
-    }
+    downloadShareImage()
+    alert("Gambar telah diunduh. Silakan bagikan ke Instagram secara manual.")
   }
 
   if (isLoading) {
@@ -224,7 +214,6 @@ export default function MessagePage() {
           Kembali
         </Button>
 
-        {/* Message Card - This is what gets captured for sharing */}
         <div ref={messageCardRef} className="max-w-2xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
             <div className="mb-6">
@@ -244,7 +233,6 @@ export default function MessagePage() {
                     fill
                     className="rounded-lg object-cover"
                     onError={() => setImageError(true)}
-                    unoptimized
                     sizes="240px"
                   />
                 </div>
@@ -257,12 +245,10 @@ export default function MessagePage() {
           </div>
         </div>
 
-        {/* Sharing Options */}
         <div className="max-w-2xl mx-auto mt-8">
           <h3 className="text-lg font-medium mb-4">Bagikan Pesan</h3>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Regular Social Sharing */}
             <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="font-medium mb-3">Bagikan Link</h4>
               <div className="flex space-x-3 mb-3">
@@ -281,7 +267,6 @@ export default function MessagePage() {
               </div>
             </div>
 
-            {/* Instagram Image Sharing */}
             <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="font-medium mb-3">Bagikan ke Instagram</h4>
               <div className="flex flex-col space-y-3">
