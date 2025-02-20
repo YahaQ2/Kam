@@ -1,54 +1,79 @@
-import { ImageResponse } from '@vercel/og';
+import { ImageResponse } from 'next/server'
+import { fetchMessage } from '@/lib/api'
 
-export const runtime = 'edge';
+export const runtime = 'edge'
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request) {
   try {
-    const { id } = params;
-    const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`);
-    const data = await response.json();
-    const message = data.data[0];
+    const { searchParams } = new URL(request.url)
+    const messageId = searchParams.get('id')
 
+    if (!messageId) {
+      return new Response('Message ID is required', { status: 400 })
+    }
+
+    // Fetch message data from your API
+    const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${messageId}`)
+    if (!response.ok) {
+      throw new Error('Failed to fetch message')
+    }
+
+    const data = await response.json()
+    const message = data?.data?.[0]
+
+    if (!message) {
+      return new Response('Message not found', { status: 404 })
+    }
+
+    // Generate dynamic OG image
     return new ImageResponse(
       (
         <div
           style={{
-            height: '100%',
-            width: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#fff',
-            padding: 50,
+            width: '1200px',
+            height: '630px',
+            backgroundColor: '#ffffff',
+            padding: '40px',
+            fontFamily: 'sans-serif',
           }}
         >
-          <div style={{ fontSize: 42, marginBottom: 20 }}>💌 Message for {message.recipient}</div>
-          <div style={{ fontSize: 32, marginBottom: 30, maxWidth: 800, textAlign: 'center' }}>
-            "{message.message}"
+          <div
+            style={{
+              fontSize: '48px',
+              fontWeight: 'bold',
+              color: '#1a1a1a',
+              marginBottom: '20px',
+              textAlign: 'center',
+            }}
+          >
+            Message for {message.recipient}
           </div>
-          <div style={{ display: 'flex', gap: 20 }}>
-            <div style={{ fontSize: 24 }}>From: {message.sender}</div>
-            <div style={{ fontSize: 24 }}>To: {message.recipient}</div>
+          <div
+            style={{
+              fontSize: '24px',
+              color: '#4a4a4a',
+              maxWidth: '800px',
+              textAlign: 'center',
+              lineHeight: '1.4',
+            }}
+          >
+            {message.message.length > 140
+              ? `${message.message.substring(0, 140)}...`
+              : message.message}
           </div>
-          {message.spotify_id && (
-            <div style={{ marginTop: 30 }}>
-              <img
-                src={`https://i.scdn.co/image/${message.spotify_id}`}
-                alt="Spotify Track"
-                width={300}
-                height={300}
-              />
-            </div>
-          )}
         </div>
       ),
       {
         width: 1200,
         height: 630,
       }
-    );
+    )
   } catch (error) {
-    return new Response(`Failed to generate image: ${error}`, { status: 500 });
+    console.error('Error generating OG image:', error)
+    return new Response('Failed to generate image', { status: 500 })
   }
 }
