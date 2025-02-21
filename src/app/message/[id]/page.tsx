@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/ui/navbar"
 import { Footer } from "@/components/ui/footer"
@@ -237,3 +238,167 @@ const VoiceNotePlayer = ({ url }: { url: string }) => {
   )
 }
 
+export default function MessageClient({ params }: { params: { id: string } }) {
+  const router = useRouter()
+  const { id } = params
+  const [message, setMessage] = useState<MessageType | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [imageError, setImageError] = useState(false)
+
+  useEffect(() => {
+    const fetchMessage = async () => {
+      setIsLoading(true)
+      try {
+        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`)
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+        
+        const data = await response.json()
+        if (!data?.status || !data?.data?.[0]) throw new Error("Invalid data format")
+        
+        setMessage(data.data[0])
+      } catch (error) {
+        console.error("Error fetching message:", error)
+        setMessage(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchMessage()
+  }, [id])
+
+  const handleShare = (platform: string) => {
+    const shareUrl = getShareUrl(id)
+    const shareText = `Check out this message I received: ${message?.message}`
+    const imageUrl = `https://unand.vercel.app/api/og-image/${id}`
+
+    switch (platform) {
+      case "twitter":
+        window.open(
+          `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+          "_blank"
+        )
+        break
+      case "facebook":
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+          "_blank"
+        )
+        break
+      case "whatsapp":
+        window.open(
+          `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`,
+          "_blank"
+        )
+        break
+      case "instagram":
+        window.open(imageUrl, "_blank")
+        break
+      case "copy":
+        if (navigator?.clipboard) {
+          navigator.clipboard
+            .writeText(shareUrl)
+            .then(() => {
+              alert("Link copied to clipboard!")
+            })
+            .catch(console.error)
+        }
+        break
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!message) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl font-semibold text-gray-600">Message not found</p>
+      </div>
+    )
+  }
+
+  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm")
+  const hasInappropriateWords = detectInappropriateWords(message.message)
+  const hasUnandWords = detectUnandWords(message.message)
+  const isLoveMessage = detectLoveMessage(message.message)
+
+  const getBackgroundColor = () => {
+    if (hasInappropriateWords) return "bg-red-50"
+    if (isLoveMessage) return "bg-pink-50"
+    return "bg-white"
+  }
+
+  return (
+    <div className="min-h-screen bg-white text-gray-800 flex flex-col">
+      <Navbar />
+      <main className="flex-grow container mx-auto px-4 py-32">
+        <div className="flex justify-between items-center mb-8">
+          <Button onClick={() => router.back()} className="bg-gray-800 text-white hover:bg-gray-900">
+            Back
+          </Button>
+          <ShareMenu message={message.message} id={id} onShare={handleShare} />
+        </div>
+
+        <div className={`max-w-2xl mx-auto shadow-lg rounded-lg overflow-hidden ${getBackgroundColor()} relative`}>
+          {isLoveMessage && (
+            <div 
+              className="absolute inset-0 bg-cover bg-center opacity-10" 
+              style={{ backgroundImage: "url('https://res.cloudinary.com/depbfbxtm/image/upload/v1738829131/dkncarmepvddfdt93cxj.png')" }} 
+            />
+          )}
+          
+          {hasUnandWords && !hasInappropriateWords && (
+            <div 
+              className="absolute inset-0 bg-cover bg-center opacity-10" 
+              style={{ backgroundImage: "url('https://res.cloudinary.com/depbfbxtm/image/upload/v1738897074/IMG_20250207_095652_727_gsfzyg.jpg')" }} 
+            />
+          )}
+
+          <div className="p-8 relative z-10">
+            <div className="mb-6">
+              <p className="text-sm text-gray-500">To: {message.recipient}</p>
+              <p className="text-sm text-gray-500">From: {message.sender}</p>
+            </div>
+
+            <div className="border-t border-b border-gray-200 py-6">
+              <p className="text-sm text-gray-500 italic">
+                Seseorang mengirimkan lagu dan pesan untukmu, mungkin ini adalah lagu yang akan kamu sukai :)
+              </p>
+              <p className="font-['Reenie_Beanie'] leading-relaxed text-4xl">{message.message}</p>
+              
+              {message.voice_note_url && (
+                <VoiceNotePlayer url={message.voice_note_url} />
+              )}
+              
+              {message.gif_url && !imageError && (
+                <div className="w-[240px] h-[240px] mx-auto my-6 relative">
+                  <Image
+                    src={message.gif_url}
+                    alt="Gift from sender"
+                    fill
+                    className="rounded-lg object-cover"
+                    onError={() => setImageError(true)}
+                    sizes="240px"
+                  />
+                </div>
+              )}
+
+              {message.spotify_id && <SpotifyEmbed trackId={message.spotify_id} />}
+            </div>
+
+            <div className="mt-4 text-right">
+              <p className="text-sm text-gray-500">Sent on: {formattedDate}</p>
+            </div>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  )
+}
