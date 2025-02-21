@@ -87,7 +87,7 @@ export default function MulaiBerceritaPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Voice recording states
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -167,7 +167,7 @@ export default function MulaiBerceritaPage() {
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingDuration(0);
-      
+
       // Start timer
       timerRef.current = setInterval(() => {
         setRecordingDuration(prev => prev + 1);
@@ -184,18 +184,18 @@ export default function MulaiBerceritaPage() {
       // Stop all tracks in the stream
       mediaRecorderRef.current?.stream?.getTracks().forEach(track => track.stop());
     }
-    
+
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    
+
     setIsRecording(false);
   };
 
   const handleRecordingStop = async () => {
     if (chunksRef.current.length === 0) return;
-    
+
     const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
     await uploadVoiceNote(audioBlob);
   };
@@ -203,25 +203,25 @@ export default function MulaiBerceritaPage() {
   const uploadVoiceNote = async (audioBlob: Blob) => {
     setIsUploading(true);
     try {
-      // Create form data
       const formData = new FormData();
       formData.append('file', audioBlob, 'voice-note.webm');
-      
+
       const response = await fetch('https://unand.vercel.app/v1/api/upload-voice-note', {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         throw new Error('Gagal mengunggah voice note');
       }
-      
+
       const result = await response.json();
       if (result.success && result.url) {
         setFormState(prev => ({
           ...prev,
           voiceNoteUrl: result.url
         }));
+        console.log('Voice note uploaded successfully');
       } else {
         throw new Error(result.message || 'Gagal mengunggah voice note');
       }
@@ -257,7 +257,7 @@ export default function MulaiBerceritaPage() {
       ...prev,
       voiceNoteUrl: ""
     }));
-    
+
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -387,7 +387,7 @@ export default function MulaiBerceritaPage() {
             <Label>Voice Note (opsional)</Label>
             <div className="mt-2 border rounded-lg p-4 bg-gray-50">
               {!formState.voiceNoteUrl && !isRecording && !isUploading && (
-                <Button 
+                <Button
                   type="button"
                   onClick={startRecording}
                   className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white"
@@ -409,7 +409,7 @@ export default function MulaiBerceritaPage() {
                       <div className="bg-red-500 h-1.5 rounded-full" style={{ width: `${Math.min(recordingDuration / 60 * 100, 100)}%` }}></div>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     type="button"
                     onClick={stopRecording}
                     className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-800 text-white"
@@ -429,10 +429,10 @@ export default function MulaiBerceritaPage() {
 
               {formState.voiceNoteUrl && (
                 <div className="flex flex-col space-y-2">
-                  <audio 
+                  <audio
                     ref={audioRef}
-                    src={formState.voiceNoteUrl} 
-                    controls 
+                    src={formState.voiceNoteUrl}
+                    controls
                     className="w-full"
                   />
                   <Button
