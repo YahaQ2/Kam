@@ -1,72 +1,72 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Navbar } from "@/components/ui/navbar"
-import { Footer } from "@/components/ui/footer"
-import { useEffect, useState, useRef } from "react"
-import dayjs from "dayjs"
-import utc from "dayjs/plugin/utc"
-import timezone from "dayjs/plugin/timezone"
-import { Loader2, Twitter, Facebook, Link2, MessageCircle, Instagram, Share2, Play, Pause, Volume2 } from "lucide-react"
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/ui/navbar";
+import { Footer } from "@/components/ui/footer";
+import { useEffect, useState, useRef } from "react";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import { Loader2, Twitter, Facebook, Link2, MessageCircle, Instagram, Share2, Play, Pause, Volume2 } from "lucide-react";
 
-dayjs.extend(utc)
-dayjs.extend(timezone)
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type MessageType = {
-  id: number
-  sender: string
-  recipient: string
-  message: string
-  gif_url: string
-  spotify_id?: string
-  voice_note_url?: string
-  created_at: string
-}
+  id: number;
+  sender: string;
+  recipient: string;
+  message: string;
+  gif_url: string;
+  spotify_id?: string;
+  voice_note_url?: string;
+  created_at: string;
+};
 
 interface ShareMenuProps {
-  message: string
-  id: string
-  onShare: (platform: string) => void
+  message: string;
+  id: string;
+  onShare: (platform: string) => void;
 }
 
 const getShareUrl = (id: string): string => {
-  if (typeof window === 'undefined') return ''
-  return new URL(`/message/${id}`, window.location.origin).toString()
-}
+  if (typeof window === 'undefined') return '';
+  return new URL(`/message/${id}`, window.location.origin).toString();
+};
 
 const detectInappropriateWords = (message: string): boolean => {
-  const inappropriateWordsRegex = /fuck|kontol|pantek|pntk|fck|kntl|kampang|jablay|lonte|bangsat|memek/i
-  return inappropriateWordsRegex.test(message)
-}
+  const inappropriateWordsRegex = /fuck|kontol|pantek|pntk|fck|kntl|kampang|jablay|lonte|bangsat|memek/i;
+  return inappropriateWordsRegex.test(message);
+};
 
 const detectUnandWords = (message: string): boolean => {
-  const unandWordsRegex = /unand|yunand|yunend|unend|unands/i
-  return unandWordsRegex.test(message)
-}
+  const unandWordsRegex = /unand|yunand|yunend|unend|unands/i;
+  return unandWordsRegex.test(message);
+};
 
 const detectLoveMessage = (message: string): boolean => {
-  const loveWordsRegex = /love|cinta|sayang|crush/i
-  return !detectInappropriateWords(message) && loveWordsRegex.test(message)
-}
+  const loveWordsRegex = /love|cinta|sayang|crush/i;
+  return !detectInappropriateWords(message) && loveWordsRegex.test(message);
+};
 
 const ShareMenu = ({ message, id, onShare }: ShareMenuProps) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) return;
 
     const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
+      const target = e.target as HTMLElement;
       if (!target.closest('.share-menu-container')) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
     }
 
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [isOpen])
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isOpen]);
 
   return (
     <div className="relative share-menu-container">
@@ -124,11 +124,11 @@ const ShareMenu = ({ message, id, onShare }: ShareMenuProps) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
-  if (!trackId) return null
+  if (!trackId) return null;
 
   return (
     <iframe
@@ -139,68 +139,68 @@ const SpotifyEmbed = ({ trackId }: { trackId?: string | null }) => {
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
       loading="lazy"
     />
-  )
-}
+  );
+};
 
 const VoiceNotePlayer = ({ url }: { url: string }) => {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [duration, setDuration] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const progressRef = useRef<HTMLDivElement>(null)
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const audio = new Audio(url)
-    audioRef.current = audio
+    const audio = new Audio(url);
+    audioRef.current = audio;
     
     audio.addEventListener('loadedmetadata', () => {
-      setDuration(audio.duration)
-    })
+      setDuration(audio.duration);
+    });
     
     audio.addEventListener('timeupdate', () => {
-      setCurrentTime(audio.currentTime)
-    })
+      setCurrentTime(audio.currentTime);
+    });
     
     audio.addEventListener('ended', () => {
-      setIsPlaying(false)
-      setCurrentTime(0)
-    })
+      setIsPlaying(false);
+      setCurrentTime(0);
+    });
     
     return () => {
-      audio.pause()
-      audio.src = ''
-      audio.removeEventListener('loadedmetadata', () => {})
-      audio.removeEventListener('timeupdate', () => {})
-      audio.removeEventListener('ended', () => {})
+      audio.pause();
+      audio.src = '';
+      audio.removeEventListener('loadedmetadata', () => {});
+      audio.removeEventListener('timeupdate', () => {});
+      audio.removeEventListener('ended', () => {});
     }
-  }, [url])
+  }, [url]);
   
   const togglePlayPause = () => {
-    if (!audioRef.current) return
+    if (!audioRef.current) return;
     
     if (isPlaying) {
-      audioRef.current.pause()
+      audioRef.current.pause();
     } else {
-      audioRef.current.play()
+      audioRef.current.play();
     }
-    setIsPlaying(!isPlaying)
-  }
+    setIsPlaying(!isPlaying);
+  };
   
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current || !progressRef.current) return
+    if (!audioRef.current || !progressRef.current) return;
     
-    const rect = progressRef.current.getBoundingClientRect()
-    const pos = (e.clientX - rect.left) / rect.width
+    const rect = progressRef.current.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
     
-    audioRef.current.currentTime = pos * duration
-    setCurrentTime(pos * duration)
-  }
+    audioRef.current.currentTime = pos * duration;
+    setCurrentTime(pos * duration);
+  };
   
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
   
   return (
     <div className="my-6 bg-gray-100 rounded-lg p-4">
@@ -235,84 +235,84 @@ const VoiceNotePlayer = ({ url }: { url: string }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default function MessageClient({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const { id } = params
-  const [message, setMessage] = useState<MessageType | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [imageError, setImageError] = useState(false)
+  const router = useRouter();
+  const { id } = params;
+  const [message, setMessage] = useState<MessageType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchMessage = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`)
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+        const response = await fetch(`https://unand.vercel.app/v1/api/menfess-spotify-search/${id}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
-        const data = await response.json()
-        if (!data?.status || !data?.data?.[0]) throw new Error("Invalid data format")
+        const data = await response.json();
+        if (!data?.status || !data?.data?.[0]) throw new Error("Invalid data format");
         
-        setMessage(data.data[0])
+        setMessage(data.data[0]);
       } catch (error) {
-        console.error("Error fetching message:", error)
-        setMessage(null)
+        console.error("Error fetching message:", error);
+        setMessage(null);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchMessage()
-  }, [id])
+    fetchMessage();
+  }, [id]);
 
   const handleShare = (platform: string) => {
-    const shareUrl = getShareUrl(id)
-    const shareText = `Check out this message I received: ${message?.message}`
-    const imageUrl = `https://unand.vercel.app/api/og-image/${id}`
+    const shareUrl = getShareUrl(id);
+    const shareText = `Check out this message I received: ${message?.message}`;
+    const imageUrl = `https://unand.vercel.app/api/og-image/${id}`;
 
     switch (platform) {
       case "twitter":
         window.open(
           `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
           "_blank"
-        )
-        break
+        );
+        break;
       case "facebook":
         window.open(
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
           "_blank"
-        )
-        break
+        );
+        break;
       case "whatsapp":
         window.open(
           `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`,
           "_blank"
-        )
-        break
+        );
+        break;
       case "instagram":
-        window.open(imageUrl, "_blank")
-        break
+        window.open(imageUrl, "_blank");
+        break;
       case "copy":
         if (navigator?.clipboard) {
           navigator.clipboard
             .writeText(shareUrl)
             .then(() => {
-              alert("Link copied to clipboard!")
+              alert("Link copied to clipboard!");
             })
-            .catch(console.error)
+            .catch(console.error);
         }
-        break
+        break;
     }
-  }
+  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin" />
       </div>
-    )
+    );
   }
 
   if (!message) {
@@ -320,19 +320,19 @@ export default function MessageClient({ params }: { params: { id: string } }) {
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-xl font-semibold text-gray-600">Message not found</p>
       </div>
-    )
+    );
   }
 
-  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm")
-  const hasInappropriateWords = detectInappropriateWords(message.message)
-  const hasUnandWords = detectUnandWords(message.message)
-  const isLoveMessage = detectLoveMessage(message.message)
+  const formattedDate = dayjs.utc(message.created_at).tz("Asia/Jakarta").format("DD MMM YYYY, HH:mm");
+  const hasInappropriateWords = detectInappropriateWords(message.message);
+  const hasUnandWords = detectUnandWords(message.message);
+  const isLoveMessage = detectLoveMessage(message.message);
 
   const getBackgroundColor = () => {
-    if (hasInappropriateWords) return "bg-red-50"
-    if (isLoveMessage) return "bg-pink-50"
-    return "bg-white"
-  }
+    if (hasInappropriateWords) return "bg-red-50";
+    if (isLoveMessage) return "bg-pink-50";
+    return "bg-white";
+  };
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
@@ -377,14 +377,13 @@ export default function MessageClient({ params }: { params: { id: string } }) {
               )}
               
               {message.gif_url && !imageError && (
-                <div className="w-[240px] h-[240px] mx-auto my-6 relative">
-                  <Image
+                <div className="w-full max-w-md mx-auto my-6">
+                  <img
                     src={message.gif_url}
                     alt="Gift from sender"
-                    fill
-                    className="rounded-lg object-cover"
+                    className="rounded-lg object-cover w-full h-auto"
                     onError={() => setImageError(true)}
-                    sizes="240px"
+                    loading="lazy"
                   />
                 </div>
               )}
@@ -400,5 +399,5 @@ export default function MessageClient({ params }: { params: { id: string } }) {
       </main>
       <Footer />
     </div>
-  )
+  );
 }
