@@ -237,5 +237,3 @@ const VoiceNotePlayer = ({ url }: { url: string }) => {
   )
 }
 
-export default function MessageClient({ params }: { params: { id: string } }) {
-  const router = useRouter()
