@@ -11,6 +11,12 @@ import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
 import { SuccessModal } from "@/components/success-modal";
 import { Mic, Square, Loader2 } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
+
+// Inisialisasi Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface SpotifyTrack {
   id: string;
@@ -30,6 +36,21 @@ interface FormState {
   selectedTrack: SpotifyTrack | null;
   voiceNoteUrl: string;
 }
+
+const SpotifyPreview = ({ trackId }: { trackId: string }) => {
+  return (
+    <div className="mt-4">
+      <iframe
+        src={`https://open.spotify.com/embed/track/${trackId}`}
+        width="100%"
+        height="80"
+        frameBorder="0"
+        allow="encrypted-media"
+        className="rounded-lg"
+      />
+    </div>
+  );
+};
 
 const isValidFormState = (state: unknown): state is FormState => {
   return (
@@ -203,32 +224,30 @@ export default function MulaiBerceritaPage() {
   const uploadVoiceNote = async (audioBlob: Blob) => {
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', audioBlob, 'voice-note.webm');
+      // Generate unique filename
+      const fileName = `voice-${Date.now()}.webm`;
 
-      const response = await fetch('https://unand.vercel.app/v1/api/upload-voice-note', {
-        method: 'POST',
-        body: formData,
-      });
+      // Upload ke Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('voice_notes')
+        .upload(fileName, audioBlob);
 
-      if (!response.ok) {
-        throw new Error('Gagal mengunggah voice note');
-      }
+      if (uploadError) throw uploadError;
 
-      const result = await response.json();
-      if (result.success && result.url) {
-        // Update form state with the voice note URL
-        setFormState(prev => ({
-          ...prev,
-          voiceNoteUrl: result.url
-        }));
-        console.log('Voice note uploaded successfully:', result.url);
-      } else {
-        throw new Error(result.message || 'Gagal mengunggah voice note');
-      }
+      // Dapatkan URL publik
+      const { data: urlData } = supabase.storage
+        .from('voice_notes')
+        .getPublicUrl(uploadData.path);
+
+      // Simpan URL ke state form
+      setFormState(prev => ({
+        ...prev,
+        voiceNoteUrl: urlData.publicUrl
+      }));
+
     } catch (err) {
       console.error('Error uploading voice note:', err);
-      setError('voice note sudah di upload silahkan lengkapi bagian yang massage dan to, from.');
+      setError('Gagal mengunggah voice note. Coba lagi.');
     } finally {
       setIsUploading(false);
     }
@@ -276,8 +295,8 @@ export default function MulaiBerceritaPage() {
     setError(null);
 
     // Validasi URL GIF
-    if (formState.gifUrl && !formState.gifUrl.match(/\.(gif|webp|jpg|jpeg|png)(\?.*)?$/i)) {
-      setError("Harap masukkan URL GIF/gambar yang valid");
+    if (formState.gifUrl && !formState.gifUrl.match(/\.(gif|webp)(\?.*)?$/i)) {
+      setError("Harap masukkan URL GIF yang valid (akhiran .gif atau .webp)");
       return;
     }
 
@@ -289,24 +308,19 @@ export default function MulaiBerceritaPage() {
     setIsLoading(true);
 
     try {
-      // Create payload with all required fields
-      const payload = {
-        sender: formState.from,
-        recipient: formState.to,
-        message: formState.message,
-        spotify_id: formState.spotifyId,
-        gif_url: formState.gifUrl || "",
-        voice_note_url: formState.voiceNoteUrl || ""
-      };
-
-      console.log("Sending payload:", payload); // Debug log
-
       const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          sender: formState.from,
+          recipient: formState.to,
+          message: formState.message,
+          spotify_id: formState.spotifyId,
+          gif_url: formState.gifUrl,
+          voice_note_url: formState.voiceNoteUrl,
+        }),
       });
 
       if (!response.ok) {
@@ -408,6 +422,7 @@ export default function MulaiBerceritaPage() {
                 <div className="flex items-center space-x-4">
                   <div className="flex-1">
                     <div className="text-red-500 font-semibold flex items-center">
+                      <span className="inline-block w-2 h-2 rounded-full"
                       <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-2 animate-pulse"></span>
                       Merekam... {formatDuration(recordingDuration)}
                     </div>
@@ -543,22 +558,25 @@ export default function MulaiBerceritaPage() {
             )}
 
             {formState.selectedTrack && (
-              <div className="mt-4 flex items-center">
-                {formState.selectedTrack.cover_url && (
-                  <img
-                    src={formState.selectedTrack.cover_url}
-                    alt={formState.selectedTrack.name}
-                    className="w-12 h-12 mr-4 object-cover rounded"
-                  />
-                )}
-                <div>
-                  <div className="font-medium line-clamp-1">
-                    {formState.selectedTrack.name}
-                  </div>
-                  <div className="text-sm text-gray-500 line-clamp-1">
-                    {formState.selectedTrack.artist}
+              <div className="mt-4">
+                <div className="flex items-center">
+                  {formState.selectedTrack.cover_url && (
+                    <img
+                      src={formState.selectedTrack.cover_url}
+                      alt={formState.selectedTrack.name}
+                      className="w-12 h-12 mr-4 object-cover rounded"
+                    />
+                  )}
+                  <div>
+                    <div className="font-medium line-clamp-1">
+                      {formState.selectedTrack.name}
+                    </div>
+                    <div className="text-sm text-gray-500 line-clamp-1">
+                      {formState.selectedTrack.artist}
+                    </div>
                   </div>
                 </div>
+                <SpotifyPreview trackId={formState.selectedTrack.id} />
               </div>
             )}
           </div>
@@ -582,3 +600,4 @@ export default function MulaiBerceritaPage() {
     </div>
   );
 }
+                      
