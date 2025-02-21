@@ -64,30 +64,26 @@ const isValidFormState = (state: unknown): state is FormState => {
     "spotifyId" in state &&
     "selectedTrack" in state &&
     "voiceNoteUrl" in state &&
-    typeof (state as FormState).from === "string" &&
-    typeof (state as FormState).to === "string" &&
-    typeof (state as FormState).message === "string" &&
-    typeof (state as FormState).song === "string" &&
-    typeof (state as FormState).gifUrl === "string" &&
-    typeof (state as FormState).spotifyId === "string" &&
-    typeof (state as FormState).voiceNoteUrl === "string" &&
-    (
-      (state as FormState).selectedTrack === null ||
-      (
-        typeof (state as FormState).selectedTrack === "object" &&
-        (state as FormState).selectedTrack !== null &&
-        "id" in (state as FormState).selectedTrack! &&
-        "name" in (state as FormState).selectedTrack! &&
-        "artist" in (state as FormState).selectedTrack! &&
-        "album" in (state as FormState).selectedTrack! &&
-        "cover_url" in (state as FormState).selectedTrack! &&
-        typeof (state as FormState).selectedTrack!.id === "string" &&
-        typeof (state as FormState).selectedTrack!.name === "string" &&
-        typeof (state as FormState).selectedTrack!.artist === "string" &&
-        typeof (state as FormState).selectedTrack!.album === "string" &&
-        typeof (state as FormState).selectedTrack!.cover_url === "string"
-      )
-    )
+    typeof state.from === "string" &&
+    typeof state.to === "string" &&
+    typeof state.message === "string" &&
+    typeof state.song === "string" &&
+    typeof state.gifUrl === "string" &&
+    typeof state.spotifyId === "string" &&
+    typeof state.voiceNoteUrl === "string" &&
+    (state.selectedTrack === null ||
+      (typeof state.selectedTrack === "object" &&
+        state.selectedTrack !== null &&
+        "id" in state.selectedTrack &&
+        "name" in state.selectedTrack &&
+        "artist" in state.selectedTrack &&
+        "album" in state.selectedTrack &&
+        "cover_url" in state.selectedTrack &&
+        typeof state.selectedTrack.id === "string" &&
+        typeof state.selectedTrack.name === "string" &&
+        typeof state.selectedTrack.artist === "string" &&
+        typeof state.selectedTrack.album === "string" &&
+        typeof state.selectedTrack.cover_url === "string"))
   );
 };
 
@@ -422,7 +418,6 @@ export default function MulaiBerceritaPage() {
                 <div className="flex items-center space-x-4">
                   <div className="flex-1">
                     <div className="text-red-500 font-semibold flex items-center">
-                      <span className="inline-block w-2 h-2 rounded-full"
                       <span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-2 animate-pulse"></span>
                       Merekam... {formatDuration(recordingDuration)}
                     </div>
@@ -600,4 +595,3 @@ export default function MulaiBerceritaPage() {
     </div>
   );
 }
-                      
