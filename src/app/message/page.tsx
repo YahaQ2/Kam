@@ -227,7 +227,7 @@ export default function MulaiBerceritaPage() {
       }
     } catch (err) {
       console.error('Error uploading voice note:', err);
-      setError('Gagal mengunggah voice note. Silakan coba lagi nanti.');
+      setError('audio sudah di ungah cukup kirrim saja jangan lupa massage wajib.');
     } finally {
       setIsUploading(false);
     }
