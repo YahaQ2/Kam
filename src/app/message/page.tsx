@@ -217,17 +217,18 @@ export default function MulaiBerceritaPage() {
 
       const result = await response.json();
       if (result.success && result.url) {
+        // Update form state with the voice note URL
         setFormState(prev => ({
           ...prev,
           voiceNoteUrl: result.url
         }));
-        console.log('Voice note uploaded successfully');
+        console.log('Voice note uploaded successfully:', result.url);
       } else {
         throw new Error(result.message || 'Gagal mengunggah voice note');
       }
     } catch (err) {
       console.error('Error uploading voice note:', err);
-      setError('audio sudah di ungah cukup kirrim saja jangan lupa massage wajib.');
+      setError('Gagal mengunggah voice note. Silakan coba lagi.');
     } finally {
       setIsUploading(false);
     }
@@ -275,8 +276,8 @@ export default function MulaiBerceritaPage() {
     setError(null);
 
     // Validasi URL GIF
-    if (formState.gifUrl && !formState.gifUrl.match(/\.(gif|webp)(\?.*)?$/i)) {
-      setError("Harap masukkan URL GIF yang valid (akhiran .gif atau .webp)");
+    if (formState.gifUrl && !formState.gifUrl.match(/\.(gif|webp|jpg|jpeg|png)(\?.*)?$/i)) {
+      setError("Harap masukkan URL GIF/gambar yang valid");
       return;
     }
 
@@ -288,19 +289,24 @@ export default function MulaiBerceritaPage() {
     setIsLoading(true);
 
     try {
+      // Create payload with all required fields
+      const payload = {
+        sender: formState.from,
+        recipient: formState.to,
+        message: formState.message,
+        spotify_id: formState.spotifyId,
+        gif_url: formState.gifUrl || "",
+        voice_note_url: formState.voiceNoteUrl || ""
+      };
+
+      console.log("Sending payload:", payload); // Debug log
+
       const response = await fetch("https://unand.vercel.app/v1/api/menfess-spotify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          sender: formState.from,
-          recipient: formState.to,
-          message: formState.message,
-          spotify_id: formState.spotifyId,
-          gif_url: formState.gifUrl,
-          voice_note_url: formState.voiceNoteUrl,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
