@@ -234,6 +234,10 @@ export default function MulaiBerceritaPage() {
       const { data: urlData } = supabase.storage
         .from('voice_notes')
         .getPublicUrl(uploadData.path);
+           
+            if (!urlData.publicUrl) {
+      throw new Error("Gagal mendapatkan URL publik.");
+    }
 
       // Simpan URL ke state form
       setFormState(prev => ({
@@ -241,14 +245,20 @@ export default function MulaiBerceritaPage() {
         voiceNoteUrl: urlData.publicUrl
       }));
 
-    } catch (err) {
-      console.error('Error uploading voice note:', err);
-      setError('Gagal mengunggah voice note. Coba lagi.');
-    } finally {
-      setIsUploading(false);
-    }
-  };
+ // Buat FormData untuk mengirim ke server
+    const formData = new FormData();
+    formData.append('voiceNote', audioBlob, fileName);
 
+    // Kirim ke server
+    const response = await fetch('https://unand.vercel.app/v1/api/upload-voice-note', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Gagal mengunggah voice note ke server");
+    }
   const handleSelectTrack = (track: SpotifyTrack) => {
     setFormState(prev => ({
       ...prev,
