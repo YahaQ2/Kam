@@ -228,7 +228,7 @@ export default function MulaiBerceritaPage() {
       }
     } catch (err) {
       console.error('Error uploading voice note:', err);
-      setError('Gagal mengunggah voice note. Silakan coba lagi.');
+      setError('voice note sudah di upload silahkan lengkapi bagian yang massage dan to, from.');
     } finally {
       setIsUploading(false);
     }
