@@ -13,7 +13,6 @@ import { SuccessModal } from "@/components/success-modal";
 import { Mic, Square, Loader2 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 
-// Inisialisasi Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -185,7 +184,6 @@ export default function MulaiBerceritaPage() {
       setIsRecording(true);
       setRecordingDuration(0);
 
-      // Start timer
       timerRef.current = setInterval(() => {
         setRecordingDuration(prev => prev + 1);
       }, 1000);
@@ -198,7 +196,6 @@ export default function MulaiBerceritaPage() {
   const stopRecording = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
-      // Stop all tracks in the stream
       mediaRecorderRef.current?.stream?.getTracks().forEach(track => track.stop());
     }
 
@@ -220,45 +217,46 @@ export default function MulaiBerceritaPage() {
   const uploadVoiceNote = async (audioBlob: Blob) => {
     setIsUploading(true);
     try {
-      // Generate unique filename
       const fileName = `voice-${Date.now()}.webm`;
-
-      // Upload ke Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('voice_notes')
         .upload(fileName, audioBlob);
 
       if (uploadError) throw uploadError;
 
-      // Dapatkan URL publik
       const { data: urlData } = supabase.storage
         .from('voice_notes')
         .getPublicUrl(uploadData.path);
            
-            if (!urlData.publicUrl) {
-      throw new Error("Gagal mendapatkan URL publik.");
-    }
+      if (!urlData.publicUrl) {
+        throw new Error("Gagal mendapatkan URL publik.");
+      }
 
-      // Simpan URL ke state form
       setFormState(prev => ({
         ...prev,
         voiceNoteUrl: urlData.publicUrl
       }));
 
- // Buat FormData untuk mengirim ke server
-    const formData = new FormData();
-    formData.append('voiceNote', audioBlob, fileName);
+      const formData = new FormData();
+      formData.append('voiceNote', audioBlob, fileName);
 
-    // Kirim ke server
-    const response = await fetch('https://unand.vercel.app/v1/api/upload-voice-note', {
-      method: 'POST',
-      body: formData,
-    });
+      const response = await fetch('https://unand.vercel.app/v1/api/upload-voice-note', {
+        method: 'POST',
+        body: formData,
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Gagal mengunggah voice note ke server");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Gagal mengunggah voice note ke server");
+      }
+    } catch (error) {
+      console.error("Error uploading voice note:", error);
+      setError("Gagal mengunggah rekaman suara. Coba lagi.");
+    } finally {
+      setIsUploading(false);
     }
+  };
+
   const handleSelectTrack = (track: SpotifyTrack) => {
     setFormState(prev => ({
       ...prev,
@@ -300,7 +298,6 @@ export default function MulaiBerceritaPage() {
     e.preventDefault();
     setError(null);
 
-    // Validasi URL GIF
     if (formState.gifUrl && !formState.gifUrl.match(/\.(gif|webp)(\?.*)?$/i)) {
       setError("Harap masukkan URL GIF yang valid (akhiran .gif atau .webp)");
       return;
@@ -408,7 +405,6 @@ export default function MulaiBerceritaPage() {
             />
           </div>
 
-          {/* Voice Note Section */}
           <div className="mb-6">
             <Label>Voice Note (opsional)</Label>
             <div className="mt-2 border rounded-lg p-4 bg-gray-50">
@@ -538,9 +534,8 @@ export default function MulaiBerceritaPage() {
               <div className="absolute z-10 w-full bg-white p-2 text-sm text-gray-500">
                 Mencari lagu...
               </div>
-            )}
-
-            {tracks.length > 0 && !formState.selectedTrack && (
+            )}          
+           {tracks.length > 0 && !formState.selectedTrack && (
               <div className="absolute z-10 w-full bg-white border rounded-md shadow-lg mt-1 max-h-80 overflow-y-auto">
                 {tracks.map((track) => (
                   <div
