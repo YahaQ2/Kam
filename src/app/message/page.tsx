@@ -217,15 +217,15 @@ export default function MulaiBerceritaPage() {
   const uploadVoiceNote = async (audioBlob: Blob) => {
     setIsUploading(true);
     try {
-      const fileName = `voice-${Date.now()}.webm`;
+      const fileName = `voice-notes${Date.now()}.webm`;
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('voice_notes')
+        .from('media')
         .upload(fileName, audioBlob);
 
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage
-        .from('voice_notes')
+        .from('media')
         .getPublicUrl(uploadData.path);
            
       if (!urlData.publicUrl) {
@@ -238,7 +238,7 @@ export default function MulaiBerceritaPage() {
       }));
 
       const formData = new FormData();
-      formData.append('voiceNote', audioBlob, fileName);
+      formData.append('media', audioBlob, fileName);
 
       const response = await fetch('https://unand.vercel.app/v1/api/upload-voice-note', {
         method: 'POST',
