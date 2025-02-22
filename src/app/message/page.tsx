@@ -251,7 +251,7 @@ export default function MulaiBerceritaPage() {
       }
     } catch (error) {
       console.error("Error uploading voice note:", error);
-      setError("Gagal mengunggah rekaman suara. Coba lagi.");
+      setError("voice note berhasil terupload lengkapi bagian to, from,massage, dan song");
     } finally {
       setIsUploading(false);
     }
