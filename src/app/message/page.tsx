@@ -12,6 +12,7 @@ import { Footer } from "@/components/ui/footer";
 import { SuccessModal } from "@/components/success-modal";
 import { Mic, Square, Loader2 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
+import { encodeWAV } from 'audio-encode'; // Assuming you have a library for WAV encoding
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -168,7 +169,9 @@ export default function MulaiBerceritaPage() {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/wav', // Set MIME type to WAV
+      });
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
@@ -210,14 +213,17 @@ export default function MulaiBerceritaPage() {
   const handleRecordingStop = async () => {
     if (chunksRef.current.length === 0) return;
 
-    const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-    await uploadVoiceNote(audioBlob);
+    const audioBlob = new Blob(chunksRef.current, { type: 'audio/wav' });
+    const audioArrayBuffer = await audioBlob.arrayBuffer();
+    const wavBlob = await encodeWAV(audioArrayBuffer); // Encode to WAV
+
+    await uploadVoiceNote(wavBlob);
   };
 
-  const uploadVoiceNote = async (audioBlob: Blob) => {
+  const uploadVoiceNote = async (audioBlob) => {
     setIsUploading(true);
     try {
-      const fileName = `voice-notes${Date.now()}.webm`;
+      const fileName = `voice-notes${Date.now()}.wav`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('media')
         .upload(fileName, audioBlob);
@@ -227,7 +233,7 @@ export default function MulaiBerceritaPage() {
       const { data: urlData } = supabase.storage
         .from('media')
         .getPublicUrl(uploadData.path);
-           
+
       if (!urlData.publicUrl) {
         throw new Error("Gagal mendapatkan URL publik.");
       }
@@ -534,8 +540,9 @@ export default function MulaiBerceritaPage() {
               <div className="absolute z-10 w-full bg-white p-2 text-sm text-gray-500">
                 Mencari lagu...
               </div>
-            )}          
-           {tracks.length > 0 && !formState.selectedTrack && (
+            )}
+
+            {tracks.length > 0 && !formState.selectedTrack && (
               <div className="absolute z-10 w-full bg-white border rounded-md shadow-lg mt-1 max-h-80 overflow-y-auto">
                 {tracks.map((track) => (
                   <div
