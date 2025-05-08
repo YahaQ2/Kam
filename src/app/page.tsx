@@ -628,9 +628,6 @@ const handleScrollToMenfess = () => {
 >
   ⬇️ Scroll ke Menfess
 </button>
-
-// Tambahkan ref ke bagian Menfess
-<section ref={menfessSectionRef} className="py-16 md:py-24 bg-gray-900
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
