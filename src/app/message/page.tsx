@@ -12,7 +12,6 @@ import { Footer } from "@/components/ui/footer";
 import { SuccessModal } from "@/components/success-modal";
 import { Mic, Square, Loader2 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
-import { encodeWAV } from 'audio-encode'; // Assuming you have a library for WAV encoding
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
