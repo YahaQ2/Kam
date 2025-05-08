@@ -521,6 +521,10 @@ export default function HomePage() {
       );
     }
   };
+  const menfessSectionRef = useRef<HTMLDivElement | null>(null);
+const handleScrollToMenfess = () => {
+  menfessSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+};
 
   // Main component render
   return (
@@ -617,15 +621,7 @@ export default function HomePage() {
             </motion.div>
           </div>
         </section>
-// Tambahkan useRef untuk referensi bagian Menfess
-const menfessSectionRef = useRef<HTMLDivElement | null>(null);
 
-// Tambahkan fungsi untuk scroll ke bagian Menfess
-const handleScrollToMenfess = () => {
-  menfessSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-};
-
-// Tambahkan tombol "Scroll ke Bawah" di dalam render utama
 <button
   className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700"
   onClick={handleScrollToMenfess}
@@ -634,9 +630,7 @@ const handleScrollToMenfess = () => {
 </button>
 
 // Tambahkan ref ke bagian Menfess
-<section ref={menfessSectionRef} className="py-16 md:py-24 bg-gray-900">
-  {/* Bagian konten Menfess */}
-</section>
+<section ref={menfessSectionRef} className="py-16 md:py-24 bg-gray-900
         <section className="py-16 md:py-24 bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
