@@ -604,25 +604,7 @@ export default function HomePage() {
                 </Link>
               </Button>
               
-              {/* Featured External Link Button */}
-              <Button
-                asChild
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg shadow-md flex items-center gap-2 transition-all duration-300 transform hover:-translate-y-1"
-              >
-                <Link href="https://ziwa-351410.web.app" target="_blank" rel="noopener noreferrer">
-                  <Users className="h-4 w-4" />
-                  <span>Ziwa - Cari Teman Baru</span>
-                </Link>
-              </Button>
               
-              {/* Utility Link Button */}
-              <Link
-                href="https://v0-kopih-rhlgiz.vercel.app/"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-all duration-300 shadow-sm transform hover:-translate-y-1"
-              >
-                <MessageSquare className="h-4 w-4" />
-                <span>Kuisyuned (Upload Kuisioner)</span>
-              </Link>
 
               {/* Feedback Link Button */}
               <Link
