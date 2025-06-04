@@ -5,6 +5,17 @@ import { Reenie_Beanie } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
+import AdSense from '@/components/AdSense'
+
+export default function MainLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <AdSense />
+      {}
+      {children}
+    </>
+  )
+}
 // Fonts
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
