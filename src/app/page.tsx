@@ -10,6 +10,27 @@ import { Sparkles, Send, Search, Users, MessageSquare, HelpCircle } from 'lucide
 import { CarouselCard } from "@/components/carousel-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { BackgroundVideo } from "@/components/background-video";
+import { Html, Head, Main, NextScript } from 'next/document'
+
+export default function Document() {
+  return (
+    <Html>
+      <Head>
+        {/* ✅ Google AdSense Script */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7644025135360982"
+          crossOrigin="anonymous"
+        ></script>
+      </Head>
+      <body>
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  )
+}
+
 
 // Type definitions for our data structures
 interface Track {
